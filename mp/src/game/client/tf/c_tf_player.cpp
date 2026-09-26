@@ -953,6 +953,7 @@ BEGIN_RECV_TABLE_NOBASE( C_TFPlayer, DT_TFLocalPlayerExclusive )
 
 	RecvPropFloat( RECVINFO( m_angEyeAngles[0] ) ),
 //	RecvPropFloat( RECVINFO( m_angEyeAngles[1] ) ),
+	RecvPropInt( RECVINFO( m_ArmorValue ) ),
 
 END_RECV_TABLE()
 

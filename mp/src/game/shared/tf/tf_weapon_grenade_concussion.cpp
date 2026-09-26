@@ -15,6 +15,7 @@
 #include "tf_player.h"
 #include "items.h"
 #include "tf_weaponbase_grenadeproj.h"
+#include "tf_fx.h"
 #include "soundent.h"
 #include "KeyValues.h"
 
@@ -166,7 +167,8 @@ void CTFGrenadeConcussionProjectile::Explode( trace_t *pTrace, int bitsDamageTyp
 	}
 
 	// Explosion effect on client
-	SendDispatchEffect();
+	CPVSFilter filter( GetAbsOrigin() );
+	TE_TFExplosion( filter, 0.0f, GetAbsOrigin(), Vector( 0, 0, 1 ), GetWeaponID(), -1 );
 
 	// Explosion sound.
 	CSoundEnt::InsertSound( SOUND_COMBAT, GetAbsOrigin(), BASEGRENADE_EXPLOSION_VOLUME, 3.0 );
@@ -187,9 +189,23 @@ void CTFGrenadeConcussionProjectile::Explode( trace_t *pTrace, int bitsDamageTyp
 
 		// You can concuss yourself.
 		bool bIsThrower = ( pPlayer == pTestPlayer );
-		if ( bIsThrower || ( pTestPlayer && !InSameTeam( pTestPlayer) ) )
+		if ( pTestPlayer && ( bIsThrower || !InSameTeam( pTestPlayer ) ) )
 		{
-			pTestPlayer->m_Shared.Concussion( this, m_DmgRadius );
+			// Scale the effect by distance from the blast.
+			Vector vecDir = pTestPlayer->WorldSpaceCenter() - GetAbsOrigin();
+			float flDist = vecDir.NormalizeInPlace();
+			float flScale = 1.0f - clamp( flDist / m_DmgRadius, 0.0f, 1.0f );
+
+			// Shove them away from the blast and lift them off the ground.
+			Vector vecPush = vecDir * ( 500.0f * flScale );
+			vecPush.z += 200.0f * flScale;
+			pTestPlayer->SetGroundEntity( NULL );
+			pTestPlayer->ApplyAbsVelocityImpulse( vecPush );
+
+			// Rattle the view.
+			pTestPlayer->ViewPunch( QAngle( random->RandomFloat( -20.0f, 20.0f ) * flScale,
+											random->RandomFloat( -20.0f, 20.0f ) * flScale,
+											random->RandomFloat( -30.0f, 30.0f ) * flScale ) );
 		}
 	}
 

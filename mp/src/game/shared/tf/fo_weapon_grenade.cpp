@@ -66,7 +66,7 @@ CFOGrenade::~CFOGrenade()
 //-----------------------------------------------------------------------------
 void CFOGrenade::Spawn( void )
 {
-	m_iAltFireHint = HINT_ALTFIRE_GRENADE;
+	m_iAltFireHint = HINT_ALTFIRE_GRENADELAUNCHER;
 	BaseClass::Spawn();
 }
 
@@ -84,23 +84,6 @@ bool CFOGrenade::Holster( CBaseCombatWeapon *pSwitchingTo )
 bool CFOGrenade::Deploy( void )
 {
 	return BaseClass::Deploy();
-
-	// Check for ammunition.
-	if (m_iClip1 <= 0 && m_iClip1 != -1)
-		return;
-
-	// Are we capable of firing again?
-	if (m_flNextPrimaryAttack > gpGlobals->curtime)
-		return;
-
-	if (!CanAttack())
-	{
-		return;
-	}
-
-	m_iWeaponMode = TF_WEAPON_PRIMARY_MODE;
-
-	LaunchGrenade();
 }
 
 //-----------------------------------------------------------------------------
@@ -135,7 +118,22 @@ int CFOGrenade::GetDefaultClip1( void ) const
 //-----------------------------------------------------------------------------
 void CFOGrenade::PrimaryAttack( void )
 {
+	// Check for ammunition.
+	if (m_iClip1 <= 0 && m_iClip1 != -1)
+		return;
 
+	// Are we capable of firing again?
+	if (m_flNextPrimaryAttack > gpGlobals->curtime)
+		return;
+
+	if (!CanAttack())
+	{
+		return;
+	}
+
+	m_iWeaponMode = TF_WEAPON_PRIMARY_MODE;
+
+	LaunchGrenade();
 }
 
 //-----------------------------------------------------------------------------

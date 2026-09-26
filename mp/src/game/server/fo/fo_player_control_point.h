@@ -45,6 +45,7 @@ public:
 	void		InputReset( inputdata_t &input );
 	void		InputShowModel( inputdata_t &input );
 	void		InputHideModel( inputdata_t &input );
+	void		InputRoundActivate( inputdata_t &inputdata );
 
 	// Owner handling
 	void		ForceOwner( int iTeam ); // used when selecting a specific round to play
@@ -103,10 +104,13 @@ private:
 	float		GetTeamCapPercentage( int iTeam );
 
 	int			m_iPlayer;			
+	int			m_iTeam;			
+	int			m_iDefaultOwner;			// Team that initially owns the cap point
 	int			m_iIndex;					// The index of this point in the controlpointArray
 	bool		m_bWarnOnCap;				// Warn the team that owns the control point when the opposing team starts to capture it.
 	string_t	m_iszPrintName;
 	string_t	m_iszWarnSound;				// Sound played if the team needs to be warned about this point being captured
+	bool		m_bRandomOwnerOnRestart;	// Do we want to randomize the owner after a restart?
 
 	// We store a copy of this data for each team, +1 for the un-owned state.
 	struct perteamdata_t
@@ -151,6 +155,90 @@ private:
 
 	COutputEvent	m_OnOwnerExchanged;
 
+	// Per-team outputs (restored from the stock team_control_point.h)
+	COutputEvent	m_OnCapTeam1;
+	COutputEvent	m_OnCapTeam2;
+	COutputEvent	m_OnCapTeam3;
+	COutputEvent	m_OnCapTeam4;
+	COutputEvent	m_OnCapTeam5;
+	COutputEvent	m_OnCapTeam6;
+
+	COutputEvent	m_OnOwnerChangedToTeam1;
+	COutputEvent	m_OnOwnerChangedToTeam2;
+	COutputEvent	m_OnOwnerChangedToTeam3;
+	COutputEvent	m_OnOwnerChangedToTeam4;
+	COutputEvent	m_OnOwnerChangedToTeam5;
+	COutputEvent	m_OnOwnerChangedToTeam6;
+
+	COutputEvent	m_OnExchangedToTeam1;
+	COutputEvent	m_OnExchangedToTeam2;
+	COutputEvent	m_OnExchangedToTeam3;
+	COutputEvent	m_OnExchangedToTeam4;
+	COutputEvent	m_OnExchangedToTeam5;
+	COutputEvent	m_OnExchangedToTeam6;
+
+	COutputEvent	m_OnExchangedFromTeam1;
+	COutputEvent	m_OnExchangedFromTeam2;
+	COutputEvent	m_OnExchangedFromTeam3;
+	COutputEvent	m_OnExchangedFromTeam4;
+	COutputEvent	m_OnExchangedFromTeam5;
+	COutputEvent	m_OnExchangedFromTeam6;
+
+	COutputEvent	m_OnRoundStartOwnedByTeam1;
+	COutputEvent	m_OnRoundStartOwnedByTeam2;
+	COutputEvent	m_OnRoundStartOwnedByTeam3;
+	COutputEvent	m_OnRoundStartOwnedByTeam4;
+	COutputEvent	m_OnRoundStartOwnedByTeam5;
+	COutputEvent	m_OnRoundStartOwnedByTeam6;
+
+	// FO: pairwise team events (fired by the exchange/swap logic in the .cpp)
+	COutputEvent	m_OnSwappedBetweenTeam1AndTeam2;
+	COutputEvent	m_OnSwappedBetweenTeam1AndTeam3;
+	COutputEvent	m_OnSwappedBetweenTeam1AndTeam4;
+	COutputEvent	m_OnSwappedBetweenTeam1AndTeam5;
+	COutputEvent	m_OnSwappedBetweenTeam1AndTeam6;
+	COutputEvent	m_OnSwappedBetweenTeam2AndTeam3;
+	COutputEvent	m_OnSwappedBetweenTeam2AndTeam4;
+	COutputEvent	m_OnSwappedBetweenTeam2AndTeam5;
+	COutputEvent	m_OnSwappedBetweenTeam2AndTeam6;
+	COutputEvent	m_OnSwappedBetweenTeam3AndTeam4;
+	COutputEvent	m_OnSwappedBetweenTeam3AndTeam5;
+	COutputEvent	m_OnSwappedBetweenTeam3AndTeam6;
+	COutputEvent	m_OnSwappedBetweenTeam4AndTeam5;
+	COutputEvent	m_OnSwappedBetweenTeam4AndTeam6;
+	COutputEvent	m_OnSwappedBetweenTeam5AndTeam6;
+
+	COutputEvent	m_OnExchangedFromTeam1ToTeam2;
+	COutputEvent	m_OnExchangedFromTeam1ToTeam3;
+	COutputEvent	m_OnExchangedFromTeam1ToTeam4;
+	COutputEvent	m_OnExchangedFromTeam1ToTeam5;
+	COutputEvent	m_OnExchangedFromTeam1ToTeam6;
+	COutputEvent	m_OnExchangedFromTeam2ToTeam1;
+	COutputEvent	m_OnExchangedFromTeam2ToTeam3;
+	COutputEvent	m_OnExchangedFromTeam2ToTeam4;
+	COutputEvent	m_OnExchangedFromTeam2ToTeam5;
+	COutputEvent	m_OnExchangedFromTeam2ToTeam6;
+	COutputEvent	m_OnExchangedFromTeam3ToTeam1;
+	COutputEvent	m_OnExchangedFromTeam3ToTeam2;
+	COutputEvent	m_OnExchangedFromTeam3ToTeam4;
+	COutputEvent	m_OnExchangedFromTeam3ToTeam5;
+	COutputEvent	m_OnExchangedFromTeam3ToTeam6;
+	COutputEvent	m_OnExchangedFromTeam4ToTeam1;
+	COutputEvent	m_OnExchangedFromTeam4ToTeam2;
+	COutputEvent	m_OnExchangedFromTeam4ToTeam3;
+	COutputEvent	m_OnExchangedFromTeam4ToTeam5;
+	COutputEvent	m_OnExchangedFromTeam4ToTeam6;
+	COutputEvent	m_OnExchangedFromTeam5ToTeam1;
+	COutputEvent	m_OnExchangedFromTeam5ToTeam2;
+	COutputEvent	m_OnExchangedFromTeam5ToTeam3;
+	COutputEvent	m_OnExchangedFromTeam5ToTeam4;
+	COutputEvent	m_OnExchangedFromTeam5ToTeam6;
+	COutputEvent	m_OnExchangedFromTeam6ToTeam1;
+	COutputEvent	m_OnExchangedFromTeam6ToTeam2;
+	COutputEvent	m_OnExchangedFromTeam6ToTeam3;
+	COutputEvent	m_OnExchangedFromTeam6ToTeam4;
+	COutputEvent	m_OnExchangedFromTeam6ToTeam5;
+
 
 	int			m_bPointVisible;		//should this capture point be visible on the hud?
 	int			m_iPointIndex;			//the mapper set index value of this control point
@@ -171,4 +259,4 @@ private:
 	string_t	m_iszCaptureInterrupted;
 };
 
-#endif // TEAM_CONTROL_POINT_H
+#endif // FO_PLAYER_CONTROL_POINT_H

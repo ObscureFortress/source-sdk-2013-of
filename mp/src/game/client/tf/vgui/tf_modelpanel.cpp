@@ -34,7 +34,7 @@
 bool UseHWMorphModels();
 
 
-char* ReadAndAllocStringValue( KeyValues *pSub, const char *pName, const char *pFilename = NULL );
+#include "util_shared.h"
 
 using namespace vgui;
 

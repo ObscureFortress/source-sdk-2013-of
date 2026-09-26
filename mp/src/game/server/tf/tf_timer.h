@@ -18,6 +18,16 @@
 class CTFPlayer;
 
 
+enum TFTimer_t
+{
+	TF_TIMER_ANY = -1,
+	TF_TIMER_ROTHEALTH,
+	TF_TIMER_INFECTION,
+	TF_TIMER_RETURNITEM,
+	TF_TIMER_ENDROUND,
+	TF_TIMER_DELAYEDGOAL,
+};
+
 class CTimer
 {
 public:

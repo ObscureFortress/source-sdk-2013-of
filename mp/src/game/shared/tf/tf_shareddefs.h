@@ -139,6 +139,7 @@ enum
 	FO_CLASS_WORKERNODE,
 	FO_CLASS_SAPTRAP,		// FO_LAST_NORMAL_CLASS
 	FO_CLASS_COURIER,
+	FO_CLASS_TELECON,
 
 	// Add any new classes after Engineer
 	TF_CLASS_CIVILIAN,		// Civilians are a special class. It is not a player class.
@@ -328,6 +329,8 @@ enum
 	TF_WEAPON_SENTRY_ROCKET,
 	TF_WEAPON_DISPENSER,
 	TF_WEAPON_INVIS,
+	TF_WEAPON_FLAG,
+	FO_WEAPON_GRENADE,
 	FO_WEAPON_ASA10, // fo weapons onwards
 	FO_WEAPON_PDA_AUTOMATON,
 	FO_WEAPON_SENTRONIC_GRENADE,
@@ -400,6 +403,7 @@ enum
 	TF_COND_INVULNERABLE_WEARINGOFF,
 	TF_COND_STEALTHED_BLINK,
 	TF_COND_SELECTED_TO_TELEPORT,
+	TF_COND_SMOKE_BOMB,
 
 	// The following conditions all expire faster when the player is being healed
 	// If you add a new condition that shouldn't have this behavior, add it before this section.
@@ -630,6 +634,7 @@ extern const char *g_pszHintMessages[];
 #define DMG_HALF_FALLOFF		(DMG_RADIATION)
 #define DMG_CRITICAL			(DMG_ACID)
 #define DMG_RADIUS_MAX			(DMG_ENERGYBEAM)
+#define DMG_LEG_DAMAGE			(DMG_BLAST_SURFACE)	// Caltrops: DMG_BLAST_SURFACE is otherwise dead in TF (only set by env_explosion's underwater-safe flag, never read back)
 #define DMG_IGNITE				(DMG_PLASMA)
 #define DMG_USEDISTANCEMOD		(DMG_SLOWBURN)		// NEED TO REMOVE CALTROPS
 #define DMG_NOCLOSEDISTANCEMOD	(DMG_POISON)
@@ -649,6 +654,7 @@ enum
 	TF_DMG_WRENCH_FIX,
 	TF_DMG_CUSTOM_MINIGUN,
 	TF_DMG_CUSTOM_SUICIDE,
+	TF_DMG_CUSTOM_EMP,
 };
 
 enum

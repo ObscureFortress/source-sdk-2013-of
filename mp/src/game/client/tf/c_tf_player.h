@@ -82,6 +82,7 @@ public:
 	C_TFPlayerClass *GetPlayerClass( void )		{ return &m_PlayerClass; }
 	bool IsPlayerClass( int iClass );
 	virtual int GetMaxHealth( void ) const;
+	int ArmorValue( void ) const { return m_ArmorValue; }
 
 	virtual int GetRenderTeamNumber( void );
 
@@ -267,6 +268,7 @@ private:
 	CHandle<C_TFPlayer>	m_hHealer;
 	float				m_flHealerChargeLevel;
 	int					m_iOldHealth;
+	int					m_ArmorValue;
 
 	CNetworkVar( int, m_iPlayerModelIndex );
 

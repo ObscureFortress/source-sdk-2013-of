@@ -10,6 +10,9 @@
 #include "engine/IEngineSound.h"
 #include "tf_weapon_grenade_smoke_bomb.h"
 
+// Duration of the smoke bomb condition (shared so the client HUD can read it).
+ConVar tf_smoke_bomb_time( "tf_smoke_bomb_time", "10", FCVAR_REPLICATED | FCVAR_CHEAT, "Duration of the smoke bomb effect, in seconds." );
+
 // Server specific.
 #ifdef GAME_DLL
 #include "tf_player.h"
@@ -47,8 +50,6 @@ PRECACHE_WEAPON_REGISTER( tf_weapon_grenade_smoke_bomb );
 
 BEGIN_DATADESC( CTFGrenadeSmokeBomb )
 END_DATADESC()
-
-extern ConVar tf_smoke_bomb_time;
 
 //-----------------------------------------------------------------------------
 // Purpose:

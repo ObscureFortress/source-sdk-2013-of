@@ -84,7 +84,7 @@ void CHudSmokeBomb::Paint()
 	if ( !pPlayer )
 		return;
     
-	float flExpireTime = pPlayer->m_Shared.GetSmokeBombExpireTime();
+	float flExpireTime = pPlayer->m_Shared.GetConditionDuration( TF_COND_SMOKE_BOMB );
 
 	float flPercent = ( flExpireTime - gpGlobals->curtime ) / tf_smoke_bomb_time.GetFloat();
 

@@ -15,6 +15,7 @@
 #include "tf_player.h"
 #include "items.h"
 #include "tf_weaponbase_grenadeproj.h"
+#include "tf_fx.h"
 #include "soundent.h"
 #include "KeyValues.h"
 #include "particle_parse.h"
@@ -143,7 +144,8 @@ void CTFGrenadeEmpProjectile::Detonate()
 	}
 
 	// Explosion effect on client
-	SendDispatchEffect();
+	CPVSFilter filter( GetAbsOrigin() );
+	TE_TFExplosion( filter, 0.0f, GetAbsOrigin(), Vector( 0, 0, 1 ), GetWeaponID(), -1 );
 
 	float flRadius = 180;
 	float flDamage = 1;
@@ -156,7 +158,8 @@ void CTFGrenadeEmpProjectile::Detonate()
 	// Apply some amount of EMP damage to every entity in the radius. They will calculate 
 	// their own damage based on how much ammo they have or some other wacky calculation.
 
-	CTakeDamageInfo info( this, GetThrower(), vec3_origin, GetAbsOrigin(), flDamage, DMG_EMP | DMG_PREVENT_PHYSICS_FORCE );
+	CTakeDamageInfo info( this, GetThrower(), vec3_origin, GetAbsOrigin(), flDamage, DMG_PREVENT_PHYSICS_FORCE );
+	info.SetDamageCustom( TF_DMG_CUSTOM_EMP );
 
 	CBaseEntity *pEntityList[100];
 	int nEntityCount = UTIL_EntitiesInSphere( pEntityList, 100, GetAbsOrigin(), flRadius, 0 );

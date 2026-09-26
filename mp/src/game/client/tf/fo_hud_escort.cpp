@@ -32,6 +32,7 @@
 #include "teamplayroundbased_gamerules.h"
 #include "tf_gamerules.h"
 #include "tf_hud_freezepanel.h"
+#include "fo_hud_escort.h"
 
 using namespace vgui;
 

@@ -287,6 +287,34 @@ void CFOPlayerControlPoint::InputHideModel( inputdata_t &input )
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: Sent to every entity at round start; fires the output for the team that owns this point
+//-----------------------------------------------------------------------------
+void CFOPlayerControlPoint::InputRoundActivate( inputdata_t &inputdata )
+{
+	switch ( m_iTeam - FIRST_GAME_TEAM+1 )
+	{
+	case 1:
+		m_OnRoundStartOwnedByTeam1.FireOutput( this, this );
+		break;
+	case 2:
+		m_OnRoundStartOwnedByTeam2.FireOutput( this, this );
+		break;
+	case 3:
+		m_OnRoundStartOwnedByTeam3.FireOutput( this, this );
+		break;
+	case 4:
+		m_OnRoundStartOwnedByTeam4.FireOutput( this, this );
+		break;
+	case 5:
+		m_OnRoundStartOwnedByTeam5.FireOutput( this, this );
+		break;
+	case 6:
+		m_OnRoundStartOwnedByTeam6.FireOutput( this, this );
+		break;
+	}
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
 int CFOPlayerControlPoint::GetCurrentHudIconIndex( void )
@@ -808,7 +836,7 @@ void CFOPlayerControlPoint::InternalSetOwner( int iCapTeam, bool bMakeSound, int
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CFOPlayerControlPoint::SendCapString( char sCappingPlayer )
+void CFOPlayerControlPoint::SendCapString( int iCapTeam, int iNumCappers, int *pCappingPlayers )
 {
 	if ( strlen( STRING(m_iszPrintName) ) <= 0 )
 		return;
@@ -818,15 +846,19 @@ void CFOPlayerControlPoint::SendCapString( char sCappingPlayer )
 	{
 		event->SetInt( "cp", m_iPointIndex );
 		event->SetString( "cpname", STRING(m_iszPrintName) );
-		event->SetString( "player", STRING(sCappingPlayer) );
+		event->SetInt( "team", iCapTeam );
 
-		char capper[1];
-		capper[0] = sCappingPlayer;
+		char cappers[9];	// pCappingPlayers is max length 8
+		int i;
+		for( i=0;i<iNumCappers;i++ )
+		{
+			cappers[i] = (char)pCappingPlayers[i];
+		}
 
-		capper[1] = '\0';
+		cappers[i] = '\0';
 
 		// pCappingPlayers is a null terminated list of player indices
-		event->SetString( "player", capper );
+		event->SetString( "cappers", cappers );
 		event->SetInt( "priority", 9 );
 
 		gameeventmanager->FireEvent( event );
@@ -890,6 +922,50 @@ void CFOPlayerControlPoint::SetActive( bool active )
 	{
 		AddEffects( EF_NODRAW );
 	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CFOPlayerControlPoint::UpdateCapPercentage( void )
+{
+	for ( int i = LAST_SHARED_TEAM+1; i < m_TeamData.Count(); i++ )
+	{
+		// Skip spectator
+		if ( i == TEAM_SPECTATOR )
+			continue;
+
+		float flPerc = GetTeamCapPercentage(i);
+
+		if ( m_TeamData[i].iTeamPoseParam != -1 )
+		{
+			SetPoseParameter( m_TeamData[i].iTeamPoseParam, flPerc );
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+float CFOPlayerControlPoint::GetTeamCapPercentage( int iTeam )
+{
+	int iCappingTeam = ObjectiveResource()->GetCappingTeam( GetPointIndex() );
+	if ( iCappingTeam == TEAM_UNASSIGNED )
+	{
+		// No-one's capping this point.
+		if ( iTeam == m_iTeam )
+			return 1.0;
+
+		return 0.0;
+	}
+
+	float flCapPerc = ObjectiveResource()->GetCPCapPercentage( GetPointIndex() );
+	if ( iTeam == iCappingTeam )
+		return (1.0 - flCapPerc);
+	if ( iTeam == m_iTeam )
+		return flCapPerc;
+
+	return 0.0;
 }
 
 //-----------------------------------------------------------------------------

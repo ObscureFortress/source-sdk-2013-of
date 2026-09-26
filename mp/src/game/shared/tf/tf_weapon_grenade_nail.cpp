@@ -226,7 +226,7 @@ void CTFGrenadeNailProjectile::EmitNails( void )
 		QAngle angNail( random->RandomFloat( -3, 3 ), m_flNailAngle, 0 );
 
 		// Emit a nail
-		CTFProjectile_Nail *pNail = CTFProjectile_Nail::Create( GetAbsOrigin(), angNail, this, GetThrower() );	
+		CTFProjectile_Syringe *pNail = CTFProjectile_Syringe::Create( GetAbsOrigin(), angNail, this, GetThrower() );	
 		if ( pNail )
 		{
 			pNail->SetDamage( 18 );

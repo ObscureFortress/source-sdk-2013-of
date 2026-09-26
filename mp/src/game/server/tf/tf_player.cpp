@@ -255,6 +255,7 @@ BEGIN_SEND_TABLE_NOBASE( CTFPlayer, DT_TFLocalPlayerExclusive )
 
 	SendPropFloat( SENDINFO_VECTORELEM(m_angEyeAngles, 0), 8, SPROP_CHANGES_OFTEN, -90.0f, 90.0f ),
 //	SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 1), 10, SPROP_CHANGES_OFTEN ),
+	SendPropInt( SENDINFO( m_ArmorValue ), 10, SPROP_UNSIGNED ),
 
 END_SEND_TABLE()
 

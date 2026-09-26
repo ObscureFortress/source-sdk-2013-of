@@ -1,5 +1,2 @@
-#!/bin/bash
-
-pushd `dirname $0`
-devtools/bin/vpc /hl2mp +game /mksln games
-popd
+#!/bin/sh
+./devtools/bin/vpc_linux /fo +game /mksln game_fo.sln
