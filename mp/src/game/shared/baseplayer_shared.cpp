@@ -369,9 +369,9 @@ const Vector CBasePlayer::GetPlayerMins( void ) const
 	}
 	else
 	{
-		if ( GetFlags() & FL_DUCKING )
+		if (GetFlags() & FL_DUCKING)
 		{
-			return VEC_DUCK_HULL_MIN_SCALED( this );
+			return VEC_DUCK_HULL_MIN_SCALED(this);
 		}
 		else
 		{

@@ -18,14 +18,13 @@
 #include "props.h"
 #include "physconstraint.h"
 
-#ifdef TF_DLL
 #include "tf_shareddefs.h"
-#endif
+#include "tf_gamerules.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
-/*
-#define TWM_FIRSTSTAGEOUTCOME01	"Announcer.PLR_FirstStageOutcome01"
+
+/*#define TWM_FIRSTSTAGEOUTCOME01	"Announcer.PLR_FirstStageOutcome01"
 #define TWM_FIRSTSTAGEOUTCOME02	"Announcer.PLR_FirstStageOutcome02"
 #define TWM_RACEGENERAL01	"Announcer.PLR_RaceGeneral01"
 #define TWM_RACEGENERAL02	"Announcer.PLR_RaceGeneral02"
@@ -58,8 +57,8 @@
 #define TWM_FINALSTAGESTART05	"Announcer.PLR_FinalStageStart05"
 #define TWM_FINALSTAGESTART06	"Announcer.PLR_FinalStageStart06"
 
-EHANDLE g_hTeamTrainWatcherMaster = NULL;
-*/
+EHANDLE g_hTeamTrainWatcherMaster = NULL;*/
+
 #define MAX_ALARM_TIME_NO_RECEDE 18 // max amount of time to play the alarm if the train isn't going to recede
 
 BEGIN_DATADESC( CTeamTrainWatcher )
@@ -135,9 +134,11 @@ IMPLEMENT_SERVERCLASS_ST(CTeamTrainWatcher, DT_TeamTrainWatcher)
 	SendPropInt( SENDINFO( m_iTrainSpeedLevel ), 4 ),
 	SendPropTime( SENDINFO( m_flRecedeTime ) ),
 	SendPropInt( SENDINFO( m_nNumCappers ) ),
+
 #ifdef GLOWS_ENABLE
 	SendPropEHandle( SENDINFO( m_hGlowEnt ) ),
-#endif // GLOWS_ENABLE
+#endif
+
 
 END_SEND_TABLE()
 
@@ -146,8 +147,8 @@ LINK_ENTITY_TO_CLASS( team_train_watcher, CTeamTrainWatcher );
 
 IMPLEMENT_AUTO_LIST( ITFTeamTrainWatcher );
 
-/*
-LINK_ENTITY_TO_CLASS( team_train_watcher_master, CTeamTrainWatcherMaster );
+
+/*LINK_ENTITY_TO_CLASS( team_train_watcher_master, CTeamTrainWatcherMaster );
 PRECACHE_REGISTER( team_train_watcher_master );
 
 CTeamTrainWatcherMaster::CTeamTrainWatcherMaster()
@@ -252,7 +253,7 @@ void CTeamTrainWatcherMaster::TWMThink( void )
 
 void CTeamTrainWatcherMaster::FireGameEvent( IGameEvent *event )
 {
-	const char *eventname = event->GetName();`
+	const char *eventname = event->GetName();
 
 	if ( FStrEq( "teamplay_round_start", eventname ) )
 	{
@@ -288,8 +289,8 @@ void CTeamTrainWatcherMaster::FireGameEvent( IGameEvent *event )
 			}
 		}
 	}
-}
-*/
+}*/
+
 CTeamTrainWatcher::CTeamTrainWatcher()
 {
 	m_bDisabled = false;
@@ -317,20 +318,17 @@ CTeamTrainWatcher::CTeamTrainWatcher()
 
 #ifdef GLOWS_ENABLE
 	m_hGlowEnt.Set( NULL );
-#endif // GLOWS_ENABLE
-
-#ifdef TF_DLL
-	ChangeTeam( TF_TEAM_BLUE );
-#else
-	ChangeTeam( TEAM_UNASSIGNED );
 #endif
-/*
+
+
+	ChangeTeam( TF_TEAM_BLUE );
+
 	// create a CTeamTrainWatcherMaster entity
-	if ( g_hTeamTrainWatcherMaster.Get() == NULL )
+	/*if ( g_hTeamTrainWatcherMaster.Get() == NULL )
 	{
 		g_hTeamTrainWatcherMaster = CreateEntityByName( "team_train_watcher_master" );
-	}
-*/
+	}*/
+
 	ListenForGameEvent( "path_track_passed" );
 }
 
@@ -390,7 +388,8 @@ void CTeamTrainWatcher::InputDisable( inputdata_t &inputdata )
 
 #ifdef GLOWS_ENABLE
 	m_hGlowEnt.Set( NULL );
-#endif // GLOWS_ENABLE
+#endif
+
 
 	// if we're moving the train, let's shut it down
 	if ( m_bHandleTrainMovement )
@@ -651,6 +650,7 @@ void CTeamTrainWatcher::InternalSetNumTrainCappers( int iNumCappers, CBaseEntity
 	if ( pAreaCap )
 	{
 		m_bCapBlocked = pAreaCap->IsBlocked();
+		if (m_bCapBlocked)
 		m_hAreaCap = pAreaCap;
 	}
 
@@ -660,7 +660,6 @@ void CTeamTrainWatcher::InternalSetNumTrainCappers( int iNumCappers, CBaseEntity
 		{
 			// start receding in [tf_escort_cart_recede_time] seconds
 			m_bWaitingToRecede = true;
-
 			if ( TeamplayRoundBasedRules() && TeamplayRoundBasedRules()->InOvertime() )
 			{
 				m_flRecedeTotalTime = tf_escort_recede_time_overtime.GetFloat();
@@ -682,7 +681,7 @@ void CTeamTrainWatcher::InternalSetNumTrainCappers( int iNumCappers, CBaseEntity
 	{
 		// cancel receding
 		m_bWaitingToRecede = false;
-		m_flRecedeTime = 0;
+		m_flRecedeTime = -1;
 	}
 
 	HandleTrainMovement();
@@ -711,7 +710,7 @@ void CTeamTrainWatcher::InputSetTrainRecedeTime( inputdata_t &inputdata )
 	}
 	else
 	{
-		m_nTrainRecedeTime = 0;
+		m_nTrainRecedeTime = -1;
 	}
 }
 
@@ -814,7 +813,8 @@ void CTeamTrainWatcher::FindGlowEntity( void )
 		}
 	}
 }
-#endif // GLOWS_ENABLE
+#endif
+
 
 // ==========================================================
 // given a start node and a list of goal nodes
@@ -832,6 +832,7 @@ void CTeamTrainWatcher::WatcherActivate( void )
 	m_bAlarmPlayed = false;
 
 	m_Sparks.Purge();
+	Precache();
 
 	StopCaptureAlarm();
 
@@ -841,6 +842,7 @@ void CTeamTrainWatcher::WatcherActivate( void )
 	{
 		Warning("%s failed to find train named '%s'\n", GetClassname(), STRING( m_iszTrain ) );
 	}
+
 
 	// find the trigger area that will give us movement updates and find the sparks (if we're going to handle the train movement)
 	if ( m_bHandleTrainMovement )
@@ -1030,7 +1032,8 @@ void CTeamTrainWatcher::WatcherActivate( void )
 
 #ifdef GLOWS_ENABLE
 	FindGlowEntity();
-#endif // GLOWS_ENABLE
+#endif
+
 
 	InternalSetSpeedForwardModifier( m_flSpeedForwardModifier );
 
@@ -1069,9 +1072,34 @@ void CTeamTrainWatcher::PlayCaptureAlert( CTeamControlPoint *pPoint, bool bFinal
 	if ( !pPoint )
 		return;
 
-	if ( TeamplayRoundBasedRules() )
+	if (TeamplayRoundBasedRules()->State_Get() == GR_STATE_RND_RUNNING)
 	{
-		TeamplayRoundBasedRules()->PlayTrainCaptureAlert( pPoint, bFinalPointInMap );
+		if (bFinalPointInMap)
+		{
+			if (GetTeamNumber() == TF_TEAM_BLUE)
+			{
+				TFGameRules()->BroadcastSound(TF_TEAM_BLUE, TEAM_TRAIN_FINAL_ALERT_ATTACK);
+				TFGameRules()->BroadcastSound(TF_TEAM_RED, TEAM_TRAIN_FINAL_ALERT_DEFENSE);
+			}
+			else
+			{
+				TFGameRules()->BroadcastSound(TF_TEAM_RED, TEAM_TRAIN_FINAL_ALERT_ATTACK);
+				TFGameRules()->BroadcastSound(TF_TEAM_BLUE, TEAM_TRAIN_FINAL_ALERT_DEFENSE);
+			}
+		}
+		else
+		{
+			if (GetTeamNumber() == TF_TEAM_BLUE)
+			{
+				TFGameRules()->BroadcastSound(TF_TEAM_BLUE, TEAM_TRAIN_ALERT_ATTACK);
+				TFGameRules()->BroadcastSound(TF_TEAM_RED, TEAM_TRAIN_ALERT_DEFENSE);
+			}
+			else
+			{
+				TFGameRules()->BroadcastSound(TF_TEAM_RED, TEAM_TRAIN_ALERT_ATTACK);
+				TFGameRules()->BroadcastSound(TF_TEAM_BLUE, TEAM_TRAIN_ALERT_DEFENSE);
+			}
+		}
 	}
 }
 
@@ -1085,6 +1113,7 @@ void CTeamTrainWatcher::WatcherThink( void )
 		if ( m_flRecedeTime < gpGlobals->curtime )
 		{
 			m_bWaitingToRecede = false;
+			//ObjectiveResource()->SetWaitingToRecede(false);
 
 			// don't actually recede in overtime
 			if ( TeamplayRoundBasedRules() && !TeamplayRoundBasedRules()->InOvertime() )
@@ -1183,6 +1212,7 @@ void CTeamTrainWatcher::WatcherThink( void )
 					{
 						if ( m_hAreaCap->IsTouching( pPlayer ) )
 						{
+							//m_hAreaCap->StartTouch(pPlayer);
 							pPlayer->SpeakConceptIfAllowed( MP_CONCEPT_CART_MOVING_FORWARD );
 						}
 					}
@@ -1278,6 +1308,7 @@ void CTeamTrainWatcher::WatcherThink( void )
 							}
 							else 
 							{
+								/*
 								// or this is the last round
 								if ( pMaster->NumPlayableControlPointRounds() == 1 )
 								{
@@ -1296,9 +1327,9 @@ void CTeamTrainWatcher::WatcherThink( void )
 										}
 									}
 								}
+								*/ //CHECKPOINT: IMPLEMENT THIS LATER
 							}
 						}
-
 						PlayCaptureAlert( pCurrentPoint, bFinalPointInMap );
 					}
 				}
@@ -1409,6 +1440,9 @@ bool CTeamTrainWatcher::TimerMayExpire( void )
 
 	// capture blocked so we're not receding, but game shouldn't end
 	if ( m_bCapBlocked )
+		return false;
+
+	if ( m_flRecedeTime > gpGlobals->curtime )
 		return false;
 
 	// not waiting, so we're capping, in which case the area capture
@@ -1523,6 +1557,16 @@ Vector CTeamTrainWatcher::GetNextCheckpointPosition( void ) const
 
 	Assert( !"No checkpoint found in team train watcher\n" );
 	return vec3_origin;
+}
+
+void CTeamTrainWatcher::Precache( void )
+{
+	PrecacheScriptSound(TEAM_TRAIN_ALARM);
+	PrecacheScriptSound(TEAM_TRAIN_ALARM_SINGLE);
+	PrecacheScriptSound(TEAM_TRAIN_ALERT_DEFENSE);
+	PrecacheScriptSound(TEAM_TRAIN_ALERT_ATTACK);
+	PrecacheScriptSound(TEAM_TRAIN_FINAL_ALERT_DEFENSE);
+	PrecacheScriptSound(TEAM_TRAIN_FINAL_ALERT_ATTACK);
 }
 
 #if defined( STAGING_ONLY ) && defined( TF_DLL )

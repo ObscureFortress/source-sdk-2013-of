@@ -19,7 +19,7 @@
 #define ROUND_TO_TICKS( t )		( TICK_INTERVAL * TIME_TO_TICKS( t ) )
 #define TICK_NEVER_THINK		(-1)
 
-#if defined( TF_DLL )
+#if defined( TF_DLL ) || defined( TF_MOD )
 #define ANIMATION_CYCLE_BITS		10
 #else
 #define ANIMATION_CYCLE_BITS		15
@@ -93,6 +93,8 @@ public:
 #define VEC_DUCK_HULL_MAX_SCALED( player )		( g_pGameRules->GetViewVectors()->m_vDuckHullMax * player->GetModelScale() )
 #define VEC_DUCK_VIEW_SCALED( player )			( g_pGameRules->GetViewVectors()->m_vDuckView * player->GetModelScale() )
 
+#define VEC_DUCK_HULL_MAX_SCALED_WORKERNODE( player )		( g_pGameRules->GetViewVectors()->m_vDuckHullMax * player->GetModelScale() * 0.8 )
+
 #define VEC_OBS_HULL_MIN_SCALED( player )		( g_pGameRules->GetViewVectors()->m_vObsHullMin * player->GetModelScale() )
 #define VEC_OBS_HULL_MAX_SCALED( player )		( g_pGameRules->GetViewVectors()->m_vObsHullMax * player->GetModelScale() )
 
@@ -102,7 +104,7 @@ public:
 
 #define MAX_CLIMB_SPEED		200
 
-#if defined(TF_DLL) || defined(TF_CLIENT_DLL)
+#if defined(TF_DLL) || defined(TF_CLIENT_DLL) || defined(TF_MOD) || defined(TF_MOD_CLIENT)
 	#define TIME_TO_DUCK		0.2
 	#define TIME_TO_DUCK_MS		200.0f
 #else
@@ -530,6 +532,8 @@ typedef enum
 #define COLOR_GREY		Color(204, 204, 204, 255)
 #define COLOR_WHITE		Color(255, 255, 255, 255)
 #define COLOR_BLACK		Color(0, 0, 0, 255)
+#define COLOR_PURPLE	Color(255, 0, 255, 255)
+#define COLOR_PINK		Color(255, 105, 180, 255)
 
 // All NPCs need this data
 enum
@@ -835,14 +839,14 @@ struct EmitSound_t
 //-----------------------------------------------------------------------------
 // Multiplayer specific defines
 //-----------------------------------------------------------------------------
-#define MAX_CONTROL_POINTS			8
+#define MAX_CONTROL_POINTS			16
 #define MAX_CONTROL_POINT_GROUPS	8
 
 // Maximum number of points that a control point may need owned to be cappable
 #define MAX_PREVIOUS_POINTS			3
 
 // The maximum number of teams the control point system knows how to deal with
-#define MAX_CONTROL_POINT_TEAMS		8
+#define MAX_CONTROL_POINT_TEAMS		16
 
 // Maximum length of the cap layout string
 #define MAX_CAPLAYOUT_LENGTH		32
@@ -887,7 +891,7 @@ enum
 //-----------------------------------------------------------------------------
 // Commentary Mode
 //-----------------------------------------------------------------------------
-#if defined(TF_DLL) || defined(TF_CLIENT_DLL)
+#if defined(TF_DLL) || defined(TF_CLIENT_DLL) || defined(TF_MOD) || defined(TF_MOD_CLIENT)
 #define GAME_HAS_NO_USE_KEY
 
 #if defined( SPROP_COORD )

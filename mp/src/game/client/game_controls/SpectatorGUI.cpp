@@ -39,7 +39,7 @@
 #include <shareddefs.h>
 #include <igameresources.h>
 
-#ifdef TF_CLIENT_DLL
+#ifdef CLIENT_DLL
 #include "tf_gamerules.h"
 void AddSubKeyNamed( KeyValues *pKeys, const char *pszName );
 #endif

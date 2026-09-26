@@ -1,0 +1,48 @@
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//
+// Purpose: Worker Node's Wall
+//
+// $NoKeywords: $
+//=============================================================================//
+
+#ifndef FO_OBJ_WALL_H
+#define FO_OBJ_WALL_H
+#ifdef _WIN32
+#pragma once
+#endif
+
+#include "tf_obj.h"
+
+class CTFPlayer;
+
+// ------------------------------------------------------------------------ //
+// Resupply object that's built by the player
+// ------------------------------------------------------------------------ //
+class CObjectWorkerWall : public CBaseObject
+{
+	DECLARE_CLASS( CObjectWorkerWall, CBaseObject );
+
+public:
+	DECLARE_SERVERCLASS();
+
+	CObjectWorkerWall();
+	~CObjectWorkerWall();
+
+	static CObjectWorkerWall* Create(const Vector &vOrigin, const QAngle &vAngles);
+
+	virtual void	Spawn();
+
+	virtual void	Precache();
+	virtual bool	ClientCommand( CTFPlayer *pPlayer, const CCommand &args );
+
+	virtual void	DetonateObject( void );
+	virtual void	OnGoActive( void );	
+	virtual bool	StartBuilding( CBaseEntity *pBuilder );
+	virtual void	SetModel( const char *pModel );
+
+	virtual int	ObjectCaps( void ) { return (BaseClass::ObjectCaps() | FCAP_IMPULSE_USE); }
+
+	DECLARE_DATADESC();
+};
+
+#endif // FO_OBJ_WALL_H

@@ -2647,6 +2647,10 @@ void SixenseInput::SixenseUpdateKeys( float flFrametime, CUserCmd *pCmd )
 				// if the class or team menus are up hide it with start
 				if( ( Q_strcmp( panel->GetName(), "class_blue" ) == 0 ) ||
 					( Q_strcmp( panel->GetName(), "class_red" ) == 0 ) ||
+					(Q_strcmp(panel->GetName(), "class_green") == 0) ||
+					(Q_strcmp(panel->GetName(), "class_yellow") == 0) ||
+					(Q_strcmp(panel->GetName(), "class_purple") == 0) ||
+					(Q_strcmp(panel->GetName(), "class_pink") == 0) ||
 					( Q_strcmp( panel->GetName(), "team" ) == 0 ) )
 				{
 
