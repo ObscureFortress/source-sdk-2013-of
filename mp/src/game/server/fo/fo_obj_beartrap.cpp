@@ -132,7 +132,7 @@ void CObjectBeartrap::OnGoActive( void )
 //-----------------------------------------------------------------------------
 void CObjectBeartrap::BeartrapTouch( CBaseEntity *pOther )
 {
-	if ( m_bDisabled )
+	if ( IsDisabled() )
 		return;
 
 	if ( !pOther->IsPlayer() )
