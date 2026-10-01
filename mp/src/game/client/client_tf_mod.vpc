@@ -393,6 +393,8 @@ $Project "Client (TF)"
 		$File	"$SRCDIR\game\shared\fo\fo_weapon_hammer.h"
 		$File	"$SRCDIR\game\shared\fo\fo_weapon_nodegun.cpp"
 		$File	"$SRCDIR\game\shared\fo\fo_weapon_nodegun.h"
+		$File	"$SRCDIR\game\shared\fo\fo_weapon_paddle.cpp"
+		$File	"$SRCDIR\game\shared\fo\fo_weapon_paddle.h"
 		$File	"$SRCDIR\game\shared\fo\fo_weapon_sentronic_grenade.cpp"
 		$File	"$SRCDIR\game\shared\fo\fo_weapon_sentronic_grenade.h"
 	}
