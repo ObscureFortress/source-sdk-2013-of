@@ -182,6 +182,8 @@ public:
 
 	float	GetTeleconTeleportMeter() const { return m_flTeleportMeter; }
 	void	SetTeleconTeleportMeter(float val) { m_flTeleportMeter = val; }
+	float	GetSaptrapEnergyMeter() { return m_flEnergyMeter; }
+	void	SetSaptrapEnergyMeter( float val ) { m_flEnergyMeter = val; }
 
 	bool	IsJumping( void ) { return m_bJumping; }
 	void	SetJumping( bool bJumping );
@@ -293,6 +295,7 @@ private:
 	CNetworkVar( float, m_flCloakMeter );	// [0,100]
 
 	CNetworkVar(float, m_flTeleportMeter);	// [0,100]
+	CNetworkVar(float, m_flEnergyMeter);	// [0,100]
 
 	CNetworkVar( bool, m_bJumping );
 	CNetworkVar( bool, m_bAirDash );

@@ -419,6 +419,10 @@ enum
 	TF_COND_STEALTHED_BLINK,
 	TF_COND_SELECTED_TO_TELEPORT,
 	TF_COND_SMOKE_BOMB,
+	FO_COND_STEALING_HEALTH,
+	FO_COND_SAPTRAP_BUFF1,
+	FO_COND_SAPTRAP_BUFF2,
+	FO_COND_SAPTRAP_BUFF3,
 
 	// The following conditions all expire faster when the player is being healed
 	// If you add a new condition that shouldn't have this behavior, add it before this section.
@@ -718,6 +722,7 @@ enum
 	OBJ_WALL,
 	OBJ_STAIRS,
 	OBJ_REPAIRNODE,
+	OBJ_BEARTRAP,
 	// If you add a new object, you need to add it to the g_ObjectInfos array 
 	// in tf_shareddefs.cpp, and add it's data to the scripts/object.txt
 

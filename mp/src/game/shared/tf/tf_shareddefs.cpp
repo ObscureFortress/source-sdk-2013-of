@@ -511,6 +511,7 @@ CObjectInfo g_ObjectInfos[OBJ_LAST] =
 	CObjectInfo("OBJ_WALL"),
 	CObjectInfo("OBJ_STAIRS"),
 	CObjectInfo("OBJ_REPAIRNODE"),
+	CObjectInfo("OBJ_BEARTRAP"),
 };
 
 //-----------------------------------------------------------------------------
