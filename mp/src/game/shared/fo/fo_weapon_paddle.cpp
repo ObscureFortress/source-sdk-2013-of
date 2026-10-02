@@ -53,6 +53,8 @@ PRECACHE_WEAPON_REGISTER( fo_weapon_paddle );
 class CFOPaddleTraceFilter : public CTraceFilterSimple
 {
 public:
+	typedef CTraceFilterSimple BaseClass;
+
 	CFOPaddleTraceFilter( const IHandleEntity *pPassEntity, int iCollisionGroup, int iIgnoreTeam )
 		: CTraceFilterSimple( pPassEntity, iCollisionGroup )
 	{
