@@ -2180,6 +2180,14 @@ void KeyValues::RecursiveMergeKeyValues( KeyValues *baseKV )
 // Returns whether a keyvalues conditional evaluates to true or false
 // Needs more flexibility with conditionals, checking convars would be nice.
 //-----------------------------------------------------------------------------
+// Optional hook so a game can add its own conditionals (see gamemounter.cpp).
+bool (*pEvaluateExtraConditional)( const char * ) = NULL;
+
+void SetExtraConditionalFunc( bool (*pfnEvaluate)( const char * ) )
+{
+	pEvaluateExtraConditional = pfnEvaluate;
+}
+
 bool EvaluateConditional( const char *str )
 {
 	if ( !str )
@@ -2210,6 +2218,9 @@ bool EvaluateConditional( const char *str )
 	if ( Q_stristr( str, "$POSIX" ) )
 		return IsPosix() ^ bNot;
 	
+	if ( pEvaluateExtraConditional )
+		return pEvaluateExtraConditional( str );
+
 	return false;
 }
 

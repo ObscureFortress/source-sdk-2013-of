@@ -170,6 +170,8 @@ extern vgui::IInputInternal *g_InputInternal;
 #include "sixense/in_sixense.h"
 #endif
 
+#include "gamemounter.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -1088,6 +1090,9 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 #ifndef _X360
 	HookHapticMessages(); // Always hook the messages
 #endif
+
+	// Mount any extra games / SourceMods listed in gamemounting.txt and sourcemounting.txt
+	AddRequiredSearchPaths();
 
 	return true;
 }
