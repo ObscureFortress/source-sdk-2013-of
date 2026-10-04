@@ -358,6 +358,30 @@ bool CTeamControlPointMaster::FindControlPointRoundToPlay( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+int CTeamControlPointMaster::NumPlayableControlPointRounds( void )
+{
+	int nRetVal = 0;
+
+	for ( int i = 0 ; i < m_ControlPointRounds.Count() ; ++i )
+	{
+		CTeamControlPointRound *pRound = m_ControlPointRounds[i];
+
+		if ( pRound )
+		{
+			if ( pRound->IsPlayable() )
+			{
+				// we found one that's playable
+				nRetVal++;
+			}
+		}
+	}
+
+	return nRetVal;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 bool CTeamControlPointMaster::SelectSpecificRound( void )
 {
 	CTeamControlPointRound *pRound = NULL;

@@ -107,6 +107,7 @@ public:
 	bool ShouldScorePerCapture( void ){ return m_bScorePerCapture; }
 	bool ShouldPlayAllControlPointRounds( void ){ return m_bPlayAllRounds; }
 	bool FindControlPointRoundToPlay( void ); // checks to see if there are any more rounds to play (but doesn't actually "get" one to play)
+	int NumPlayableControlPointRounds( void ); // returns how many rounds are still playable
 	
 //	void ListRounds( void );
 
