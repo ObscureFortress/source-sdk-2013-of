@@ -26,6 +26,7 @@ class C_MuzzleFlashModel;
 class C_BaseObject;
 
 extern ConVar tf_medigun_autoheal;
+extern ConVar tf_hands_autosteal;
 extern ConVar cl_autorezoom;
 extern ConVar cl_autoreload;
 
@@ -173,6 +174,7 @@ public:
 	void			ForceUpdateObjectHudState( void );
 
 	bool			GetMedigunAutoHeal( void ){ return tf_medigun_autoheal.GetBool(); }
+	bool			GetHandsAutoSteal( void ){ return tf_hands_autosteal.GetBool(); }
 	bool			ShouldAutoRezoom( void ){ return cl_autorezoom.GetBool(); }
 	bool			ShouldAutoReload(void) { return cl_autoreload.GetBool(); }
 
