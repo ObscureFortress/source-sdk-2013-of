@@ -1072,34 +1072,47 @@ void CTeamTrainWatcher::PlayCaptureAlert( CTeamControlPoint *pPoint, bool bFinal
 	if ( !pPoint )
 		return;
 
-	if (TeamplayRoundBasedRules()->State_Get() == GR_STATE_RND_RUNNING)
+	if ( TeamplayRoundBasedRules()->State_Get() == GR_STATE_RND_RUNNING )
 	{
-		if (bFinalPointInMap)
+		const char *pszDefense = bFinalPointInMap ? TEAM_TRAIN_FINAL_ALERT_DEFENSE : TEAM_TRAIN_ALERT_DEFENSE;
+		const char *pszAttack = bFinalPointInMap ? TEAM_TRAIN_FINAL_ALERT_ATTACK : TEAM_TRAIN_ALERT_ATTACK;
+
+		const char *pszRed = pszDefense;
+		const char *pszBlue = pszDefense;
+		const char *pszGreen = pszDefense;
+		const char *pszYellow = pszDefense;
+		const char *pszPurple = pszDefense;
+		const char *pszPink = pszDefense;
+
+		// the team that owns this train is attacking, everyone else is defending
+		switch ( GetTeamNumber() )
 		{
-			if (GetTeamNumber() == TF_TEAM_BLUE)
-			{
-				TFGameRules()->BroadcastSound(TF_TEAM_BLUE, TEAM_TRAIN_FINAL_ALERT_ATTACK);
-				TFGameRules()->BroadcastSound(TF_TEAM_RED, TEAM_TRAIN_FINAL_ALERT_DEFENSE);
-			}
-			else
-			{
-				TFGameRules()->BroadcastSound(TF_TEAM_RED, TEAM_TRAIN_FINAL_ALERT_ATTACK);
-				TFGameRules()->BroadcastSound(TF_TEAM_BLUE, TEAM_TRAIN_FINAL_ALERT_DEFENSE);
-			}
+		case TF_TEAM_RED:
+			pszRed = pszAttack;
+			break;
+		case TF_TEAM_BLUE:
+			pszBlue = pszAttack;
+			break;
+		case FO_TEAM_GREEN:
+			pszGreen = pszAttack;
+			break;
+		case FO_TEAM_YELLOW:
+			pszYellow = pszAttack;
+			break;
+		case FO_TEAM_PURPLE:
+			pszPurple = pszAttack;
+			break;
+		case FO_TEAM_PINK:
+			pszPink = pszAttack;
+			break;
 		}
-		else
-		{
-			if (GetTeamNumber() == TF_TEAM_BLUE)
-			{
-				TFGameRules()->BroadcastSound(TF_TEAM_BLUE, TEAM_TRAIN_ALERT_ATTACK);
-				TFGameRules()->BroadcastSound(TF_TEAM_RED, TEAM_TRAIN_ALERT_DEFENSE);
-			}
-			else
-			{
-				TFGameRules()->BroadcastSound(TF_TEAM_RED, TEAM_TRAIN_ALERT_ATTACK);
-				TFGameRules()->BroadcastSound(TF_TEAM_BLUE, TEAM_TRAIN_ALERT_DEFENSE);
-			}
-		}
+
+		TeamplayRoundBasedRules()->BroadcastSound( TF_TEAM_RED, pszRed );
+		TeamplayRoundBasedRules()->BroadcastSound( TF_TEAM_BLUE, pszBlue );
+		TeamplayRoundBasedRules()->BroadcastSound( FO_TEAM_GREEN, pszGreen );
+		TeamplayRoundBasedRules()->BroadcastSound( FO_TEAM_YELLOW, pszYellow );
+		TeamplayRoundBasedRules()->BroadcastSound( FO_TEAM_PURPLE, pszPurple );
+		TeamplayRoundBasedRules()->BroadcastSound( FO_TEAM_PINK, pszPink );
 	}
 }
 
@@ -1113,7 +1126,6 @@ void CTeamTrainWatcher::WatcherThink( void )
 		if ( m_flRecedeTime < gpGlobals->curtime )
 		{
 			m_bWaitingToRecede = false;
-			//ObjectiveResource()->SetWaitingToRecede(false);
 
 			// don't actually recede in overtime
 			if ( TeamplayRoundBasedRules() && !TeamplayRoundBasedRules()->InOvertime() )
@@ -1212,7 +1224,6 @@ void CTeamTrainWatcher::WatcherThink( void )
 					{
 						if ( m_hAreaCap->IsTouching( pPlayer ) )
 						{
-							//m_hAreaCap->StartTouch(pPlayer);
 							pPlayer->SpeakConceptIfAllowed( MP_CONCEPT_CART_MOVING_FORWARD );
 						}
 					}
@@ -1308,7 +1319,6 @@ void CTeamTrainWatcher::WatcherThink( void )
 							}
 							else 
 							{
-								/*
 								// or this is the last round
 								if ( pMaster->NumPlayableControlPointRounds() == 1 )
 								{
@@ -1327,9 +1337,9 @@ void CTeamTrainWatcher::WatcherThink( void )
 										}
 									}
 								}
-								*/ //CHECKPOINT: IMPLEMENT THIS LATER
 							}
 						}
+
 						PlayCaptureAlert( pCurrentPoint, bFinalPointInMap );
 					}
 				}
