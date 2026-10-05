@@ -128,9 +128,4 @@ void AddRequiredSearchPaths()
 	pSourceMods->deleteThis();
 }
 
-void SetExtraConditionalFunc(bool (*func)(const char*))
-{
-	// empty stub - satisfies the linker
-}
-
 #endif // CLIENT_DLL
