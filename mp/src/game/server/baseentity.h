@@ -918,6 +918,9 @@ public:
 	// Notifier that I've killed some other entity. (called from Victim's Event_Killed).
 	virtual void	Event_KilledOther( CBaseEntity *pVictim, const CTakeDamageInfo &info ) { return; }
 
+	// Called on the weapon that airblasted pEntity (see CFOPaddle)
+	virtual void	OnAirblast( CBaseEntity *pEntity ) {}
+
 	// UNDONE: Make this data?
 	virtual int				BloodColor( void );
 

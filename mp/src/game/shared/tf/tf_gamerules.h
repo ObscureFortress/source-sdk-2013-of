@@ -84,6 +84,12 @@ public:
 	void	InputSetYellowTeamRole(inputdata_t &inputdata);
 	void	InputSetPurpleTeamRole(inputdata_t &inputdata);
 	void	InputSetPinkTeamRole(inputdata_t &inputdata);
+	void	InputSetRedKothClockActive( inputdata_t &inputdata );
+	void	InputSetBlueKothClockActive( inputdata_t &inputdata );
+	void	InputSetGreenKothClockActive( inputdata_t &inputdata );
+	void	InputSetYellowKothClockActive( inputdata_t &inputdata );
+	void	InputSetPurpleKothClockActive( inputdata_t &inputdata );
+	void	InputSetPinkKothClockActive( inputdata_t &inputdata );
 
 	int		m_nExtraTeamMode;
 
@@ -162,7 +168,7 @@ public:
 	virtual void	SetupOnStalemateStart( void );
 	virtual void	SetupOnStalemateEnd( void );
 
-	void			RecalculateControlPointState( void );
+	virtual void	RecalculateControlPointState( void );
 
 	virtual void	HandleSwitchTeams( void );
 	virtual void	HandleScrambleTeams( void );
@@ -225,6 +231,23 @@ public:
 
 	virtual int		ExtraTeamMode(void) { return m_nExtraTeamMode; };
 	virtual bool    IsInEscortMode(void) { return m_nGameType == TF_GAMETYPE_ESCORT; }
+
+	// King of the Hill: each team has its own clock
+	virtual bool	IsInKothMode( void ) { return m_bPlayingKoth; }
+	CTeamRoundTimer	*GetBlueKothRoundTimer( void ) { return m_hBlueKothTimer.Get(); }
+	CTeamRoundTimer	*GetRedKothRoundTimer( void ) { return m_hRedKothTimer.Get(); }
+	CTeamRoundTimer	*GetGreenKothRoundTimer( void ) { return m_hGreenKothTimer.Get(); }
+	CTeamRoundTimer	*GetYellowKothRoundTimer( void ) { return m_hYellowKothTimer.Get(); }
+	CTeamRoundTimer	*GetPurpleKothRoundTimer( void ) { return m_hPurpleKothTimer.Get(); }
+	CTeamRoundTimer	*GetPinkKothRoundTimer( void ) { return m_hPinkKothTimer.Get(); }
+#ifdef GAME_DLL
+	void			SetBlueKothRoundTimer( CTeamRoundTimer *pTimer ) { m_hBlueKothTimer.Set( pTimer ); }
+	void			SetRedKothRoundTimer( CTeamRoundTimer *pTimer ) { m_hRedKothTimer.Set( pTimer ); }
+	void			SetGreenKothRoundTimer( CTeamRoundTimer *pTimer ) { m_hGreenKothTimer.Set( pTimer ); }
+	void			SetYellowKothRoundTimer( CTeamRoundTimer *pTimer ) { m_hYellowKothTimer.Set( pTimer ); }
+	void			SetPurpleKothRoundTimer( CTeamRoundTimer *pTimer ) { m_hPurpleKothTimer.Set( pTimer ); }
+	void			SetPinkKothRoundTimer( CTeamRoundTimer *pTimer ) { m_hPinkKothTimer.Set( pTimer ); }
+#endif
 
 	const char *GetTeamGoalString( int iTeam );
 
@@ -335,8 +358,16 @@ private:
 
 	CHandle<CTeamTrainWatcher> m_hRedAttackTrain;
 	CHandle<CTeamTrainWatcher> m_hBlueAttackTrain;
+	CHandle<CTeamTrainWatcher> m_hGreenAttackTrain;
+	CHandle<CTeamTrainWatcher> m_hYellowAttackTrain;
+	CHandle<CTeamTrainWatcher> m_hPurpleAttackTrain;
+	CHandle<CTeamTrainWatcher> m_hPinkAttackTrain;
 	CHandle<CTeamTrainWatcher> m_hRedDefendTrain;
 	CHandle<CTeamTrainWatcher> m_hBlueDefendTrain;
+	CHandle<CTeamTrainWatcher> m_hGreenDefendTrain;
+	CHandle<CTeamTrainWatcher> m_hYellowDefendTrain;
+	CHandle<CTeamTrainWatcher> m_hPurpleDefendTrain;
+	CHandle<CTeamTrainWatcher> m_hPinkDefendTrain;
 
 #endif
 
@@ -347,6 +378,14 @@ private:
 	CNetworkString(m_pszTeamGoalStringYellow, MAX_TEAMGOAL_STRING);
 	CNetworkString(m_pszTeamGoalStringPurple, MAX_TEAMGOAL_STRING);
 	CNetworkString(m_pszTeamGoalStringPink, MAX_TEAMGOAL_STRING);
+
+	CNetworkVar( bool, m_bPlayingKoth );
+	CNetworkHandle( CTeamRoundTimer, m_hBlueKothTimer );
+	CNetworkHandle( CTeamRoundTimer, m_hRedKothTimer );
+	CNetworkHandle( CTeamRoundTimer, m_hGreenKothTimer );
+	CNetworkHandle( CTeamRoundTimer, m_hYellowKothTimer );
+	CNetworkHandle( CTeamRoundTimer, m_hPurpleKothTimer );
+	CNetworkHandle( CTeamRoundTimer, m_hPinkKothTimer );
 
 public:
 

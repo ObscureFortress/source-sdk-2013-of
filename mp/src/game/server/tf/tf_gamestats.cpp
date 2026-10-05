@@ -36,10 +36,14 @@ const char *g_aClassNames[] =
 	"TF_CLASS_CIVILIAN",
 	"FO_CLASS_SENTRONIC",
 	"FO_CLASS_DISMATIC",
-	"TF_CLASS_ROBO",
+	"FO_CLASS_TELECON",
 	"FO_CLASS_WORKERNODE",
 	"FO_CLASS_SAPTRAP",
+	"FO_CLASS_CUSTOM1",
+	"FO_CLASS_CUSTOM2",
+	"FO_CLASS_CUSTOM3",
 	"FO_CLASS_COURIER",
+	"FO_CLASS_CONTROLFREAK",
 };
 
 //-----------------------------------------------------------------------------

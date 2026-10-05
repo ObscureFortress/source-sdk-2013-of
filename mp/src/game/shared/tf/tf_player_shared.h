@@ -281,6 +281,7 @@ private:
 	float					m_flFlameBurnTime;
 	float					m_flFlameRemoveTime;
 	float					m_flTauntRemoveTime;
+	float					m_flCloakHurtTime;
 
 
 	float m_flDisguiseCompleteTime;
@@ -311,6 +312,7 @@ private:
 #ifdef GAME_DLL
 	float	m_flNextCritUpdate;
 	CUtlVector<CTFDamageEvent> m_DamageEvents;
+	float	m_flNextStealHealthUpdate;	// Next time the hands weapon may steal health from a target
 #else
 	int m_iDisguiseWeaponModelIndex;
 	int m_iOldDisguiseWeaponModelIndex;

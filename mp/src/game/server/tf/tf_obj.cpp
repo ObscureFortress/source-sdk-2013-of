@@ -110,7 +110,9 @@ IMPLEMENT_SERVERCLASS_ST(CBaseObject, DT_BaseObject)
 	SendPropVector( SENDINFO( m_vecBuildMaxs ), -1, SPROP_COORD ),
 	SendPropVector( SENDINFO( m_vecBuildMins ), -1, SPROP_COORD ),
 	SendPropInt( SENDINFO( m_iDesiredBuildRotations ), 2, SPROP_UNSIGNED ),
+	SendPropBool( SENDINFO( m_bHealing ) ),
 	SendPropBool( SENDINFO( m_bServerOverridePlacement ) ),
+	SendPropBool( SENDINFO( m_bWasMapPlaced ) ),
 END_SEND_TABLE();
 
 bool PlayerIndexLessFunc( const int &lhs, const int &rhs )	
@@ -170,6 +172,8 @@ CBaseObject::CBaseObject()
 	m_bBuilding = false;
 	m_Activity = ACT_INVALID;
 	m_bDisabled = false;
+	m_bHealing = false;
+	m_bWasMapPlaced = false;
 	m_SolidToPlayers = SOLID_TO_PLAYER_USE_DEFAULT;
 	m_bPlacementOK = false;
 	m_aGibs.Purge();
@@ -446,6 +450,15 @@ void CBaseObject::BaseObjectThink( void )
 {
 	SetNextThink( gpGlobals->curtime + BASE_OBJECT_THINK_DELAY, OBJ_BASE_THINK_CONTEXT );
 
+	// Repair nodes slowly heal objects inside their range
+	if ( m_bHealing )
+	{
+		if ( GetHealth() < GetMaxHealth() )
+		{
+			SetHealth( GetHealth() + 5 );
+		}
+	}
+
 	// Make sure animation is up to date
 	DetermineAnimation();
 
@@ -549,7 +562,7 @@ bool CBaseObject::EstimateValidBuildPos( void )
 	//NDebugOverlay::Cross3D( vecBuildOrigin, 10, 255, 0, 0, false, 0.1 );
 
 	// Cannot build inside a nobuild brush
-	if ( PointInNoBuild( vecBuildOrigin ) )
+	if ( PointInNoBuild( vecBuildOrigin, this ) )
 		return false;
 
 	if ( PointInRespawnRoom( NULL, vecBuildOrigin ) )
@@ -616,7 +629,60 @@ void CBaseObject::Activate( void )
 {
 	BaseClass::Activate();
 
-	Assert( 0 );
+	// Objects placed in the map have no builder
+	if ( !GetBuilder() )
+	{
+		InitializeMapPlacedObject();
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Set up an object that was placed in the map by the level designer
+//-----------------------------------------------------------------------------
+void CBaseObject::InitializeMapPlacedObject( void )
+{
+	m_bWasMapPlaced = true;
+
+	if ( !( m_fObjectFlags & OF_IS_CART_OBJECT ) )
+	{
+		SpawnControlPanels();
+	}
+
+	SetHealth( GetMaxHealth() );
+
+	FinishedBuilding();
+
+	// Add this object to its team's list of objects
+	CTFTeam *pTFTeam = GetGlobalTFTeam( GetTeamNumber() );
+	if ( pTFTeam && !pTFTeam->IsObjectOnTeam( this ) )
+	{
+		pTFTeam->AddObject( this );
+	}
+
+	switch ( GetTeamNumber() )
+	{
+	case TF_TEAM_RED:
+		m_nSkin = 0;
+		break;
+	case TF_TEAM_BLUE:
+		m_nSkin = 1;
+		break;
+	case FO_TEAM_GREEN:
+		m_nSkin = 2;
+		break;
+	case FO_TEAM_YELLOW:
+		m_nSkin = 3;
+		break;
+	case FO_TEAM_PURPLE:
+		m_nSkin = 4;
+		break;
+	case FO_TEAM_PINK:
+		m_nSkin = 5;
+		break;
+	default:
+		m_nSkin = 1;
+		break;
+	}
 }
 
 
@@ -1065,6 +1131,11 @@ const char *CBaseObject::GetResponseRulesModifier( void )
 	case OBJ_TELEPORTER_EXIT: return "objtype:teleporter_exit"; break;
 	case OBJ_SENTRYGUN: return "objtype:sentrygun"; break;
 	case OBJ_ATTACHMENT_SAPPER: return "objtype:sapper"; break;
+	case OBJ_FORT: return "objtype:fort"; break;
+	case OBJ_WALL: return "objtype:wall"; break;
+	case OBJ_STAIRS: return "objtype:stairs"; break;
+	case OBJ_REPAIRNODE: return "objtype:repairnode"; break;
+	case OBJ_BEARTRAP: return "objtype:beartrap"; break;
 	default:
 		break;
 	}

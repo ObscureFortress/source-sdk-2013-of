@@ -136,7 +136,7 @@ public:
 	{
 		m_pClassButtons[FO_CLASS_SENTRONIC] = new CImageMouseOverButton<CTFClassInfoPanel>( this, "sentronic_blue", m_pClassInfoPanel );
 		m_pClassButtons[FO_CLASS_DISMATIC] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "dismatic_blue", m_pClassInfoPanel);
-		m_pClassButtons[TF_CLASS_ROBO] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "telecon_blue", m_pClassInfoPanel);
+		m_pClassButtons[FO_CLASS_TELECON] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "telecon_blue", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_WORKERNODE] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "workernode_blue", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_SAPTRAP] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "saptrap_blue", m_pClassInfoPanel);
 		m_pClassButtons[TF_CLASS_RANDOM] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "randompc_blue", m_pClassInfoPanel);
@@ -205,7 +205,7 @@ public:
 	{
 		m_pClassButtons[FO_CLASS_SENTRONIC] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "sentronic_red", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_DISMATIC] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "dismatic_red", m_pClassInfoPanel);
-		m_pClassButtons[TF_CLASS_ROBO] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "telecon_red", m_pClassInfoPanel);
+		m_pClassButtons[FO_CLASS_TELECON] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "telecon_red", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_WORKERNODE] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "workernode_red", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_SAPTRAP] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "saptrap_red", m_pClassInfoPanel);
 		m_pClassButtons[TF_CLASS_RANDOM] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "randompc_red", m_pClassInfoPanel);
@@ -274,7 +274,7 @@ public:
 	{
 		m_pClassButtons[FO_CLASS_SENTRONIC] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "sentronic_green", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_DISMATIC] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "dismatic_green", m_pClassInfoPanel);
-		m_pClassButtons[TF_CLASS_ROBO] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "telecon_green", m_pClassInfoPanel);
+		m_pClassButtons[FO_CLASS_TELECON] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "telecon_green", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_WORKERNODE] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "workernode_green", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_SAPTRAP] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "saptrap_green", m_pClassInfoPanel);
 		m_pClassButtons[TF_CLASS_RANDOM] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "randompc_green", m_pClassInfoPanel);
@@ -343,7 +343,7 @@ public:
 	{
 		m_pClassButtons[FO_CLASS_SENTRONIC] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "sentronic_yellow", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_DISMATIC] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "dismatic_yellow", m_pClassInfoPanel);
-		m_pClassButtons[TF_CLASS_ROBO] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "telecon_yellow", m_pClassInfoPanel);
+		m_pClassButtons[FO_CLASS_TELECON] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "telecon_yellow", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_WORKERNODE] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "workernode_yellow", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_SAPTRAP] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "saptrap_yellow", m_pClassInfoPanel);
 		m_pClassButtons[TF_CLASS_RANDOM] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "randompc_yellow", m_pClassInfoPanel);
@@ -412,7 +412,7 @@ public:
 	{
 		m_pClassButtons[FO_CLASS_SENTRONIC] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "sentronic_purple", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_DISMATIC] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "dismatic_purple", m_pClassInfoPanel);
-		m_pClassButtons[TF_CLASS_ROBO] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "telecon_purple", m_pClassInfoPanel);
+		m_pClassButtons[FO_CLASS_TELECON] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "telecon_purple", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_WORKERNODE] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "workernode_purple", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_SAPTRAP] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "saptrap_purple", m_pClassInfoPanel);
 		m_pClassButtons[TF_CLASS_RANDOM] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "randompc_purple", m_pClassInfoPanel);
@@ -481,7 +481,7 @@ public:
 	{
 		m_pClassButtons[FO_CLASS_SENTRONIC] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "sentronic_pink", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_DISMATIC] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "dismatic_pink", m_pClassInfoPanel);
-		m_pClassButtons[TF_CLASS_ROBO] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "telecon_pink", m_pClassInfoPanel);
+		m_pClassButtons[FO_CLASS_TELECON] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "telecon_pink", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_WORKERNODE] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "workernode_pink", m_pClassInfoPanel);
 		m_pClassButtons[FO_CLASS_SAPTRAP] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "saptrap_pink", m_pClassInfoPanel);
 		m_pClassButtons[TF_CLASS_RANDOM] = new CImageMouseOverButton<CTFClassInfoPanel>(this, "randompc_pink", m_pClassInfoPanel);

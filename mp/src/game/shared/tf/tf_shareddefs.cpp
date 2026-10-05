@@ -59,7 +59,11 @@ const char *g_aPlayerClassNames[] =
 	"#FO_Class_Name_Telecon",
 	"#FO_Class_Name_WorkerNode",
 	"#FO_Class_Name_Saptrap",
-	"#FO_Class_Name_Courier"
+	"",		// FO_CLASS_CUSTOM1
+	"",		// FO_CLASS_CUSTOM2
+	"",		// FO_CLASS_CUSTOM3
+	"#FO_Class_Name_Courier",
+	"#FO_Class_Name_ControlFreak"
 };
 
 const char *g_aPlayerClassNames_NonLocalized[] =
@@ -78,9 +82,13 @@ const char *g_aPlayerClassNames_NonLocalized[] =
 	"Sentronic",
 	"Dismatic",
 	"Telecon",
-	"Worker Node",
+	"Workernode",
 	"Saptrap",
-	"Courier"
+	"",		// FO_CLASS_CUSTOM1
+	"",		// FO_CLASS_CUSTOM2
+	"",		// FO_CLASS_CUSTOM3
+	"Courier",
+	"Controlfreak"
 };
 
 //-----------------------------------------------------------------------------
@@ -98,7 +106,8 @@ const char *g_aGameTypeNames[] =
 	"#Gametype_ARENA",
 	"#Gametype_ESCORT",
 	"#Gametype_PAYLOAD",
-	"#Gametype_GD"
+	"#Gametype_GD",
+	"#Gametype_FW"
 };
 
 //-----------------------------------------------------------------------------
@@ -356,6 +365,10 @@ const char *g_pszHintMessages[] =
 	"#Hint_enemy_using_dispenser",
 	"#Hint_enemy_using_tp_entrance",
 	"#Hint_enemy_using_tp_exit",
+
+	// Worker Node
+	"#Hint_WorkerNode_upgrade_wall",
+	"#Hint_WorkerNode_upgrade_fort",
 };
 
 //-----------------------------------------------------------------------------
@@ -666,5 +679,5 @@ bool ClassCanBuild( int iClass, int iObjectType )
 	return false;
 	*/
 
-	return ( iClass == TF_CLASS_ENGINEER || iClass == FO_CLASS_SENTRONIC + 1 || iClass == FO_CLASS_DISMATIC + 1 || iClass == TF_CLASS_ROBO + 1 || iClass == FO_CLASS_WORKERNODE + 1 || iClass == FO_CLASS_SAPTRAP + 1);
+	return ( iClass == TF_CLASS_ENGINEER || iClass == FO_CLASS_SENTRONIC + 1 || iClass == FO_CLASS_DISMATIC + 1 || iClass == FO_CLASS_TELECON + 1 || iClass == FO_CLASS_WORKERNODE + 1 || iClass == FO_CLASS_SAPTRAP + 1 || iClass == FO_CLASS_CUSTOM1 + 1 || iClass == FO_CLASS_CUSTOM2 + 1 || iClass == FO_CLASS_CUSTOM3 + 1);
 }

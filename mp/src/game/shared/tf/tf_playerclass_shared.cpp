@@ -26,10 +26,14 @@ bool UseHWMorphModels();
 #define TF_CLASS_CIVILIAN_FILE			"scripts/playerclasses/civilian"
 #define FO_CLASS_SENTRONIC_FILE			"scripts/playerclasses/sentronic"
 #define FO_CLASS_DISMATIC_FILE			"scripts/playerclasses/dismatic"
-#define TF_CLASS_ROBO_FILE			"scripts/playerclasses/telecon"
+#define FO_CLASS_TELECON_FILE			"scripts/playerclasses/telecon"
 #define FO_CLASS_WORKERNODE_FILE		"scripts/playerclasses/workernode"
 #define FO_CLASS_SAPTRAP_FILE			"scripts/playerclasses/saptrap"
+#define FO_CLASS_CUSTOM1_FILE			"scripts/playerclasses/custom/custom1"
+#define FO_CLASS_CUSTOM2_FILE			"scripts/playerclasses/custom/custom2"
+#define FO_CLASS_CUSTOM3_FILE			"scripts/playerclasses/custom/custom3"
 #define FO_CLASS_COURIER_FILE			"scripts/playerclasses/courier"
+#define FO_CLASS_CONTROLFREAK_FILE		"scripts/playerclasses/bosses/controlfreak"
 
 const char *s_aPlayerClassFiles[] =
 {
@@ -46,10 +50,14 @@ const char *s_aPlayerClassFiles[] =
 	TF_CLASS_CIVILIAN_FILE,
 	FO_CLASS_SENTRONIC_FILE,
 	FO_CLASS_DISMATIC_FILE,
-	TF_CLASS_ROBO_FILE,
+	FO_CLASS_TELECON_FILE,
 	FO_CLASS_WORKERNODE_FILE,
 	FO_CLASS_SAPTRAP_FILE,
-	FO_CLASS_COURIER_FILE
+	FO_CLASS_CUSTOM1_FILE,
+	FO_CLASS_CUSTOM2_FILE,
+	FO_CLASS_CUSTOM3_FILE,
+	FO_CLASS_COURIER_FILE,
+	FO_CLASS_CONTROLFREAK_FILE
 };
 
 TFPlayerClassData_t s_aTFPlayerClassData[TF_CLASS_COUNT_ALL];

@@ -780,7 +780,7 @@ void CTFPlayerShared::ConditionThink( void )
 		}
 	}
 
-	if (m_pOuter->IsPlayerClass(TF_CLASS_ROBO + 1))
+	if (m_pOuter->IsPlayerClass(FO_CLASS_TELECON + 1))
 	{
 		m_flTeleportMeter += gpGlobals->frametime * (tf_spy_cloak_regen_rate.GetFloat() * 2);
 

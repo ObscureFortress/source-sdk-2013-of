@@ -52,7 +52,9 @@ IMPLEMENT_CLIENTCLASS_DT(C_BaseObject, DT_BaseObject, CBaseObject)
 	RecvPropVector( RECVINFO( m_vecBuildMaxs ) ),
 	RecvPropVector( RECVINFO( m_vecBuildMins ) ),
 	RecvPropInt( RECVINFO( m_iDesiredBuildRotations ) ),
+	RecvPropInt( RECVINFO( m_bHealing ) ),
 	RecvPropInt( RECVINFO( m_bServerOverridePlacement ) ),
+	RecvPropBool( RECVINFO( m_bWasMapPlaced ) ),
 END_RECV_TABLE()
 
 ConVar cl_obj_test_building_damage( "cl_obj_test_building_damage", "-1", FCVAR_CHEAT, "debug building damage", true, -1, true, BUILDING_DAMAGE_LEVEL_CRITICAL );
@@ -704,7 +706,7 @@ void C_BaseObject::DisplayHintTo( C_BasePlayer *pPlayer )
 			bHintPlayed = pPlayer->HintMessage( HINT_OBJECT_HAS_SAPPER, true, true );
 		}
 
-		if ( pTFPlayer->IsPlayerClass( TF_CLASS_ENGINEER ) || pTFPlayer->IsPlayerClass(FO_CLASS_SENTRONIC + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_DISMATIC + 1) || pTFPlayer->IsPlayerClass(TF_CLASS_ROBO + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_WORKERNODE + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_SAPTRAP + 1))
+		if ( pTFPlayer->IsPlayerClass( TF_CLASS_ENGINEER ) || pTFPlayer->IsPlayerClass(FO_CLASS_SENTRONIC + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_DISMATIC + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_TELECON + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_WORKERNODE + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_SAPTRAP + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_CUSTOM1 + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_CUSTOM2 + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_CUSTOM3 + 1))
 		{
 			// I'm an engineer.
 

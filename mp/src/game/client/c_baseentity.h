@@ -1017,6 +1017,9 @@ public:
 
 	virtual bool					IsBaseTrain( void ) const { return false; }
 
+	// Called on the weapon that airblasted pEntity (see C_FOPaddle)
+	virtual void					OnAirblast( C_BaseEntity *pEntity ) {}
+
 	// Returns the eye point + angles (used for viewing + shooting)
 	virtual Vector			EyePosition( void );
 	virtual const QAngle&	EyeAngles( void );		// Direction of eyes

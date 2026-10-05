@@ -585,7 +585,7 @@ bool CTFGameMovement::CheckJumpButton()
 	bool bAirDash = false;
 	bool bOnGround = ( player->GetGroundEntity() != NULL );
 
-	bool bTelecon = m_pTFPlayer->GetPlayerClass()->IsClass(TF_CLASS_ROBO + 1);
+	bool bTelecon = m_pTFPlayer->GetPlayerClass()->IsClass(FO_CLASS_TELECON + 1);
 	bool bTeleportMove = false;
 
 	// Cannot jump will ducked.
@@ -710,7 +710,7 @@ bool CTFGameMovement::CheckJumpButton()
 bool CTFGameMovement::CheckAltButton()
 {
 	// Check to see if the player is a scout.
-	bool bTelecon = m_pTFPlayer->GetPlayerClass()->IsClass(TF_CLASS_ROBO + 1);
+	bool bTelecon = m_pTFPlayer->GetPlayerClass()->IsClass(FO_CLASS_TELECON + 1);
 	bool bTeleportMove = false;
 	bool bOnGround = (player->GetGroundEntity() != NULL);
 
@@ -1845,7 +1845,7 @@ void CTFGameMovement::PlayerRoughLandingEffects( float fvol )
 		}
 	}
 
-	if (m_pTFPlayer && m_pTFPlayer->IsPlayerClass(TF_CLASS_ROBO + 1))
+	if (m_pTFPlayer && m_pTFPlayer->IsPlayerClass(FO_CLASS_TELECON + 1))
 	{
 		// Scouts don't play rumble unless they take damage.
 		if (fvol < 1.0)

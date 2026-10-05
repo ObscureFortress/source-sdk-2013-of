@@ -196,6 +196,8 @@ protected:
 
 	BuildingDamageLevel_t CalculateDamageLevel( void );
 
+	bool			m_bHealing;		// Being healed by a repair node
+
 	char			m_szIDString[ MAX_ID_STRING ];
 
 	BuildingDamageLevel_t m_damageLevel;
@@ -244,6 +246,8 @@ private:
 	CNetworkVar( bool, m_bServerOverridePlacement );
 
 	int m_nObjectOldSequence;
+
+	bool m_bWasMapPlaced;
 
 
 private:

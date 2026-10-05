@@ -3453,7 +3453,7 @@ void CTFPlayer::Event_Killed( const CTakeDamageInfo &info )
 	m_iHealth = 0;
 
 	// If we died in sudden death and we're an engineer, explode our buildings
-	if ( (IsPlayerClass( TF_CLASS_ENGINEER ) || IsPlayerClass(FO_CLASS_SENTRONIC + 1) || IsPlayerClass(FO_CLASS_DISMATIC + 1) || IsPlayerClass(TF_CLASS_ROBO + 1) || IsPlayerClass(FO_CLASS_WORKERNODE + 1) || IsPlayerClass(FO_CLASS_SAPTRAP + 1)) && (TFGameRules()->InStalemate() || TFGameRules()->GetGameType() == TF_GAMETYPE_ARENA) )
+	if ( (IsPlayerClass( TF_CLASS_ENGINEER ) || IsPlayerClass(FO_CLASS_SENTRONIC + 1) || IsPlayerClass(FO_CLASS_DISMATIC + 1) || IsPlayerClass(FO_CLASS_TELECON + 1) || IsPlayerClass(FO_CLASS_WORKERNODE + 1) || IsPlayerClass(FO_CLASS_SAPTRAP + 1)) && (TFGameRules()->InStalemate() || TFGameRules()->GetGameType() == TF_GAMETYPE_ARENA) )
 	{
 		for (int i = GetObjectCount()-1; i >= 0; i--)
 		{
@@ -5451,7 +5451,7 @@ CBaseEntity *CTFPlayer::FindNearestObservableTarget( Vector vecOrigin, float flM
 		}
 	}
 
-	if ( !bFoundClass && IsPlayerClass( TF_CLASS_ENGINEER ) || IsPlayerClass(FO_CLASS_SENTRONIC + 1) || IsPlayerClass(FO_CLASS_DISMATIC + 1) || IsPlayerClass(TF_CLASS_ROBO + 1) || IsPlayerClass(FO_CLASS_WORKERNODE + 1) || IsPlayerClass(FO_CLASS_SAPTRAP + 1))
+	if ( !bFoundClass && IsPlayerClass( TF_CLASS_ENGINEER ) || IsPlayerClass(FO_CLASS_SENTRONIC + 1) || IsPlayerClass(FO_CLASS_DISMATIC + 1) || IsPlayerClass(FO_CLASS_TELECON + 1) || IsPlayerClass(FO_CLASS_WORKERNODE + 1) || IsPlayerClass(FO_CLASS_SAPTRAP + 1))
 	{
 		// let's spectate our sentry instead, we didn't find any other engineers to spec
 		int iNumObjects = GetObjectCount();

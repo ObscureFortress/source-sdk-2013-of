@@ -74,10 +74,14 @@ static int g_TauntCamAchievements[] =
 	0,		// TF_CLASS_CIVILIAN,
 	0,		// FO_CLASS_SENTRONIC,
 	0,		// FO_CLASS_DISMATIC,
-	0,		// TF_CLASS_ROBO,
+	0,		// FO_CLASS_TELECON,
 	0,		// FO_CLASS_WORKERNODE,
 	0,		// FO_CLASS_SAPTRAP,
+	0,		// FO_CLASS_CUSTOM1,
+	0,		// FO_CLASS_CUSTOM2,
+	0,		// FO_CLASS_CUSTOM3,
 	0,		// FO_CLASS_COURIER,
+	0,		// FO_CLASS_CONTROLFREAK,
 	0,		// TF_CLASS_COUNT_ALL,
 };
 
@@ -177,7 +181,7 @@ static CViewVectors g_TFViewVectors(
 	Vector( 0, 0, 14 )		//VEC_DEAD_VIEWHEIGHT (m_vDeadViewHeight) dead view height
 );							
 
-Vector g_TFClassViewVectors[17] =
+Vector g_TFClassViewVectors[21] =
 {
 	Vector( 0, 0, 72 ),		// TF_CLASS_UNDEFINED
 
@@ -193,10 +197,14 @@ Vector g_TFClassViewVectors[17] =
 	Vector(0, 0, 0),
 	Vector(0, 0, 75),		// FO_CLASS_SENTRONIC,		// FO_FIRST_NORMAL_CLASS
 	Vector(0, 0, 63),		// FO_CLASS_DISMATIC,
-	Vector(0, 0, 60),		// TF_CLASS_ROBO,
+	Vector(0, 0, 60),		// FO_CLASS_TELECON,
 	Vector(0, 0, 52),		// FO_CLASS_WORKERNODE,
 	Vector(0, 0, 75),		// FO_CLASS_SAPTRAP,
+	Vector(0, 0, 68),		// FO_CLASS_CUSTOM1,
+	Vector(0, 0, 68),		// FO_CLASS_CUSTOM2,
+	Vector(0, 0, 68),		// FO_CLASS_CUSTOM3,
 	Vector(0, 0, 65),		// FO_CLASS_COURIER,
+	Vector(0, 0, 100),		// FO_CLASS_CONTROLFREAK,
 };
 
 const CViewVectors *CTFGameRules::GetViewVectors() const

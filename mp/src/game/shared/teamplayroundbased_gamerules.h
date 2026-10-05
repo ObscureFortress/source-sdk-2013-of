@@ -162,6 +162,10 @@ public:
 	virtual bool PointsMayBeCaptured( void ) { return ((State_Get() == GR_STATE_RND_RUNNING || State_Get() == GR_STATE_STALEMATE) && !IsInWaitingForPlayers() && !m_bArenaLock); }
 
 	virtual int GetWinningTeam( void ){ return m_iWinningTeam; }
+
+	virtual void HandleTeamScoreModify( int iTeam, int iScore ){ return; }
+	virtual bool IsInArenaMode( void ){ return false; }
+	virtual bool IsInKothMode( void ){ return false; }
 	int GetWinReason() { return m_iWinReason; }
 
 	bool InOvertime( void ){ return m_bInOvertime; }
@@ -237,6 +241,10 @@ public:
 	virtual void SetRoundOverlayDetails( void ){ return; }
 
 	virtual float GetWaitingForPlayersTime( void ) { return mp_waitingforplayers_time.GetFloat(); }
+
+#ifdef GAME_DLL
+	virtual void RecalculateControlPointState( void ){ return; }
+#endif
 	void ShouldResetScores( bool bResetTeam, bool bResetPlayer ){ m_bResetTeamScores = bResetTeam; m_bResetPlayerScores = bResetPlayer; }
 	void ShouldResetRoundsPlayed( bool bResetRoundsPlayed ){ m_bResetRoundsPlayed = bResetRoundsPlayed; }
 

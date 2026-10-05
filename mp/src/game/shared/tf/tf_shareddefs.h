@@ -135,11 +135,14 @@ enum
 	TF_CLASS_ENGINEER,		// TF_LAST_NORMAL_CLASS
 	FO_CLASS_SENTRONIC,		// FO_FIRST_NORMAL_CLASS
 	FO_CLASS_DISMATIC,
-	TF_CLASS_ROBO,
+	FO_CLASS_TELECON,
 	FO_CLASS_WORKERNODE,
 	FO_CLASS_SAPTRAP,		// FO_LAST_NORMAL_CLASS
+	FO_CLASS_CUSTOM1,
+	FO_CLASS_CUSTOM2,
+	FO_CLASS_CUSTOM3,
 	FO_CLASS_COURIER,
-	FO_CLASS_TELECON,
+	FO_CLASS_CONTROLFREAK,
 
 	// Add any new classes after Engineer
 	TF_CLASS_CIVILIAN,		// Civilians are a special class. It is not a player class.
@@ -179,6 +182,7 @@ enum
 	TF_GAMETYPE_HUNTED, // ESCORT
 	TF_GAMETYPE_ESCORT, // PAYLOAD (NOT ESCORT (ITS THE NAME THAT EVERY OTHER TF2 MOD USES IN THE CODE DONT BLAME ME))
 	FO_GAMETYPE_GD,
+	FO_GAMETYPE_FW,
 };
 extern const char *g_aGameTypeNames[];	// localized gametype names
 
@@ -418,7 +422,6 @@ enum
 	TF_COND_INVULNERABLE_WEARINGOFF,
 	TF_COND_STEALTHED_BLINK,
 	TF_COND_SELECTED_TO_TELEPORT,
-	TF_COND_SMOKE_BOMB,
 	FO_COND_STEALING_HEALTH,
 	FO_COND_SAPTRAP_BUFF1,
 	FO_COND_SAPTRAP_BUFF2,
@@ -533,6 +536,9 @@ enum
 	HINT_OBJECT_ENEMY_USING_DISPENSER,	// "#Hint_enemy_using_dispenser"
 	HINT_OBJECT_ENEMY_USING_TP_ENTRANCE,	// "#Hint_enemy_using_tp_entrance"
 	HINT_OBJECT_ENEMY_USING_TP_EXIT,	// "#Hint_enemy_using_tp_exit"
+
+	HINT_WORKERNODE_UPGRADE_WALL,		// "#Hint_WorkerNode_upgrade_wall"
+	HINT_WORKERNODE_UPGRADE_FORT,		// "#Hint_WorkerNode_upgrade_fort"
 
 	NUM_HINTS
 };
@@ -727,6 +733,25 @@ enum
 	// in tf_shareddefs.cpp, and add it's data to the scripts/object.txt
 
 	OBJ_LAST,
+};
+
+// Beartrap states
+enum
+{
+	BEARTRAP_STATE_BUILDING = 0,
+	BEARTRAP_STATE_IDLE,
+	BEARTRAP_STATE_ATTACK,
+};
+
+// Worker Node wall / fort states
+enum
+{
+	WALL_STATE_INACTIVE = 0,
+	WALL_STATE_ACTIVE,
+	WALL_STATE_ATTACKING,
+	WALL_STATE_UPGRADING,
+
+	WALL_NUM_STATES
 };
 
 // Warning levels for buildings in the building hud, in priority order

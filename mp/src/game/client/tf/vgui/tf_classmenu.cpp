@@ -555,6 +555,8 @@ static const char *g_sDialogVariables[] = {
 	"numSniper",
 	"numSpy",
 	"",
+	"", "", "", "", "",
+	"", "", "", "",
 };
 
 static const char *g_sClassImagesBlue[] = {
@@ -577,6 +579,7 @@ static const char *g_sClassImagesBlue[] = {
 	"class_sel_sm_demo_blu",
 	"class_sel_sm_heavy_blu",
 	"",
+	"", "", "", "",
 };
 
 static const char *g_sClassImagesRed[] = {
@@ -599,6 +602,7 @@ static const char *g_sClassImagesRed[] = {
 	"class_sel_sm_demo_red",
 	"class_sel_sm_heavy_red",
 	"",
+	"", "", "", "",
 };
 
 static const char *g_sClassImagesGreen[] = {
@@ -621,6 +625,7 @@ static const char *g_sClassImagesGreen[] = {
 	"class_sel_sm_demo_red",
 	"class_sel_sm_heavy_red",
 	"",
+	"", "", "", "",
 };
 
 static const char *g_sClassImagesYellow[] = {
@@ -643,6 +648,7 @@ static const char *g_sClassImagesYellow[] = {
 	"class_sel_sm_demo_red",
 	"class_sel_sm_heavy_red",
 	"",
+	"", "", "", "",
 };
 
 static const char *g_sClassImagesPurple[] = {
@@ -665,6 +671,7 @@ static const char *g_sClassImagesPurple[] = {
 	"class_sel_sm_demo_red",
 	"class_sel_sm_heavy_red",
 	"",
+	"", "", "", "",
 };
 
 static const char *g_sClassImagesPink[] = {
@@ -687,6 +694,7 @@ static const char *g_sClassImagesPink[] = {
 	"class_sel_sm_demo_red",
 	"class_sel_sm_heavy_red",
 	"",
+	"", "", "", "",
 };
 
 static int g_sClassDefines[] = {
@@ -704,9 +712,13 @@ static int g_sClassDefines[] = {
 	TF_CLASS_SPY,
 	FO_CLASS_SENTRONIC,
 	FO_CLASS_DISMATIC,
-	TF_CLASS_ROBO,
+	FO_CLASS_TELECON,
 	FO_CLASS_WORKERNODE,
 	FO_CLASS_SAPTRAP,
+	FO_CLASS_CUSTOM1,
+	FO_CLASS_CUSTOM2,
+	FO_CLASS_CUSTOM3,
+	0,
 	0,
 };
 

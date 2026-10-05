@@ -70,6 +70,7 @@ public:
 	virtual void	Precache();
 	virtual void	Spawn( void );
 	virtual void	Activate( void );
+	virtual void	InitializeMapPlacedObject( void );
 
 	virtual bool	ShouldCollide( int collisionGroup, int contentsMask ) const;
 
@@ -274,6 +275,10 @@ private:
 	//bool TestPositionForPlayerBlock( Vector vecBuildOrigin, CBasePlayer *pPlayer );
 	//void RecursiveTestBuildSpace( int iNode, bool *bNodeClear, bool *bNodeVisited );
 
+public:
+	// Set by repair nodes while this object is inside their healing range
+	CNetworkVar( bool, m_bHealing );
+
 protected:
 	enum OBJSOLIDTYPE
 	{
@@ -310,6 +315,9 @@ protected:
 	// Control panel
 	typedef CHandle<CVGuiScreen>	ScreenHandle_t;
 	CUtlVector<ScreenHandle_t>	m_hScreens;
+
+	// True when this object was placed in the map rather than built by a player
+	CNetworkVar( bool, m_bWasMapPlaced );
 
 private:
 	// Make sure we pick up changes to these.

@@ -189,7 +189,7 @@ int	CHudMenuSpyDisguise::HudElementKeyInput( int down, ButtonCode_t keynum, cons
 		*/
 		FO_CLASS_SENTRONIC,
 		FO_CLASS_DISMATIC,
-		TF_CLASS_ROBO,
+		FO_CLASS_TELECON,
 		FO_CLASS_WORKERNODE,
 		FO_CLASS_SAPTRAP
 	};
