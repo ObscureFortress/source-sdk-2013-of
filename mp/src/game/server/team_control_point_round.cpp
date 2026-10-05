@@ -108,7 +108,8 @@ void CTeamControlPointRound::FindControlPoints( void )
 int CTeamControlPointRound::CheckWinConditions( void )
 {
 	int iWinners = TeamOwnsAllPoints();
-	if ( ( iWinners >= FIRST_GAME_TEAM ) && 
+	if ( ( m_iInvalidCapWinner != 1 ) &&
+		 ( iWinners >= FIRST_GAME_TEAM ) && 
 		 ( iWinners != m_iInvalidCapWinner ) )
 	{
 		FireTeamWinOutput( iWinners );
@@ -164,14 +165,22 @@ int CTeamControlPointRound::GetPointOwner( int point )
 //-----------------------------------------------------------------------------
 int CTeamControlPointRound::TeamOwnsAllPoints( CTeamControlPoint *pOverridePoint /* = NULL */, int iOverrideNewTeam /* = TEAM_UNASSIGNED */ )
 {
-	int iWinningTeam = TEAM_INVALID;
+	int i;
 
-	// if TEAM_INVALID, haven't found a flag yet
-	// if TEAM_UNASSIGNED, it's still being contested 
+	int iWinningTeam[MAX_CONTROL_POINT_GROUPS];
+
+	for( i=0;i<MAX_CONTROL_POINT_GROUPS;i++  )
+	{
+		iWinningTeam[i] = TEAM_INVALID;
+	}
+
+	// if TEAM_INVALID, haven't found a flag for this group yet
+	// if TEAM_UNASSIGNED, the group is still being contested 
 
 	// for each control point
-	for( int i = 0 ; i < m_ControlPoints.Count() ; i++ )
+	for( i=0;i<m_ControlPoints.Count();i++ )
 	{
+		int group = m_ControlPoints[i]->GetCPGroup();
 		int owner = m_ControlPoints[i]->GetOwner();
 
 		if ( pOverridePoint == m_ControlPoints[i] )
@@ -179,27 +188,28 @@ int CTeamControlPointRound::TeamOwnsAllPoints( CTeamControlPoint *pOverridePoint
 			owner = iOverrideNewTeam;
 		}
 
-		// the first one we find, set the win to true
-		if ( iWinningTeam == TEAM_INVALID )
+		// the first one we find in this group, set the win to true
+		if ( iWinningTeam[group] == TEAM_INVALID )
 		{
-			iWinningTeam = owner;
+			iWinningTeam[group] = owner;
 		}
-		// unassigned means this is being contested, move on
-		else if ( iWinningTeam == TEAM_UNASSIGNED )
+		// unassigned means this group is already contested, move on
+		else if ( iWinningTeam[group] == TEAM_UNASSIGNED )
 		{
 			continue;
 		}
 		// if we find another one in the group that isn't the same owner, set the win to false
-		else if ( owner != iWinningTeam )
+		else if ( owner != iWinningTeam[group] )
 		{
-			iWinningTeam = TEAM_UNASSIGNED;
-		}		
+			iWinningTeam[group] = TEAM_UNASSIGNED;
+		}	
 	}
 
 	// report the first win we find as the winner
-	if ( iWinningTeam >= FIRST_GAME_TEAM )
+	for ( i=0;i<MAX_CONTROL_POINT_GROUPS;i++ )
 	{
-		return iWinningTeam;
+		if ( iWinningTeam[i] >= FIRST_GAME_TEAM )
+			return iWinningTeam[i];
 	}
 
 	// no wins yet

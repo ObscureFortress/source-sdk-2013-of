@@ -9,6 +9,7 @@
 #include "team_objectiveresource.h"
 #include "team_control_point_master.h"
 #include "teamplayroundbased_gamerules.h"
+#include "tf_gamerules.h"
 
 
 BEGIN_DATADESC( CTeamControlPointMaster )
@@ -18,6 +19,7 @@ BEGIN_DATADESC( CTeamControlPointMaster )
 	DEFINE_KEYFIELD( m_bSwitchTeamsOnWin, FIELD_BOOLEAN, "switch_teams" ),
 	DEFINE_KEYFIELD( m_bScorePerCapture, FIELD_BOOLEAN, "score_style" ),
 	DEFINE_KEYFIELD( m_bPlayAllRounds, FIELD_BOOLEAN, "play_all_rounds" ),
+	DEFINE_KEYFIELD( m_flPartialCapturePointsRate, FIELD_FLOAT, "partial_cap_points_rate" ),
 
 //	DEFINE_FIELD( m_ControlPoints, CUtlMap < int , CTeamControlPoint * > ),
 //	DEFINE_FIELD( m_bFoundPoints, FIELD_BOOLEAN ),
@@ -57,6 +59,14 @@ int ControlPointRoundSort( CTeamControlPointRound* const *p1, CTeamControlPointR
 	}
 
 	return -1;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+CTeamControlPointMaster::CTeamControlPointMaster()
+{
+	m_flPartialCapturePointsRate = 0.0f;
 }
 
 //-----------------------------------------------------------------------------
@@ -271,6 +281,29 @@ bool CTeamControlPointMaster::FindControlPoints( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+int CTeamControlPointMaster::NumPlayableControlPointRounds( void )
+{
+	int nRetVal = 0;
+
+	for ( int i = 0 ; i < m_ControlPointRounds.Count() ; ++i )
+	{
+		CTeamControlPointRound *pRound = m_ControlPointRounds[i];
+
+		if ( pRound )
+		{
+			if ( pRound->IsPlayable() )
+			{
+				nRetVal++;
+			}
+		}
+	}
+
+	return nRetVal;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 void CTeamControlPointMaster::SetBaseControlPoints( void )
 {
 	for ( int team = 0; team < GetNumberOfTeams(); team++ )
@@ -353,30 +386,6 @@ bool CTeamControlPointMaster::FindControlPointRoundToPlay( void )
 	}
 
 	return false;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-int CTeamControlPointMaster::NumPlayableControlPointRounds( void )
-{
-	int nRetVal = 0;
-
-	for ( int i = 0 ; i < m_ControlPointRounds.Count() ; ++i )
-	{
-		CTeamControlPointRound *pRound = m_ControlPointRounds[i];
-
-		if ( pRound )
-		{
-			if ( pRound->IsPlayable() )
-			{
-				// we found one that's playable
-				nRetVal++;
-			}
-		}
-	}
-
-	return nRetVal;
 }
 
 //-----------------------------------------------------------------------------
@@ -659,7 +668,8 @@ void CTeamControlPointMaster::CheckWinConditions( void )
 		// Check that the points aren't all held by one team...if they are
 		// this will reset the round and will reset all the points
 		int iWinners = TeamOwnsAllPoints();
-		if ( ( iWinners >= FIRST_GAME_TEAM ) && 
+		if ( ( m_iInvalidCapWinner != 1 ) &&
+			 ( iWinners >= FIRST_GAME_TEAM ) && 
 			 ( iWinners != m_iInvalidCapWinner ) )
 		{
 			TeamplayGameRules()->SetWinningTeam( iWinners, WINREASON_ALL_POINTS_CAPTURED, true, m_bSwitchTeamsOnWin );
@@ -1232,6 +1242,19 @@ int CTeamControlPointMaster::CalcNumRoundsRemaining( int iTeam )
 	}
 
 	return iRoundsRemaining;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+float CTeamControlPointMaster::GetPartialCapturePointRate( void )
+{
+	if ( TFGameRules()->IsInEscortMode() )
+		m_flPartialCapturePointsRate = 10.0f;
+	else
+		m_flPartialCapturePointsRate = 0.0f;
+
+	return m_flPartialCapturePointsRate;
 }
 
 /*

@@ -39,6 +39,8 @@ public:
 	virtual const char *GetControlPointRoundName( void ) { return "team_control_point_round"; }
 
 public:
+	CTeamControlPointMaster();
+
 	virtual void Spawn( void );	
 	virtual void UpdateOnRemove( void );
 	virtual bool KeyValue( const char *szKeyName, const char *szValue );
@@ -107,7 +109,9 @@ public:
 	bool ShouldScorePerCapture( void ){ return m_bScorePerCapture; }
 	bool ShouldPlayAllControlPointRounds( void ){ return m_bPlayAllRounds; }
 	bool FindControlPointRoundToPlay( void ); // checks to see if there are any more rounds to play (but doesn't actually "get" one to play)
-	int NumPlayableControlPointRounds( void ); // returns how many rounds are still playable
+	int NumPlayableControlPointRounds( void );
+
+	float GetPartialCapturePointRate( void );
 	
 //	void ListRounds( void );
 
@@ -181,6 +185,8 @@ private:
 
 	COutputEvent m_OnWonByTeam1;
 	COutputEvent m_OnWonByTeam2;
+
+	float m_flPartialCapturePointsRate;
 };
 
 extern CUtlVector< CHandle<CTeamControlPointMaster> >		g_hControlPointMasters;
