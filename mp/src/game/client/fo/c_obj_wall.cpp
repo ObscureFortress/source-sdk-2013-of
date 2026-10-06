@@ -15,11 +15,10 @@
 
 using namespace vgui;
 
-//-----------------------------------------------------------------------------
-// Purpose: Wall object
-//-----------------------------------------------------------------------------
-
-IMPLEMENT_CLIENTCLASS_DT(C_ObjectWorkerWall, DT_ObjectWorkerWall, CObjectWorkerWall)
+IMPLEMENT_CLIENTCLASS_DT( C_ObjectWorkerWall, DT_ObjectWorkerWall, CObjectWorkerWall )
+	RecvPropInt( RECVINFO( m_iUpgradeLevel ) ),
+	RecvPropInt( RECVINFO( m_iState ) ),
+	RecvPropInt( RECVINFO( m_iUpgradeMetal ) ),
 END_RECV_TABLE()
 
 //-----------------------------------------------------------------------------
@@ -27,38 +26,31 @@ END_RECV_TABLE()
 //-----------------------------------------------------------------------------
 C_ObjectWorkerWall::C_ObjectWorkerWall()
 {
-	m_bPlayingSound = false;
-
 	m_pDamageEffects = NULL;
+	m_iOldUpgradeLevel = 0;
 }
 
-C_ObjectWorkerWall::~C_ObjectWorkerWall()
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_ObjectWorkerWall::OnGoActive( void )
 {
+	SetSolid( SOLID_VPHYSICS );
+	VPhysicsInitStatic();
+	CollisionProp()->SetSurroundingBoundsType( USE_HITBOXES );
+
+	BaseClass::OnGoActive();
 }
 
-void C_ObjectWorkerWall::GetStatusText( wchar_t *pStatus, int iMaxStatusLen )
+//-----------------------------------------------------------------------------
+// Purpose: 
+// Input  : updateType - 
+//-----------------------------------------------------------------------------
+void C_ObjectWorkerWall::OnPreDataChanged( DataUpdateType_t updateType )
 {
-	float flHealthPercent = (float)GetHealth() / (float)GetMaxHealth();
-	wchar_t wszHealthPercent[32];
-	_snwprintf(wszHealthPercent, sizeof(wszHealthPercent)/sizeof(wchar_t) - 1, L"%d%%", (int)( flHealthPercent * 100 ) );
+	BaseClass::OnPreDataChanged( updateType );
 
-	wchar_t *pszTemplate;
-
-	if ( IsBuilding() )
-	{
-		pszTemplate = g_pVGuiLocalize->Find( "#FO_ObjStatus_Wall_Building" );
-	}
-	else
-	{
-		pszTemplate = g_pVGuiLocalize->Find( "#FO_ObjStatus_Wall" );
-	}
-
-	if ( pszTemplate )
-	{
-		g_pVGuiLocalize->ConstructString( pStatus, iMaxStatusLen, pszTemplate,
-			1,
-			wszHealthPercent );
-	}
+	m_iOldBodygroups = GetBody();
 }
 
 //-----------------------------------------------------------------------------
@@ -68,6 +60,205 @@ void C_ObjectWorkerWall::GetStatusText( wchar_t *pStatus, int iMaxStatusLen )
 void C_ObjectWorkerWall::OnDataChanged( DataUpdateType_t updateType )
 {
 	BaseClass::OnDataChanged( updateType );
+
+	if ( m_iOldUpgradeLevel != m_iUpgradeLevel )
+	{
+		m_iOldUpgradeLevel = m_iUpgradeLevel;
+	}
+
+	// intercept bodygroup sets from the server
+	// we aren't clientsideanimating, but we don't want the server setting our
+	// bodygroup while we are placing
+	if ( IsPlacing() && m_iOldBodygroups != GetBody() )
+	{
+		m_nBody = m_iOldBodygroups;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_ObjectWorkerWall::GetStatusText( wchar_t *pStatus, int iMaxStatusLen )
+{
+	float flHealthPercent = (float)GetHealth() / (float)GetMaxHealth();
+	wchar_t wszHealthPercent[32];
+	_snwprintf(wszHealthPercent, sizeof(wszHealthPercent)/sizeof(wchar_t) - 1, L"%d%%", (int)( flHealthPercent * 100 ) );
+
+	if ( IsBuilding() )
+	{
+		// "Wall Building... 85%" 
+
+		wchar_t *pszTemplate = g_pVGuiLocalize->Find( "#FO_ObjStatus_Wall_Building" );
+
+		if ( pszTemplate )
+		{
+			g_pVGuiLocalize->ConstructString( pStatus, iMaxStatusLen, pszTemplate,
+				1,
+				wszHealthPercent );
+		}
+	}
+	else if ( m_iUpgradeLevel == 1 )
+	{
+		// "Wall ( Level 1 )  Health 100%" 
+
+		wchar_t wszLevel[16]; 
+
+		_snwprintf(wszLevel, sizeof(wszLevel)/sizeof(wchar_t) - 1, L"%d", m_iUpgradeLevel );
+
+		wchar_t *pszTemplate = g_pVGuiLocalize->Find( "#FO_ObjStatus_Wall_Level1" );
+
+		if ( pszTemplate )
+		{
+			g_pVGuiLocalize->ConstructString( pStatus, iMaxStatusLen, pszTemplate,
+				2,
+				wszLevel,
+				wszHealthPercent );
+		}
+	}
+	else
+	{
+		// "Wall ( Level 2 )  Health 100%" 
+
+		wchar_t *pszTemplate = g_pVGuiLocalize->Find( "#FO_ObjStatus_Wall_Level2" );
+
+		if ( pszTemplate )
+		{
+			g_pVGuiLocalize->ConstructString( pStatus, iMaxStatusLen, pszTemplate,
+				1,
+				wszHealthPercent );
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_ObjectWorkerWall::DisplayHintTo( C_BasePlayer *pPlayer )
+{
+	bool bHintPlayed = false;
+
+	C_TFPlayer *pTFPlayer = ToTFPlayer(pPlayer);
+	if ( InSameTeam( pPlayer ) )
+	{
+		// We're looking at a friendly object. 
+		if ( pTFPlayer->IsPlayerClass( TF_CLASS_ENGINEER ) || pTFPlayer->IsPlayerClass( FO_CLASS_DISMATIC ) || pTFPlayer->IsPlayerClass( FO_CLASS_TELECON ) || pTFPlayer->IsPlayerClass( FO_CLASS_WORKERNODE ) || pTFPlayer->IsPlayerClass( FO_CLASS_SAPTRAP ) || pTFPlayer->IsPlayerClass( FO_CLASS_CUSTOM1 ) || pTFPlayer->IsPlayerClass( FO_CLASS_CUSTOM2 ) || pTFPlayer->IsPlayerClass( FO_CLASS_CUSTOM3 ) || pTFPlayer->IsPlayerClass( FO_CLASS_COURIER ) )
+		{
+			// If it can be upgraded, and I can't afford it, let me know
+			if ( GetHealth() == GetMaxHealth() && GetUpgradeLevel() < 2 )
+			{
+				if ( pTFPlayer->GetBuildResources() < SENTRYGUN_UPGRADE_COST )
+				{
+					bHintPlayed = pTFPlayer->HintMessage( HINT_ENGINEER_METAL_TO_UPGRADE, false, true );
+				}
+			}
+		}
+	}
+
+	if ( !bHintPlayed )
+	{
+		BaseClass::DisplayHintTo( pPlayer );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+bool C_ObjectWorkerWall::IsUpgrading( void ) const
+{
+	return ( m_iState == WALL_STATE_UPGRADING );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_ObjectWorkerWall::GetTargetIDString( wchar_t *sIDString, int iMaxLenInBytes )
+{
+	BaseClass::GetTargetIDString( sIDString, iMaxLenInBytes );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_ObjectWorkerWall::GetTargetIDDataString( wchar_t *sDataString, int iMaxLenInBytes )
+{
+	sDataString[0] = '\0';
+
+	if ( m_iUpgradeLevel >= 2 )
+		return;
+
+	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
+	if ( !pLocalPlayer )
+		return;
+
+	wchar_t wszBuilderName[ MAX_PLAYER_NAME_LENGTH ];
+	wchar_t wszObjectName[ 32 ];
+	wchar_t wszUpgradeProgress[ 32 ];
+
+	g_pVGuiLocalize->ConvertANSIToUnicode( GetStatusName(), wszObjectName, sizeof(wszObjectName) );
+
+	C_BasePlayer *pBuilder = GetOwner();
+
+	if ( pBuilder )
+	{
+		g_pVGuiLocalize->ConvertANSIToUnicode( pBuilder->GetPlayerName(), wszBuilderName, sizeof(wszBuilderName) );
+	}
+	else
+	{
+		wszBuilderName[0] = '\0';
+	}
+
+	// level 1 shows upgrade progress
+	_snwprintf( wszUpgradeProgress, ARRAYSIZE(wszUpgradeProgress) - 1, L"%d / %d", m_iUpgradeMetal, WALL_UPGRADE_METAL );
+	wszUpgradeProgress[ ARRAYSIZE(wszUpgradeProgress)-1 ] = '\0';
+
+	const char *printFormatString = "#TF_playerid_object_upgrading";
+
+	g_pVGuiLocalize->ConstructString( sDataString, iMaxLenInBytes, g_pVGuiLocalize->Find(printFormatString),
+		1,
+		wszUpgradeProgress );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+const char *C_ObjectWorkerWall::GetHudStatusIcon( void )
+{
+	const char *pszResult;
+
+	switch( m_iUpgradeLevel )
+	{
+	case 1:
+	default:
+		pszResult = "obj_status_wall_1";
+		break;
+	case 2:
+		pszResult = "obj_status_wall_2";
+		break;
+	}
+
+	return pszResult;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+CStudioHdr *C_ObjectWorkerWall::OnNewModel( void )
+{
+	CStudioHdr *hdr = BaseClass::OnNewModel();
+
+	UpdateDamageEffects( m_damageLevel );
+
+	// Reset Bodygroups
+	for ( int i = GetNumBodyGroups()-1; i >= 0; i-- )
+	{
+		SetBodygroup( i, 0 );
+	}
+
+	SetSolid( SOLID_VPHYSICS );
+	VPhysicsInitStatic();
+	CollisionProp()->SetSurroundingBoundsType( USE_HITBOXES );
+
+	return hdr;
 }
 
 //-----------------------------------------------------------------------------
@@ -79,31 +270,5 @@ void C_ObjectWorkerWall::UpdateDamageEffects( BuildingDamageLevel_t damageLevel 
 	{
 		m_pDamageEffects->StopEmission( false, false );
 		m_pDamageEffects = NULL;
-	}
-
-	const char *pszEffect = "";
-
-	switch( damageLevel )
-	{
-	case BUILDING_DAMAGE_LEVEL_LIGHT:
-		pszEffect = "dispenserdamage_1";
-		break;
-	case BUILDING_DAMAGE_LEVEL_MEDIUM:
-		pszEffect = "dispenserdamage_2";
-		break;
-	case BUILDING_DAMAGE_LEVEL_HEAVY:
-		pszEffect = "dispenserdamage_3";
-		break;
-	case BUILDING_DAMAGE_LEVEL_CRITICAL:
-		pszEffect = "dispenserdamage_4";
-		break;
-
-	default:
-		break;
-	}
-
-	if ( Q_strlen(pszEffect) > 0 )
-	{
-		m_pDamageEffects = ParticleProp()->Create( pszEffect, PATTACH_ABSORIGIN );
 	}
 }

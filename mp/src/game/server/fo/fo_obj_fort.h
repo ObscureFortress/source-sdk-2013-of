@@ -16,33 +16,49 @@
 class CTFPlayer;
 
 // ------------------------------------------------------------------------ //
-// Resupply object that's built by the player
+// Worker Node's Fort
 // ------------------------------------------------------------------------ //
 class CObjectWorkerFort : public CBaseObject
 {
-	DECLARE_CLASS(CObjectWorkerFort, CBaseObject);
+	DECLARE_CLASS( CObjectWorkerFort, CBaseObject );
 
 public:
 	DECLARE_SERVERCLASS();
+	DECLARE_DATADESC();
 
 	CObjectWorkerFort();
-	~CObjectWorkerFort();
 
-	static CObjectWorkerFort* Create(const Vector &vOrigin, const QAngle &vAngles);
+	static CObjectWorkerFort* Create( const Vector &vOrigin, const QAngle &vAngles );
 
 	virtual void	Spawn();
-
 	virtual void	Precache();
-	virtual bool	ClientCommand(CTFPlayer *pPlayer, const CCommand &args);
+	virtual void	OnGoActive( void );
+	virtual int		DrawDebugTextOverlays( void );
+	virtual int		OnTakeDamage( const CTakeDamageInfo &info );
+	virtual void	Killed( const CTakeDamageInfo &info );
+	virtual void	SetModel( const char *pModel );
+	virtual bool	StartBuilding( CBaseEntity *pBuilder );
+	virtual void	StartPlacement( CTFPlayer *pPlayer );
+	virtual bool	OnWrenchHit( CTFPlayer *pPlayer );
+	virtual bool	IsUpgrading( void ) const;
 
-	virtual void	DetonateObject(void);
-	virtual void	OnGoActive(void);
-	virtual bool	StartBuilding(CBaseEntity *pBuilder);
-	virtual void	SetModel(const char *pModel);
+	void			UpgradeThink( void );
+	int				GetUpgradeLevel( void ) { return m_iUpgradeLevel; }
 
-	virtual int	ObjectCaps(void) { return (BaseClass::ObjectCaps() | FCAP_IMPULSE_USE); }
+private:
+	void			FortThink( void );
+	bool			CanBeUpgraded( CTFPlayer *pPlayer );
+	void			StartUpgrading( void );
+	void			FinishUpgrading( void );
 
-	DECLARE_DATADESC();
+	CNetworkVar( int, m_iState );
+	CNetworkVar( int, m_iUpgradeLevel );
+	float m_flUpgradeCompleteTime;
+	CNetworkVar( int, m_iUpgradeMetal );
+	CNetworkVar( int, m_iUpgradeMetalRequired );
+	float m_flLastAttackedTime;
+	float m_flHeavyBulletResist;
+	int m_iPlacementBodygroup;
 };
 
-#endif // FO_OBJ_WALL_H
+#endif // FO_OBJ_FORT_H
