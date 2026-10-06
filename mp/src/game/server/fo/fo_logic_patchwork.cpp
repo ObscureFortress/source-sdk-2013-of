@@ -30,6 +30,7 @@ public:
 
 	void Think(void);
 	void TeamThink(void);
+	void HackThink(void);
 	void Activate(void);
 
 	void SetRedEliminated(inputdata_t &inputData);
@@ -62,6 +63,7 @@ BEGIN_DATADESC(CFOLogicPatchwork)
 
 	DEFINE_THINKFUNC(Think),
 	DEFINE_THINKFUNC(TeamThink),
+	DEFINE_THINKFUNC(HackThink),
 
 	DEFINE_INPUTFUNC(FIELD_VOID, "SetRedEliminated", SetRedEliminated),
 	DEFINE_INPUTFUNC(FIELD_VOID, "SetBlueEliminated", SetBlueEliminated),
@@ -129,6 +131,7 @@ void CFOLogicPatchwork::Activate(void)
 
 	SetContextThink(&CFOLogicPatchwork::Think, gpGlobals->curtime + 5, "patchworkthink");
 	SetContextThink(&CFOLogicPatchwork::TeamThink, gpGlobals->curtime + 0.1f, "patchworkteamthink");
+	SetContextThink(&CFOLogicPatchwork::HackThink, gpGlobals->curtime + 10.0f, "hackthink");
 }
 
 void CFOLogicPatchwork::Think( void )
@@ -239,4 +242,117 @@ void CFOLogicPatchwork::TeamThink(void)
 	}
 
 	SetNextThink(gpGlobals->curtime + 0.05f, "patchworkteamthink");
+}
+
+void CFOLogicPatchwork::HackThink(void)
+{
+	CTeamplayRoundBasedRules *pGameRules = dynamic_cast<CTeamplayRoundBasedRules *>(GameRules());
+
+	if (pGameRules)
+	{
+		if (TeamplayRoundBasedRules())
+		{
+			if (!(TeamplayRoundBasedRules()->IsInWaitingForPlayers()) && m_bRoundRunning && !m_bRoundOver)
+			{
+				if (m_bRedAlive)
+				{
+					for (int i = 1; i <= gpGlobals->maxClients; i++)
+					{
+						CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
+
+						if (pPlayer && pPlayer->IsPlayer() && pPlayer->GetTeamNumber() == TF_TEAM_RED && pPlayer->IsDead())
+						{
+							if (pGameRules->GetNextRespawnWave(TF_TEAM_RED, pPlayer) > 30.0f)
+							{
+								pGameRules->SetTeamRespawnWaveTime(TF_TEAM_RED, 10.0f);
+								pPlayer->ForceRespawn();
+							}
+						}
+					}
+				}
+				if (m_bBlueAlive)
+				{
+					for (int i = 1; i <= gpGlobals->maxClients; i++)
+					{
+						CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
+
+						if (pPlayer && pPlayer->IsPlayer() && pPlayer->GetTeamNumber() == TF_TEAM_BLUE && pPlayer->IsDead())
+						{
+							if (pGameRules->GetNextRespawnWave(TF_TEAM_BLUE, pPlayer) > 30.0f)
+							{
+								pGameRules->SetTeamRespawnWaveTime(TF_TEAM_BLUE, 10.0f);
+								pPlayer->ForceRespawn();
+							}
+						}
+					}
+				}
+				if (m_bGreenAlive)
+				{
+					for (int i = 1; i <= gpGlobals->maxClients; i++)
+					{
+						CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
+
+						if (pPlayer && pPlayer->IsPlayer() && pPlayer->GetTeamNumber() == FO_TEAM_GREEN && pPlayer->IsDead())
+						{
+							if (pGameRules->GetNextRespawnWave(FO_TEAM_GREEN, pPlayer) > 30.0f)
+							{
+								pGameRules->SetTeamRespawnWaveTime(FO_TEAM_GREEN, 10.0f);
+								pPlayer->ForceRespawn();
+							}
+						}
+					}
+				}
+				if (m_bYellowAlive)
+				{
+					for (int i = 1; i <= gpGlobals->maxClients; i++)
+					{
+						CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
+
+						if (pPlayer && pPlayer->IsPlayer() && pPlayer->GetTeamNumber() == FO_TEAM_YELLOW && pPlayer->IsDead())
+						{
+							if (pGameRules->GetNextRespawnWave(FO_TEAM_YELLOW, pPlayer) > 30.0f)
+							{
+								pGameRules->SetTeamRespawnWaveTime(FO_TEAM_YELLOW, 10.0f);
+								pPlayer->ForceRespawn();
+							}
+						}
+					}
+				}
+				if (m_bPurpleAlive)
+				{
+					for (int i = 1; i <= gpGlobals->maxClients; i++)
+					{
+						CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
+
+						if (pPlayer && pPlayer->IsPlayer() && pPlayer->GetTeamNumber() == FO_TEAM_PURPLE && pPlayer->IsDead())
+						{
+							if (pGameRules->GetNextRespawnWave(FO_TEAM_PURPLE, pPlayer) > 30.0f)
+							{
+								pGameRules->SetTeamRespawnWaveTime(FO_TEAM_PURPLE, 10.0f);
+								pPlayer->ForceRespawn();
+							}
+						}
+					}
+				}
+				if (m_bPinkAlive)
+				{
+					for (int i = 1; i <= gpGlobals->maxClients; i++)
+					{
+						CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
+
+						if (pPlayer && pPlayer->IsPlayer() && pPlayer->GetTeamNumber() == FO_TEAM_PINK && pPlayer->IsDead())
+						{
+							if (pGameRules->GetNextRespawnWave(FO_TEAM_PINK, pPlayer) > 30.0f)
+							{
+								pGameRules->SetTeamRespawnWaveTime(FO_TEAM_PINK, 10.0f);
+								pPlayer->ForceRespawn();
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	SetNextThink(gpGlobals->curtime + 10.0f, "hackthink");
 }

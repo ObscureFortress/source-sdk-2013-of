@@ -102,6 +102,7 @@ public:
 private:
 	void		SendCapString( int iCapTeam, int iNumCappers, int *pCappingPlayers );
 	void		InternalSetOwner( int iCapTeam, bool bMakeSound = true, int iNumCappers = 0, int *iCappingPlayers = NULL );
+	void		HandleScoring( int iTeam );
 	float		GetTeamCapPercentage( int iTeam );
 
 	int			m_iTeam;			

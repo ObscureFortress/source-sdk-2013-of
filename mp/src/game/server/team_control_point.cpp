@@ -8,11 +8,16 @@
 #include "team_control_point.h"
 #include "player.h"
 #include "teamplay_gamerules.h"
+#include "teamplayroundbased_gamerules.h"
 #include "team.h"
 #include "team_control_point_master.h"
 #include "mp_shareddefs.h"
 #include "engine/IEngineSound.h"
 #include "soundenvelope.h"
+
+#if defined( TF_DLL ) || defined( TF_MOD )
+#include "tf_shareddefs.h"
+#endif
 
 BEGIN_DATADESC(CTeamControlPoint)
 	DEFINE_KEYFIELD( m_iszPrintName,			FIELD_STRING,	"point_printname" ),
@@ -303,6 +308,35 @@ void CTeamControlPoint::InputReset( inputdata_t &input )
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTeamControlPoint::HandleScoring( int iTeam )
+{
+	if ( TeamplayRoundBasedRules() && !TeamplayRoundBasedRules()->ShouldScorePerRound() )
+	{
+		GetGlobalTeam( iTeam )->AddScore( 1 );
+		TeamplayRoundBasedRules()->HandleTeamScoreModify( iTeam, 1 );
+
+		CTeamControlPointMaster *pMaster = g_hControlPointMasters.Count() ? g_hControlPointMasters[0] : NULL;
+		if ( pMaster && !pMaster->WouldNewCPOwnerWinGame( this, iTeam ) )
+		{
+#if defined( TF_DLL ) || defined( TF_MOD )
+			if ( TeamplayRoundBasedRules()->GetGameType() == TF_GAMETYPE_ESCORT )
+			{
+				CBroadcastRecipientFilter filter;
+				EmitSound( filter, entindex(), "Hud.EndRoundScored" );
+			}
+			else
+#endif
+			{
+				CTeamRecipientFilter filter( iTeam );
+				EmitSound( filter, entindex(), "Hud.EndRoundScored" );
+			}
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Used by Area caps to set the owner
 //-----------------------------------------------------------------------------
 void CTeamControlPoint::InputSetOwner( inputdata_t &input )
@@ -313,8 +347,17 @@ void CTeamControlPoint::InputSetOwner( inputdata_t &input )
 
 	Assert( input.pCaller );
 
+	if ( !input.pCaller )
+		return;
+
+	if ( GetOwner() == iCapTeam )
+		return;
+
 	if ( TeamplayGameRules()->PointsMayBeCaptured() )
 	{
+		// must be done before setting the owner
+		HandleScoring( iCapTeam );
+
 		if ( input.pCaller->IsPlayer() )
 		{
 			int iCappingPlayer = input.pCaller->entindex();
@@ -323,8 +366,10 @@ void CTeamControlPoint::InputSetOwner( inputdata_t &input )
 		else
 		{
 			InternalSetOwner( iCapTeam, false );
-		}				
+		}
+
 		ObjectiveResource()->SetOwningTeam( GetPointIndex(), m_iTeam );
+		TeamplayRoundBasedRules()->RecalculateControlPointState();
 	}
 }
 
@@ -407,8 +452,12 @@ void CTeamControlPoint::SetOwner( int iCapTeam, bool bMakeSound, int iNumCappers
 {
 	if ( TeamplayGameRules()->PointsMayBeCaptured() )
 	{
+		// must be done before setting the owner
+		HandleScoring( iCapTeam );
+
 		InternalSetOwner( iCapTeam, bMakeSound, iNumCappers, pCappingPlayers );
 		ObjectiveResource()->SetOwningTeam( GetPointIndex(), m_iTeam );
+		TeamplayRoundBasedRules()->RecalculateControlPointState();
 	}
 }
 
