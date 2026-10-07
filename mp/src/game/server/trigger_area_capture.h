@@ -65,7 +65,7 @@ public:
 	bool	IsActive( void );
 	bool	CheckIfDeathCausesBlock( CBaseMultiplayerPlayer *pVictim, CBaseMultiplayerPlayer *pKiller );
 
-	void	UpdateNumPlayers( void );
+	void	UpdateNumPlayers( bool bBlocked = false );
 	void	UpdateOwningTeam( void );
 	void	UpdateCappingTeam( int iTeam );
 	void	UpdateTeamInZone( void );
@@ -104,6 +104,9 @@ private:
 	void	SetCapTimeRemaining( float flTime );
 
 	void	HandleRespawnTimeAdjustments( int oldTeam, int newTeam );
+	void	GetNumCappingPlayers( int team, int &numcappers, int *cappingplayers );
+
+	void	SetNumCappers( int nNumCappers, bool bBlocked = false );
 
 private:
 	int		m_iCapMode;			//which capture mode we're in
@@ -166,6 +169,9 @@ private:
 	COutputEvent m_StartOutput;
 	COutputEvent m_BreakOutput;
 	COutputEvent m_CapOutput;
+
+	COutputInt m_OnNumCappersChanged;
+	COutputInt m_OnNumCappersChanged2;
 
 	int		m_iAreaIndex;	//index of this area among all other areas
 

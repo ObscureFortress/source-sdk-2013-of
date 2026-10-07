@@ -5,6 +5,7 @@
 //===========================================================================//
 
 #include "cbase.h"
+#include "team_train_watcher.h"
 #include "trigger_area_capture.h"
 #include "player.h"
 #include "teamplay_gamerules.h"
@@ -76,6 +77,9 @@ BEGIN_DATADESC(CTriggerAreaCapture)
 	DEFINE_OUTPUT( m_StartOutput,	"OnStartCap" ),
 	DEFINE_OUTPUT( m_BreakOutput,	"OnBreakCap" ),
 	DEFINE_OUTPUT( m_CapOutput,		"OnEndCap" ),
+
+	DEFINE_OUTPUT( m_OnNumCappersChanged, "OnNumCappersChanged" ),
+	DEFINE_OUTPUT( m_OnNumCappersChanged2, "OnNumCappersChanged2" ),
 
 END_DATADESC();
 
@@ -740,6 +744,37 @@ void CTriggerAreaCapture::StartCapture( int team, int capmode )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+void CTriggerAreaCapture::GetNumCappingPlayers( int team, int &numcappers, int *cappingplayers )
+{
+	numcappers = 0;
+
+	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
+	{
+		CBaseEntity *ent = UTIL_PlayerByIndex( i );
+		if ( ent )
+		{
+			CBaseMultiplayerPlayer *player = ToBaseMultiplayerPlayer(ent);
+
+			if ( IsTouching( player ) && ( player->GetTeamNumber() == team ) ) // need to make sure disguised spies aren't included in the list of capping players
+			{
+				if ( numcappers < MAX_AREA_CAPPERS-1 )
+				{
+					cappingplayers[numcappers] = i;
+					numcappers++;
+				}
+			}
+		}
+	}
+
+	if ( numcappers < MAX_AREA_CAPPERS )
+	{
+		cappingplayers[numcappers] = 0;	//null terminate :)
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 void CTriggerAreaCapture::EndCapture( int team )
 {
 	IncrementCapAttemptNumber();
@@ -1055,7 +1090,7 @@ bool CTriggerAreaCapture::CheckIfDeathCausesBlock( CBaseMultiplayerPlayer *pVict
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTriggerAreaCapture::UpdateNumPlayers( void )
+void CTriggerAreaCapture::UpdateNumPlayers( bool bBlocked /*= false */ )
 {
 	if( !m_hPoint )
 		return;
@@ -1063,6 +1098,11 @@ void CTriggerAreaCapture::UpdateNumPlayers( void )
 	int index = m_hPoint->GetPointIndex();
 	for ( int i = 0; i < m_TeamData.Count(); i++ )
 	{
+		if ( i >= FIRST_GAME_TEAM && i == m_nCapturingTeam )
+		{
+			SetNumCappers( m_TeamData[i].iNumTouching, bBlocked );
+		}
+
 		ObjectiveResource()->SetNumPlayers( index, i, m_TeamData[i].iNumTouching );
 	}
 }
@@ -1109,5 +1149,26 @@ void CTriggerAreaCapture::UpdateBlocked( void )
 	{
 		ObjectiveResource()->SetCapBlocked( m_hPoint->GetPointIndex(), m_bBlocked );
 		m_hPoint->CaptureInterrupted( m_bBlocked );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTriggerAreaCapture::SetNumCappers( int nNumCappers, bool bBlocked /* = false */ )
+{
+	m_OnNumCappersChanged.Set( nNumCappers, this, this );
+
+	// m_OnNumCappersChanged2 sets -1 for a blocked cart (for movement decisions on hills)
+	if ( bBlocked )
+	{
+		nNumCappers = -1;
+	}
+
+	m_OnNumCappersChanged2.Set( nNumCappers, this, this );
+
+	if ( m_hTrainWatcher.Get() )
+	{
+		m_hTrainWatcher->SetNumTrainCappers( nNumCappers, this );
 	}
 }
