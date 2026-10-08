@@ -141,14 +141,18 @@ void C_ObjectWorkerFort::DisplayHintTo( C_BasePlayer *pPlayer )
 	if ( InSameTeam( pPlayer ) )
 	{
 		// We're looking at a friendly object. 
-		if ( pTFPlayer->IsPlayerClass( TF_CLASS_ENGINEER ) || pTFPlayer->IsPlayerClass( FO_CLASS_DISMATIC ) || pTFPlayer->IsPlayerClass( FO_CLASS_TELECON ) || pTFPlayer->IsPlayerClass( FO_CLASS_WORKERNODE ) || pTFPlayer->IsPlayerClass( FO_CLASS_SAPTRAP ) || pTFPlayer->IsPlayerClass( FO_CLASS_CUSTOM1 ) || pTFPlayer->IsPlayerClass( FO_CLASS_CUSTOM2 ) || pTFPlayer->IsPlayerClass( FO_CLASS_CUSTOM3 ) || pTFPlayer->IsPlayerClass( FO_CLASS_COURIER ) )
+		if ( pTFPlayer->IsPlayerClass( TF_CLASS_ENGINEER ) || pTFPlayer->IsPlayerClass( FO_CLASS_SENTRONIC + 1 ) || pTFPlayer->IsPlayerClass( FO_CLASS_DISMATIC + 1 ) || pTFPlayer->IsPlayerClass( FO_CLASS_TELECON + 1 ) || pTFPlayer->IsPlayerClass( FO_CLASS_WORKERNODE + 1 ) || pTFPlayer->IsPlayerClass( FO_CLASS_SAPTRAP + 1 ) || pTFPlayer->IsPlayerClass( FO_CLASS_CUSTOM1 + 1 ) || pTFPlayer->IsPlayerClass( FO_CLASS_CUSTOM2 + 1 ) || pTFPlayer->IsPlayerClass( FO_CLASS_CUSTOM3 + 1 ) )
 		{
-			// If it can be upgraded, and I can't afford it, let me know
-			if ( GetHealth() == GetMaxHealth() && GetUpgradeLevel() < 2 )
+			// If it can be upgraded, tell me whether I still need metal or can upgrade it now
+			if ( GetHealth() == GetMaxHealth() && GetUpgradeLevel() == 1 )
 			{
 				if ( pTFPlayer->GetBuildResources() < SENTRYGUN_UPGRADE_COST )
 				{
 					bHintPlayed = pTFPlayer->HintMessage( HINT_ENGINEER_METAL_TO_UPGRADE, false, true );
+				}
+				else
+				{
+					bHintPlayed = pTFPlayer->HintMessage( HINT_WORKERNODE_UPGRADE_FORT, false, true );
 				}
 			}
 		}
@@ -268,7 +272,7 @@ void C_ObjectWorkerFort::UpdateDamageEffects( BuildingDamageLevel_t damageLevel 
 {
 	if ( m_pDamageEffects )
 	{
-		m_pDamageEffects->StopEmission( false, false );
+		ParticleProp()->StopEmission( m_pDamageEffects, false, false );
 		m_pDamageEffects = NULL;
 	}
 }

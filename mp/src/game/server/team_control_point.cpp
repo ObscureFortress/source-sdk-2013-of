@@ -137,6 +137,8 @@ void CTeamControlPoint::Spawn( void )
 
 	InternalSetOwner( m_iDefaultOwner, false );	//init the owner of this point
 
+	TeamplayRoundBasedRules()->RecalculateControlPointState();
+
 	SetActive( !m_bStartDisabled );
 
 	BaseClass::Spawn();
@@ -443,6 +445,7 @@ void CTeamControlPoint::ForceOwner( int iTeam )
 {
 	InternalSetOwner( iTeam, false, 0, 0 );
 	ObjectiveResource()->SetOwningTeam( GetPointIndex(), m_iTeam );
+	TeamplayRoundBasedRules()->RecalculateControlPointState();
 }
 
 //-----------------------------------------------------------------------------

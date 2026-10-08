@@ -10,6 +10,10 @@
 #include "teamplayroundbased_gamerules.h"
 #include "team_control_point_round.h"
 
+#if defined( TF_DLL ) || defined( TF_MOD )
+#include "tf_gamerules.h"
+#endif
+
 BEGIN_DATADESC( CTeamControlPointRound )
 	DEFINE_KEYFIELD( m_bDisabled,			FIELD_BOOLEAN,	"StartDisabled" ),
 
@@ -112,6 +116,27 @@ int CTeamControlPointRound::CheckWinConditions( void )
 		 ( iWinners >= FIRST_GAME_TEAM ) && 
 		 ( iWinners != m_iInvalidCapWinner ) )
 	{
+#if defined( TF_DLL ) || defined( TF_MOD )
+		// In KOTH, owning every point only wins once the capturing team's clock has run out
+		if ( TeamplayRoundBasedRules() && TeamplayRoundBasedRules()->IsInKothMode() )
+		{
+			CTeamRoundTimer *pTimer = NULL;
+
+			switch ( iWinners )
+			{
+			case TF_TEAM_RED:		pTimer = TFGameRules()->GetRedKothRoundTimer();		break;
+			case TF_TEAM_BLUE:		pTimer = TFGameRules()->GetBlueKothRoundTimer();	break;
+			case FO_TEAM_GREEN:		pTimer = TFGameRules()->GetGreenKothRoundTimer();	break;
+			case FO_TEAM_YELLOW:	pTimer = TFGameRules()->GetYellowKothRoundTimer();	break;
+			case FO_TEAM_PURPLE:	pTimer = TFGameRules()->GetPurpleKothRoundTimer();	break;
+			case FO_TEAM_PINK:		pTimer = TFGameRules()->GetPinkKothRoundTimer();	break;
+			}
+
+			if ( pTimer && ( pTimer->GetTimeRemaining() > 0 || !TeamplayGameRules()->TimerMayExpire() ) )
+				return -1;
+		}
+#endif
+
 		FireTeamWinOutput( iWinners );
 		return iWinners;
 	}

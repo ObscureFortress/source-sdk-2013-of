@@ -672,6 +672,33 @@ void CTeamControlPointMaster::CheckWinConditions( void )
 			 ( iWinners >= FIRST_GAME_TEAM ) && 
 			 ( iWinners != m_iInvalidCapWinner ) )
 		{
+#if defined( TF_DLL ) || defined( TF_MOD )
+			// In KOTH, owning every point only wins once the capturing team's clock has run out
+			if ( TeamplayRoundBasedRules() && TeamplayRoundBasedRules()->IsInKothMode() )
+			{
+				CTeamRoundTimer *pTimer = NULL;
+
+				switch ( iWinners )
+				{
+				case TF_TEAM_RED:		pTimer = TFGameRules()->GetRedKothRoundTimer();		break;
+				case TF_TEAM_BLUE:		pTimer = TFGameRules()->GetBlueKothRoundTimer();	break;
+				case FO_TEAM_GREEN:		pTimer = TFGameRules()->GetGreenKothRoundTimer();	break;
+				case FO_TEAM_YELLOW:	pTimer = TFGameRules()->GetYellowKothRoundTimer();	break;
+				case FO_TEAM_PURPLE:	pTimer = TFGameRules()->GetPurpleKothRoundTimer();	break;
+				case FO_TEAM_PINK:		pTimer = TFGameRules()->GetPinkKothRoundTimer();	break;
+				}
+
+				if ( pTimer )
+				{
+					if ( pTimer->GetTimeRemaining() > 0 )
+						return;
+
+					if ( !TeamplayGameRules()->TimerMayExpire() )
+						return;
+				}
+			}
+#endif
+
 			TeamplayGameRules()->SetWinningTeam( iWinners, WINREASON_ALL_POINTS_CAPTURED, true, m_bSwitchTeamsOnWin );
 			FireTeamWinOutput( iWinners );
 		}
