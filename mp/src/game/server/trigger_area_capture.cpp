@@ -199,6 +199,24 @@ void CTriggerAreaCapture::StartTouch(CBaseEntity *pOther)
 		// If we don't do this, the player can receive the above event telling him he's
 		// in a zone, but the objective resource still thinks he's not.
 		CaptureThink();
+
+		// If a capture is already running, start scoring for the player walking in
+		if ( m_bCapturing && g_hControlPointMasters.Count() )
+		{
+			CTeamControlPointMaster *pMaster = g_hControlPointMasters[0];
+			if ( pMaster )
+			{
+				float flRate = pMaster->GetPartialCapturePointRate();
+				if ( flRate > 0.0f )
+				{
+					CBaseMultiplayerPlayer *pPlayer = ToBaseMultiplayerPlayer( pOther );
+					if ( pPlayer && pPlayer->GetTeamNumber() == m_nCapturingTeam )
+					{
+						pPlayer->StartScoringEscortPoints( flRate );
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -208,7 +226,7 @@ void CTriggerAreaCapture::StartTouch(CBaseEntity *pOther)
 //-----------------------------------------------------------------------------
 void CTriggerAreaCapture::EndTouch(CBaseEntity *pOther)
 {
-	if ( PassesTriggerFilters(pOther) && m_hPoint )
+	if ( IsTouching( pOther ) && m_hPoint )
 	{
 		IGameEvent *event = gameeventmanager->CreateEvent( "controlpoint_endtouch" );
 		if ( event )
@@ -216,6 +234,12 @@ void CTriggerAreaCapture::EndTouch(CBaseEntity *pOther)
 			event->SetInt( "player", pOther->entindex() );
 			event->SetInt( "area", m_hPoint->GetPointIndex() );
 			gameeventmanager->FireEvent( event );
+		}
+
+		CBaseMultiplayerPlayer *pPlayer = ToBaseMultiplayerPlayer( pOther );
+		if ( pPlayer )
+		{
+			pPlayer->StopScoringEscortPoints();
 		}
 	}
 
@@ -395,10 +419,13 @@ void CTriggerAreaCapture::CaptureThink( void )
 
 	// If the cap is being blocked, reset the number of players so the client
 	// knows to stop the capture as well.
+	bool bBlocked = false;
 	if ( mp_blockstyle.GetInt() == 1 )
 	{
 		if ( m_bCapturing && iTeamsInZone > 1 )
 		{
+			bBlocked = true;
+
 			for ( int i = FIRST_GAME_TEAM; i < GetNumberOfTeams(); i++ )
 			{
 				iNumPlayers[i] = 0;
@@ -413,7 +440,7 @@ void CTriggerAreaCapture::CaptureThink( void )
 
 	if ( bUpdatePlayers )
 	{
-		UpdateNumPlayers();
+		UpdateNumPlayers( bBlocked );
 	}
 
 	// When a player blocks, tell them the cap index and attempt number
@@ -718,6 +745,8 @@ void CTriggerAreaCapture::StartCapture( int team, int capmode )
 	
 	m_nCapturingTeam = team;
 
+	UpdateNumPlayers( false );
+
 	if ( mp_capstyle.GetInt() == 1 )
 	{
 		SetCapTimeRemaining( ((m_flCapTime * 2) * m_TeamData[team].iNumRequiredToCap) );
@@ -737,7 +766,36 @@ void CTriggerAreaCapture::StartCapture( int team, int capmode )
 
 	if( m_hPoint )
 	{
-		m_hPoint->CaptureStart();
+		int numcappers = 0;
+		int cappingplayers[MAX_AREA_CAPPERS];
+		GetNumCappingPlayers( m_nCapturingTeam, numcappers, cappingplayers );
+
+		m_hPoint->CaptureStart( m_nCapturingTeam, numcappers, cappingplayers );
+	}
+
+	// Start scoring escort points for everyone of the capturing team that is already in the zone
+	if ( g_hControlPointMasters.Count() )
+	{
+		CTeamControlPointMaster *pMaster = g_hControlPointMasters[0];
+		if ( pMaster )
+		{
+			float flRate = pMaster->GetPartialCapturePointRate();
+			if ( flRate > 0.0f )
+			{
+				CTeam *pTeam = GetGlobalTeam( m_nCapturingTeam );
+				if ( pTeam )
+				{
+					for ( int i = 0; i < pTeam->GetNumPlayers(); i++ )
+					{
+						CBaseMultiplayerPlayer *pPlayer = ToBaseMultiplayerPlayer( pTeam->GetPlayer( i ) );
+						if ( pPlayer && IsTouching( pPlayer ) )
+						{
+							pPlayer->StartScoringEscortPoints( flRate );
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -843,19 +901,6 @@ void CTriggerAreaCapture::EndCapture( int team )
 	// Handle this before we assign the new team as the owner of this area
 	HandleRespawnTimeAdjustments( m_nOwningTeam, team );
 
-	// Handle scoring
-	if ( TeamplayRoundBasedRules() && !TeamplayRoundBasedRules()->ShouldScorePerRound() )
-	{
-		GetGlobalTeam( team )->AddScore( 1 );
-
-		CTeamControlPointMaster *pMaster = g_hControlPointMasters.Count() ? g_hControlPointMasters[0] : NULL;
-		if ( pMaster && m_hPoint && !pMaster->WouldNewCPOwnerWinGame( m_hPoint, team ) )
-		{
-			CTeamRecipientFilter filter( team );
-			EmitSound( filter, entindex(), "Hud.EndRoundScored" );
-		}
-	}
-		
 	m_nOwningTeam = team;
 	m_bCapturing = false;
 	SetCapTimeRemaining( 0 );
@@ -873,6 +918,21 @@ void CTriggerAreaCapture::EndCapture( int team )
 		UpdateOwningTeam();
 		m_hPoint->SetOwner( m_nOwningTeam, true, numcappers, cappingplayers );
 		m_hPoint->CaptureEnd();
+	}
+
+	SetNumCappers( 0, false );
+
+	CTeam *pTeam = GetGlobalTeam( m_nCapturingTeam );
+	if ( pTeam )
+	{
+		for ( int i = 0; i < pTeam->GetNumPlayers(); i++ )
+		{
+			CBaseMultiplayerPlayer *pPlayer = ToBaseMultiplayerPlayer( pTeam->GetPlayer( i ) );
+			if ( pPlayer && IsTouching( pPlayer ) )
+			{
+				pPlayer->StopScoringEscortPoints();
+			}
+		}
 	}
 }
 
@@ -925,6 +985,30 @@ void CTriggerAreaCapture::BreakCapture( bool bNotEnoughPlayers )
 		if( m_hPoint )
 		{
 			m_hPoint->CaptureEnd();
+
+			IGameEvent *event = gameeventmanager->CreateEvent( "teamplay_capture_broken" );
+			if ( event )
+			{
+				event->SetInt( "cp", m_hPoint->GetPointIndex() );
+				event->SetString( "cpname", m_hPoint->GetName() );
+				event->SetFloat( "time_remaining", m_fTimeRemaining );
+				gameeventmanager->FireEvent( event );
+			}
+		}
+
+		SetNumCappers( 0, false );
+
+		CTeam *pTeam = GetGlobalTeam( m_nCapturingTeam );
+		if ( pTeam )
+		{
+			for ( int i = 0; i < pTeam->GetNumPlayers(); i++ )
+			{
+				CBaseMultiplayerPlayer *pPlayer = ToBaseMultiplayerPlayer( pTeam->GetPlayer( i ) );
+				if ( pPlayer && IsTouching( pPlayer ) )
+				{
+					pPlayer->StopScoringEscortPoints();
+				}
+			}
 		}
 	}
 }

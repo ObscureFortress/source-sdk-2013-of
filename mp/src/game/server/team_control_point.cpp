@@ -467,7 +467,7 @@ void CTeamControlPoint::SetOwner( int iCapTeam, bool bMakeSound, int iNumCappers
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTeamControlPoint::CaptureStart( void )
+void CTeamControlPoint::CaptureStart( int iCapTeam, int iNumCappingPlayers, int *pCappingPlayers )
 {
 	IGameEvent *event = gameeventmanager->CreateEvent( "teamplay_point_startcapture" );
 	if ( event )
@@ -475,14 +475,26 @@ void CTeamControlPoint::CaptureStart( void )
 		event->SetInt( "cp", m_iPointIndex );
 		event->SetString( "cpname", STRING(m_iszPrintName) );
 		event->SetInt( "team", m_iTeam );
+		event->SetInt( "capteam", iCapTeam );
 
 		// pCappingPlayers is a null terminated list of player indices
 
-		char capper[8];
+		char cappers[9];	// pCappingPlayers is max length 8
 
-		Q_snprintf( capper, sizeof( capper ), "%d", entindex() );
+		if ( iNumCappingPlayers > 8 )
+		{
+			iNumCappingPlayers = 8;
+		}
 
-		event->SetString( "cappers", capper );
+		int i;
+		for( i=0;i<iNumCappingPlayers;i++ )
+		{
+			cappers[i] = (char)pCappingPlayers[i];
+		}
+
+		cappers[i] = '\0';
+
+		event->SetString( "cappers", cappers );
 		event->SetInt( "priority", 7 );
 
 		gameeventmanager->FireEvent( event );
