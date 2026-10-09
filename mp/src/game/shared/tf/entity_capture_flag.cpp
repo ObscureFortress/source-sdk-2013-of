@@ -494,7 +494,7 @@ void CCaptureFlag::PickUp( CTFPlayer *pPlayer, bool bInvisible )
 	}
 
 	// Remove the player's disguse if they're a spy
-	if ( (pPlayer->GetPlayerClass()->GetClassIndex() == FO_CLASS_SAPTRAP + 1))
+	if ( pPlayer->GetPlayerClass()->GetClassIndex() == TF_CLASS_SPY )
 	{
 		if ( pPlayer->m_Shared.InCond( TF_COND_DISGUISED ) ||
 			pPlayer->m_Shared.InCond( TF_COND_DISGUISING ))

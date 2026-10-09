@@ -1068,9 +1068,7 @@ void CTFPlayerShared::OnRemoveDisguised( void )
 
 	if ( !m_pOuter->InSameTeam( pLocalPlayer ) )
 	{
-		//CHECKPOINT: wont work with spy and saptrap coexisting
-		//TFPlayerClassData_t *pData = GetPlayerClassData( TF_CLASS_SPY );
-		TFPlayerClassData_t *pData = GetPlayerClassData(FO_CLASS_SAPTRAP + 1);
+		TFPlayerClassData_t *pData = GetPlayerClassData( TF_CLASS_SPY );
 		int iIndex = modelinfo->GetModelIndex( pData->GetModelName() );
 
 		m_pOuter->SetModelIndex( iIndex );
@@ -1303,7 +1301,7 @@ void CTFPlayerShared::Disguise( int nTeam, int nClass )
 	Assert ( ( nClass >= TF_CLASS_SCOUT ) && ( nClass <= TF_CLASS_ENGINEER ) );
 
 	// we're not a spy
-	if ((nRealClass != FO_CLASS_SAPTRAP + 1))
+	if ( nRealClass != TF_CLASS_SPY )
 	{
 		return;
 	}

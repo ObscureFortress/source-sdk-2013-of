@@ -255,7 +255,9 @@ BEGIN_SEND_TABLE_NOBASE( CTFPlayer, DT_TFLocalPlayerExclusive )
 
 	SendPropFloat( SENDINFO_VECTORELEM(m_angEyeAngles, 0), 8, SPROP_CHANGES_OFTEN, -90.0f, 90.0f ),
 //	SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 1), 10, SPROP_CHANGES_OFTEN ),
+#ifdef FO_UNRELEASED
 	SendPropInt( SENDINFO( m_ArmorValue ), 10, SPROP_UNSIGNED ),
+#endif
 
 END_SEND_TABLE()
 
@@ -2247,7 +2249,7 @@ bool CTFPlayer::CanDisguise( void )
 	if ( !IsAlive() )
 		return false;
 
-	if ( GetPlayerClass()->GetClassIndex() != (FO_CLASS_SAPTRAP + 1) )
+	if ( GetPlayerClass()->GetClassIndex() != TF_CLASS_SPY )
 		return false;
 
 	if ( HasItem() && GetItem()->GetItemID() == TF_ITEM_CAPTURE_FLAG )

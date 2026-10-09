@@ -201,8 +201,10 @@ const char *g_aWeaponNames[] =
 	"FO_WEAPON_MELEECUSTOM1",
 	"FO_WEAPON_MELEECUSTOM2",
 	"FO_WEAPON_MELEECUSTOM3",
+#ifdef FO_UNRELEASED
 	"TF_WEAPON_FLAG",
 	"FO_WEAPON_GRENADE",
+#endif
 
 	"TF_WEAPON_COUNT",	// end marker, do not add below here
 };
@@ -282,8 +284,10 @@ int g_aWeaponDamageTypes[] =
 	DMG_CLUB,		// FO_WEAPON_MELEECUSTOM1
 	DMG_CLUB,		// FO_WEAPON_MELEECUSTOM2
 	DMG_CLUB,		// FO_WEAPON_MELEECUSTOM3
+#ifdef FO_UNRELEASED
 	DMG_GENERIC,		// TF_WEAPON_FLAG
 	DMG_BLAST,		// FO_WEAPON_GRENADE
+#endif
 
 	// This is a special entry that must match with TF_WEAPON_COUNT
 	// to protect against updating the weapon list without updating this list

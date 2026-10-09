@@ -953,7 +953,9 @@ BEGIN_RECV_TABLE_NOBASE( C_TFPlayer, DT_TFLocalPlayerExclusive )
 
 	RecvPropFloat( RECVINFO( m_angEyeAngles[0] ) ),
 //	RecvPropFloat( RECVINFO( m_angEyeAngles[1] ) ),
+#ifdef FO_UNRELEASED
 	RecvPropInt( RECVINFO( m_ArmorValue ) ),
+#endif
 
 END_RECV_TABLE()
 
@@ -1894,7 +1896,7 @@ void C_TFPlayer::ClientThink()
 	// Ugh, this check is getting ugly
 
 	// Start smoke if we're not invisible or disguised
-	if ( (IsPlayerClass(FO_CLASS_SAPTRAP + 1)) && IsAlive() &&									// only on spy model
+	if ( IsPlayerClass( TF_CLASS_SPY ) && IsAlive() &&									// only on spy model
 		( !m_Shared.InCond( TF_COND_DISGUISED ) || !IsEnemyPlayer() ) &&	// disguise doesn't show for teammates
 		GetPercentInvisible() <= 0 &&										// don't start if invis
 		( pLocalPlayer != this ) && 										// don't show to local player
@@ -3605,7 +3607,7 @@ void C_TFPlayer::ComputeFxBlend( void )
 {
 	BaseClass::ComputeFxBlend();
 
-	if ( (GetPlayerClass()->IsClass(FO_CLASS_SAPTRAP + 1)))
+	if ( GetPlayerClass()->IsClass( TF_CLASS_SPY ) )
 	{
 		float flInvisible = GetPercentInvisible();
 		if ( flInvisible != 0.0f )

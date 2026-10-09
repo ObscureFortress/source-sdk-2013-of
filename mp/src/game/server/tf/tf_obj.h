@@ -70,7 +70,6 @@ public:
 	virtual void	Precache();
 	virtual void	Spawn( void );
 	virtual void	Activate( void );
-	virtual void	InitializeMapPlacedObject( void );
 
 	virtual bool	ShouldCollide( int collisionGroup, int contentsMask ) const;
 
@@ -94,6 +93,7 @@ public:
 
 	bool			CalculatePlacementPos( void );
 	virtual bool	IsPlacementPosValid( void );
+	virtual void	InitializeMapPlacedObject( void );
 	bool			FindSnapToBuildPos( void );
 
 	void			ReattachChildren( void );

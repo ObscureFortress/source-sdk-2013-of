@@ -235,12 +235,12 @@ void CTFHudPlayerClass::OnThink()
 
 			// set our class image
 			if (m_nClass != pPlayer->GetPlayerClass()->GetClassIndex() || bTeamChange || bCloakChange ||
-				(((m_nClass == FO_CLASS_SAPTRAP + 1)) && m_nDisguiseClass != pPlayer->m_Shared.GetDisguiseClass()) ||
-				(((m_nClass == FO_CLASS_SAPTRAP + 1)) && m_nDisguiseTeam != pPlayer->m_Shared.GetDisguiseTeam()))
+				( m_nClass == TF_CLASS_SPY && m_nDisguiseClass != pPlayer->m_Shared.GetDisguiseClass() ) ||
+				( m_nClass == TF_CLASS_SPY && m_nDisguiseTeam != pPlayer->m_Shared.GetDisguiseTeam() ))
 			{
 				m_nClass = pPlayer->GetPlayerClass()->GetClassIndex();
 
-				if (((m_nClass == FO_CLASS_SAPTRAP + 1)) && pPlayer->m_Shared.InCond(TF_COND_DISGUISED))
+				if ( m_nClass == TF_CLASS_SPY && pPlayer->m_Shared.InCond(TF_COND_DISGUISED) )
 				{
 					if (!pPlayer->m_Shared.InCond(TF_COND_DISGUISING))
 					{
@@ -257,7 +257,7 @@ void CTFHudPlayerClass::OnThink()
 				if (m_pClassImage && m_pSpyImage)
 				{
 					int iCloakState = 0;
-					if ( pPlayer->IsPlayerClass(FO_CLASS_SAPTRAP + 1))
+					if ( pPlayer->IsPlayerClass( TF_CLASS_SPY ) )
 					{
 						iCloakState = m_nCloakLevel;
 					}

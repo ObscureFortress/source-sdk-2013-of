@@ -909,7 +909,7 @@ bool CHudBuildingStatusContainer_Spy::ShouldDraw( void )
 {
 	// Don't draw in freezecam
 	C_TFPlayer *pPlayer = CTFPlayer::GetLocalTFPlayer();
-	if ( !pPlayer || !pPlayer->IsPlayerClass(FO_CLASS_SAPTRAP + 1) || pPlayer->GetObserverMode() == OBS_MODE_FREEZECAM )
+	if ( !pPlayer || !pPlayer->IsPlayerClass( TF_CLASS_SPY ) || pPlayer->GetObserverMode() == OBS_MODE_FREEZECAM )
 	{
 		return false;
 	}

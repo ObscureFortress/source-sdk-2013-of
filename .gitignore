@@ -54,3 +54,8 @@ config.cfg
 # shader files
 *.tmp
 
+# Rebuilt by game_fo.sln on every build (mathlib, raytrace, tier1, vgui_controls projects)
+mp/src/lib/public/mathlib.lib
+mp/src/lib/public/raytrace.lib
+mp/src/lib/public/tier1.lib
+mp/src/lib/public/vgui_controls.lib

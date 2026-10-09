@@ -354,6 +354,33 @@ void CTFBaseRocket::Explode( trace_t *pTrace, CBaseEntity *pOther )
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: Send the rocket back the way the deflector is facing
+//-----------------------------------------------------------------------------
+void CTFBaseRocket::Deflected( CBaseEntity *pDeflectedBy, Vector &vecDir )
+{
+	Vector vecDeflect = vecDir;
+
+	// Get rocket's speed.
+	float flVel = GetAbsVelocity().Length();
+
+	QAngle angForward;
+	VectorAngles( vecDeflect, angForward );
+
+	// Now change rocket's direction.
+	SetAbsAngles( angForward );
+	SetAbsVelocity( vecDeflect * flVel );
+
+	// Bounce off the reflector.
+	SetOwnerEntity( pDeflectedBy );
+	ChangeTeam( pDeflectedBy->GetTeamNumber() );
+
+	if ( !m_bWasDeflected )
+	{
+		m_bWasDeflected = true;
+	}
+}
+
+//-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
 void CTFBaseRocket::DrawRadius( float flRadius )

@@ -97,6 +97,10 @@ public:
 
 	virtual CBaseEntity		*GetEnemy( void )			{ return m_hEnemy; }
 
+	virtual bool		IsDeflectable() { return true; }
+	virtual void		Deflected( CBaseEntity *pDeflectedBy, Vector &vecDir );
+	virtual bool		WasDefelected( void ) { return m_bWasDeflected; }
+
 	void			SetHomingTarget( CBaseEntity *pHomingTarget );
 
 protected:
@@ -106,6 +110,7 @@ protected:
 protected:
 
 	// Not networked.
+	bool					m_bWasDeflected;
 	float					m_flDamage;
 
 	float					m_flCollideWithTeammatesTime;

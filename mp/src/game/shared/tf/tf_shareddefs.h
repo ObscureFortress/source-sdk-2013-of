@@ -352,9 +352,11 @@ enum
 	FO_WEAPON_MELEECUSTOM1,
 	FO_WEAPON_MELEECUSTOM2,
 	FO_WEAPON_MELEECUSTOM3,
+#ifdef FO_UNRELEASED
 	// Not present in the shipped Fortress Obscura build; kept after the shipped IDs so those match.
 	TF_WEAPON_FLAG,
 	FO_WEAPON_GRENADE,
+#endif
 
 	TF_WEAPON_COUNT
 };
