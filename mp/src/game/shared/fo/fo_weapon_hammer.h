@@ -35,6 +35,7 @@ public:
 
 	virtual int			GetWeaponID( void ) const			{ return FO_WEAPON_HAMMER; }
 	virtual void		Smack(void);
+	virtual void		DoViewModelAnimation( void );
 
 #ifdef GAME_DLL
 	void OnFriendlyBuildingHit(CBaseObject *pObject, CTFPlayer *pPlayer);

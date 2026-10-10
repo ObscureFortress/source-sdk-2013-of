@@ -110,7 +110,7 @@ void C_ObjectWorkerWall::GetStatusText( wchar_t *pStatus, int iMaxStatusLen )
 		if ( pszTemplate )
 		{
 			g_pVGuiLocalize->ConstructString( pStatus, iMaxStatusLen, pszTemplate,
-				2,
+				3,
 				wszLevel,
 				wszHealthPercent );
 		}
@@ -124,7 +124,7 @@ void C_ObjectWorkerWall::GetStatusText( wchar_t *pStatus, int iMaxStatusLen )
 		if ( pszTemplate )
 		{
 			g_pVGuiLocalize->ConstructString( pStatus, iMaxStatusLen, pszTemplate,
-				1,
+				3,
 				wszHealthPercent );
 		}
 	}
@@ -146,13 +146,13 @@ void C_ObjectWorkerWall::DisplayHintTo( C_BasePlayer *pPlayer )
 			// If it can be upgraded, tell me whether I still need metal or can upgrade it now
 			if ( GetHealth() == GetMaxHealth() && GetUpgradeLevel() == 1 )
 			{
-				if ( pTFPlayer->GetBuildResources() < SENTRYGUN_UPGRADE_COST )
+				if ( pTFPlayer->GetBuildResources() >= SENTRYGUN_UPGRADE_COST )
 				{
-					bHintPlayed = pTFPlayer->HintMessage( HINT_ENGINEER_METAL_TO_UPGRADE, false, true );
+					bHintPlayed = pTFPlayer->HintMessage( HINT_WORKERNODE_UPGRADE_WALL, false, true );
 				}
 				else
 				{
-					bHintPlayed = pTFPlayer->HintMessage( HINT_WORKERNODE_UPGRADE_WALL, false, true );
+					bHintPlayed = pTFPlayer->HintMessage( HINT_ENGINEER_METAL_TO_UPGRADE, false, true );
 				}
 			}
 		}
@@ -177,7 +177,23 @@ bool C_ObjectWorkerWall::IsUpgrading( void ) const
 //-----------------------------------------------------------------------------
 void C_ObjectWorkerWall::GetTargetIDString( wchar_t *sIDString, int iMaxLenInBytes )
 {
-	BaseClass::GetTargetIDString( sIDString, iMaxLenInBytes );
+	return BaseClass::GetTargetIDString( sIDString, iMaxLenInBytes );
+
+	sIDString[0] = '\0';
+
+	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
+	if ( !pLocalPlayer )
+		return;
+
+	if ( GetTeamNumber() == pLocalPlayer->GetTeamNumber() )
+	{
+		wchar_t wszObjectName[ 32 ];
+		g_pVGuiLocalize->ConvertANSIToUnicode( GetStatusName(), wszObjectName, sizeof(wszObjectName) );
+
+		g_pVGuiLocalize->ConstructString( sIDString, iMaxLenInBytes, g_pVGuiLocalize->Find( "#TF_playerid_object" ),
+			1,
+			wszObjectName );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -187,7 +203,7 @@ void C_ObjectWorkerWall::GetTargetIDDataString( wchar_t *sDataString, int iMaxLe
 {
 	sDataString[0] = '\0';
 
-	if ( m_iUpgradeLevel >= 2 )
+	if ( m_iUpgradeLevel > 1 )
 		return;
 
 	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();

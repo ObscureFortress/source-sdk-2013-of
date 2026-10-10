@@ -43,7 +43,6 @@ IMPLEMENT_SERVERCLASS_ST( CObjectWorkerWall, DT_ObjectWorkerWall )
 END_SEND_TABLE()
 
 BEGIN_DATADESC( CObjectWorkerWall )
-	DEFINE_THINKFUNC( WallThink ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( obj_wall, CObjectWorkerWall );

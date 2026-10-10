@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: Shared types for the client-side metaball renderer.
+// Purpose: A single metaball as seen by the client side renderer.
 //
 //=============================================================================//
 
@@ -10,26 +10,17 @@
 #pragma once
 #endif
 
-// One lattice point of the sampling grid.
-struct SURFACE_VERTEX
+class METABALL
 {
-	Vector	pos;		// world position
-	Vector	normal;		// accumulated field gradient
-	float	value;		// accumulated field strength
-};
+public:
+	Vector position;
+	float squaredRadius;
 
-// A vertex generated on a cube edge (output of marching cubes).
-struct EDGE_VERTEX
-{
-	Vector	pos;
-	Vector	normal;
-};
-
-// One cell of the grid, points at its 8 corner vertices.
-// Corner order: (0,0,0) (0,0,1) (0,1,1) (0,1,0) (1,0,0) (1,0,1) (1,1,1) (1,1,0)
-struct CUBE
-{
-	SURFACE_VERTEX *verts[8];
+	void Init( Vector newPosition, float newSquaredRadius )
+	{
+		position = newPosition;
+		squaredRadius = newSquaredRadius;
+	}
 };
 
 #endif // METABALL_H

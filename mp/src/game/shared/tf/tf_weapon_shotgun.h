@@ -18,6 +18,7 @@
 #define CTFShotgun_HWG C_TFShotgun_HWG
 #define CTFShotgun_Pyro C_TFShotgun_Pyro
 #define CTFScatterGun C_TFScatterGun
+#define CFODipperGun C_FODipperGun
 #endif
 
 // Reload Modes
@@ -96,6 +97,17 @@ public:
 	DECLARE_PREDICTABLE();
 
 	virtual int		GetWeaponID( void ) const			{ return TF_WEAPON_SHOTGUN_PYRO; }
+};
+
+// Fortress Obscura: shoves its owner backwards when fired
+class CFODipperGun : public CTFShotgun
+{
+public:
+	DECLARE_CLASS( CFODipperGun, CTFShotgun );
+	DECLARE_NETWORKCLASS(); 
+	DECLARE_PREDICTABLE();
+
+	virtual int		GetWeaponID( void ) const			{ return FO_WEAPON_DIPPERGUN; }
 };
 
 #endif // TF_WEAPON_SHOTGUN_H

@@ -345,10 +345,14 @@ void CTFWeaponBuilder2::SwitchOwnersWeaponToLast()
 		return;
 
 	// for engineer, switch to wrench and set last weapon appropriately
-	if (pOwner->IsPlayerClass(TF_CLASS_ENGINEER) || pOwner->IsPlayerClass(FO_CLASS_SENTRONIC + 1) || pOwner->IsPlayerClass(FO_CLASS_DISMATIC + 1) || pOwner->IsPlayerClass(FO_CLASS_TELECON + 1) || pOwner->IsPlayerClass(FO_CLASS_WORKERNODE + 1) || pOwner->IsPlayerClass(FO_CLASS_SAPTRAP + 1))
+	if (pOwner->IsPlayerClass(TF_CLASS_ENGINEER) || pOwner->IsPlayerClass(FO_CLASS_SENTRONIC + 1) || pOwner->IsPlayerClass(FO_CLASS_DISMATIC + 1) || pOwner->IsPlayerClass(FO_CLASS_TELECON + 1) || pOwner->IsPlayerClass(FO_CLASS_WORKERNODE + 1) || pOwner->IsPlayerClass(FO_CLASS_SAPTRAP + 1) || pOwner->IsPlayerClass(FO_CLASS_CUSTOM1 + 1) || pOwner->IsPlayerClass(FO_CLASS_CUSTOM2 + 1) || pOwner->IsPlayerClass(FO_CLASS_CUSTOM3 + 1))
 	{
 		// Switch to wrench if possible. if not, then best weapon
 		CBaseCombatWeapon *pWpn = pOwner->Weapon_GetSlot( 2 );
+
+		// The Worker Node's hammer is in slot 3
+		if ( pOwner->IsPlayerClass( FO_CLASS_WORKERNODE + 1 ) )
+			pWpn = pOwner->Weapon_GetSlot( 3 );
 
 		// Don't store last weapon when we autoswitch off builder
 		CBaseCombatWeapon *pLastWpn = pOwner->GetLastWeapon();

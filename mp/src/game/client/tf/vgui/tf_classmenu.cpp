@@ -58,6 +58,10 @@ static char* pszBackgroundMusic1 = "music.class_menu1";
 static char* pszBackgroundMusic2 = "music.class_menu2";
 static char* pszBackgroundMusic3 = "music.class_menu3";
 static char* pszBackgroundMusic4 = "music.class_menu4";
+static char* pszBackgroundMusic5 = "music.class_menu5";
+static char* pszBackgroundMusic6 = "music.class_menu6";
+static char* pszBackgroundMusic7 = "music.class_menu7";
+static char* pszBackgroundMusic8 = "music.class_menu8";
 
 // hoverup sounds for each class
 static char* pszHoverupSound[TF_CLASS_MENU_BUTTONS] =
@@ -212,6 +216,14 @@ void CTFClassMenu::ShowPanel( bool bShow )
 			C_BaseEntity::EmitSound(filter, SOUND_FROM_UI_PANEL, pszBackgroundMusic3);
 		else if (TFGameRules() && TFGameRules()->GetGameType() == FO_GAMETYPE_DOM)
 			C_BaseEntity::EmitSound(filter, SOUND_FROM_UI_PANEL, pszBackgroundMusic4);
+		else if (TFGameRules() && TFGameRules()->IsInKothMode())
+			C_BaseEntity::EmitSound(filter, SOUND_FROM_UI_PANEL, pszBackgroundMusic5);
+		else if (TFGameRules() && TFGameRules()->GetGameType() == FO_GAMETYPE_DITR)
+			C_BaseEntity::EmitSound(filter, SOUND_FROM_UI_PANEL, pszBackgroundMusic6);
+		else if (TFGameRules() && TFGameRules()->GetGameType() == TF_GAMETYPE_ARENA)
+			C_BaseEntity::EmitSound(filter, SOUND_FROM_UI_PANEL, pszBackgroundMusic7);
+		else if (TFGameRules() && TFGameRules()->GetGameType() == FO_GAMETYPE_CTP)
+			C_BaseEntity::EmitSound(filter, SOUND_FROM_UI_PANEL, pszBackgroundMusic8);
 		else
 			C_BaseEntity::EmitSound(filter, SOUND_FROM_UI_PANEL, pszBackgroundMusic1);
 
@@ -265,6 +277,14 @@ void CTFClassMenu::ShowPanel( bool bShow )
 			C_BaseEntity::StopSound(SOUND_FROM_UI_PANEL, pszBackgroundMusic3);
 		else if (TFGameRules() && TFGameRules()->GetGameType() == FO_GAMETYPE_DOM)
 			C_BaseEntity::StopSound(SOUND_FROM_UI_PANEL, pszBackgroundMusic4);
+		else if (TFGameRules() && TFGameRules()->IsInKothMode())
+			C_BaseEntity::StopSound(SOUND_FROM_UI_PANEL, pszBackgroundMusic5);
+		else if (TFGameRules() && TFGameRules()->GetGameType() == FO_GAMETYPE_DITR)
+			C_BaseEntity::StopSound(SOUND_FROM_UI_PANEL, pszBackgroundMusic6);
+		else if (TFGameRules() && TFGameRules()->GetGameType() == TF_GAMETYPE_ARENA)
+			C_BaseEntity::StopSound(SOUND_FROM_UI_PANEL, pszBackgroundMusic7);
+		else if (TFGameRules() && TFGameRules()->GetGameType() == FO_GAMETYPE_CTP)
+			C_BaseEntity::StopSound(SOUND_FROM_UI_PANEL, pszBackgroundMusic8);
 		else
 			C_BaseEntity::StopSound(SOUND_FROM_UI_PANEL, pszBackgroundMusic1);
 

@@ -298,7 +298,9 @@ void CTFProgressBar::Paint()
 //-----------------------------------------------------------------------------
 CTFHudTimeStatus::CTFHudTimeStatus( Panel *parent, const char *name ) : EditablePanel( parent, name )
 {
-	m_pTimeValue = NULL;
+	m_iTeamIndex = -1;
+
+	m_pTimeValue = new CTFLabel( this, "TimePanelValue", "" );
 	m_pProgressBar = NULL;
 	m_pOvertimeLabel = NULL;
 	m_pOvertimeBG = NULL;
@@ -308,6 +310,7 @@ CTFHudTimeStatus::CTFHudTimeStatus( Panel *parent, const char *name ) : Editable
 	m_pWaitingForPlayersLabel = NULL;
 	m_pSetupLabel = NULL;
 	m_pSetupBG = NULL;
+	m_pTimePanelBG = NULL;
 
 	m_flNextThink = 0.0f;
 	m_iTimerIndex = 0;
@@ -320,6 +323,7 @@ CTFHudTimeStatus::CTFHudTimeStatus( Panel *parent, const char *name ) : Editable
 
 	ListenForGameEvent( "teamplay_update_timer" );
 	ListenForGameEvent( "teamplay_timer_time_added" );
+	ListenForGameEvent( "localplayer_changeteam" );
 }
 
 //-----------------------------------------------------------------------------
@@ -339,6 +343,10 @@ void CTFHudTimeStatus::FireGameEvent( IGameEvent *event )
 		int nSeconds = event->GetInt( "seconds_added", 0 );
 
 		SetTimeAdded( iIndex, nSeconds );
+	}
+	else if ( !Q_strcmp( eventName, "localplayer_changeteam" ) )
+	{
+		SetTeamBackground();
 	}
 }
 
@@ -412,6 +420,10 @@ void CTFHudTimeStatus::SetExtraTimePanels()
 		}
 	}
 
+	CTeamRoundTimer *pTimer = dynamic_cast< CTeamRoundTimer* >( ClientEntityList().GetEnt( m_iTimerIndex ) );
+	if ( !pTimer )
+		return;
+
 	// Set the Sudden Death panels to be visible
 	if ( m_pSuddenDeathBG && m_pSuddenDeathLabel )
 	{
@@ -423,6 +435,12 @@ void CTFHudTimeStatus::SetExtraTimePanels()
 	if ( m_pOvertimeBG && m_pOvertimeLabel )
 	{
 		bool bInOver = TFGameRules()->InOvertime();
+
+		// KOTH timers go into overtime when they run out
+		if ( TFGameRules()->IsInKothMode() )
+		{
+			bInOver = ( pTimer->GetTimeRemaining() <= 0 );
+		}
 
 		if ( bInOver )
 		{
@@ -508,9 +526,12 @@ void CTFHudTimeStatus::ApplySchemeSettings( IScheme *pScheme )
 	m_pSetupLabel = dynamic_cast<CTFLabel *>( FindChildByName( "SetupLabel" ) );
 	m_pSetupBG = dynamic_cast<CTFImagePanel *>( FindChildByName("SetupBG" ) );
 
+	m_pTimePanelBG = dynamic_cast<CTFImagePanel *>( FindChildByName( "TimePanelBG" ) );
+
 	m_flNextThink = 0.0f;
 	m_iTimerIndex = 0;
 
+	SetTeamBackground();
 	SetExtraTimePanels();
 
 	BaseClass::ApplySchemeSettings( pScheme );
@@ -615,6 +636,419 @@ void CTFHudTimeStatus::Paint( void )
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Use the team's timer background (our own team unless this timer belongs to one)
+//-----------------------------------------------------------------------------
+void CTFHudTimeStatus::SetTeamBackground( void )
+{
+	if ( TFGameRules() && m_pTimePanelBG )
+	{
+		int iTeamNumber = GetLocalPlayerTeam();
+		if ( m_iTeamIndex > TEAM_INVALID )
+		{
+			iTeamNumber = m_iTeamIndex;
+		}
+
+		const char *pszImage;
+		switch ( iTeamNumber )
+		{
+		case TF_TEAM_RED:
+			pszImage = "../hud/objectives_timepanel_red_bg";
+			break;
+		case TF_TEAM_BLUE:
+			pszImage = "../hud/objectives_timepanel_blue_bg";
+			break;
+		case FO_TEAM_GREEN:
+			pszImage = "../hud/objectives_timepanel_green_bg";
+			break;
+		case FO_TEAM_YELLOW:
+			pszImage = "../hud/objectives_timepanel_yellow_bg";
+			break;
+		case FO_TEAM_PURPLE:
+			pszImage = "../hud/objectives_timepanel_purple_bg";
+			break;
+		case FO_TEAM_PINK:
+			pszImage = "../hud/objectives_timepanel_pink_bg";
+			break;
+		default:
+			pszImage = "../hud/objectives_timepanel_black_bg";
+			break;
+		}
+
+		m_pTimePanelBG->SetImage( pszImage );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFHudTimeStatus::SetTimerIndex( int index )
+{
+	m_iTimerIndex = ( index >= 0 ) ? index : 0;
+	SetExtraTimePanels();
+}
+
+DECLARE_HUDELEMENT( CTFHudKothTimeStatus );
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+CTFHudKothTimeStatus::CTFHudKothTimeStatus( const char *pElementName ) : CHudElement( pElementName ), BaseClass( NULL, "HudKothTimeStatus" )
+{
+	Panel *pParent = g_pClientMode->GetViewport();
+	SetParent( pParent );
+
+	m_pActiveKothTimerPanel = NULL;
+
+	m_pBlueKothTimer = new CTFHudTimeStatus( this, "BlueTimer" );
+	m_pBlueKothTimer->SetTeam( TF_TEAM_BLUE );
+
+	m_pRedKothTimer = new CTFHudTimeStatus( this, "RedTimer" );
+	m_pRedKothTimer->SetTeam( TF_TEAM_RED );
+
+	m_pGreenKothTimer = new CTFHudTimeStatus( this, "GreenTimer" );
+	m_pGreenKothTimer->SetTeam( FO_TEAM_GREEN );
+
+	m_pYellowKothTimer = new CTFHudTimeStatus( this, "YellowTimer" );
+	m_pYellowKothTimer->SetTeam( FO_TEAM_YELLOW );
+
+	m_pPurpleKothTimer = new CTFHudTimeStatus( this, "PurpleTimer" );
+	m_pPurpleKothTimer->SetTeam( FO_TEAM_PURPLE );
+
+	m_pPinkKothTimer = new CTFHudTimeStatus( this, "PinkTimer" );
+	m_pPinkKothTimer->SetTeam( FO_TEAM_PINK );
+
+	m_pActiveTimerBG = new ImagePanel( this, "ActiveTimerBG" );
+
+	RegisterForRenderGroup( "mid" );
+	RegisterForRenderGroup( "commentary" );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFHudKothTimeStatus::ApplySchemeSettings( IScheme *pScheme )
+{
+	if ( !TFGameRules() )
+		return;
+
+	KeyValues *pConditions = NULL;
+	if ( TFGameRules()->m_nExtraTeamMode == 1 )
+	{
+		pConditions = new KeyValues( "conditions" );
+		AddSubKeyNamed( pConditions, "if_threeteams" );
+	}
+	else if ( TFGameRules()->m_nExtraTeamMode == 2 )
+	{
+		pConditions = new KeyValues( "conditions" );
+		AddSubKeyNamed( pConditions, "if_sixteams" );
+	}
+
+	// The 3/6 team layouts need room for more timers
+	SetPos( (double)GetXPos() - ( ScreenWidth() / 640.0f ) * 73.0f, GetYPos() );
+	SetWide( GetWide() * 2 );
+
+	// load control settings...
+	LoadControlSettings( "resource/UI/HudObjectiveKothTimePanel.res", NULL, NULL, pConditions );
+
+	BaseClass::ApplySchemeSettings( pScheme );
+
+	m_nOriginalActiveTimerBGYPos = m_pActiveTimerBG->GetYPos();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+bool CTFHudKothTimeStatus::ShouldDraw( void )
+{
+	if ( !TFGameRules() )
+		return false;
+
+	if ( !TFGameRules()->IsInKothMode() )
+		return false;
+
+	if ( TFGameRules()->IsInWaitingForPlayers() )
+		return false;
+
+	return CHudElement::ShouldDraw();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFHudKothTimeStatus::Reset( void )
+{
+	if ( m_pBlueKothTimer )
+	{
+		m_pBlueKothTimer->Reset();
+	}
+
+	if ( m_pRedKothTimer )
+	{
+		m_pRedKothTimer->Reset();
+	}
+
+	if ( m_pGreenKothTimer )
+	{
+		m_pGreenKothTimer->Reset();
+	}
+
+	if ( m_pYellowKothTimer )
+	{
+		m_pYellowKothTimer->Reset();
+	}
+
+	if ( m_pPurpleKothTimer )
+	{
+		m_pPurpleKothTimer->Reset();
+	}
+
+	if ( m_pPinkKothTimer )
+	{
+		m_pPinkKothTimer->Reset();
+	}
+
+	UpdateActiveTeam();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFHudKothTimeStatus::Think( void )
+{
+	if ( !TFGameRules() )
+		return;
+
+	if ( !m_pBlueKothTimer || !m_pRedKothTimer )
+		return;
+
+	// Hide the timers in freezecam
+	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
+	if ( pPlayer && pPlayer->GetObserverMode() == OBS_MODE_FREEZECAM )
+	{
+		m_pBlueKothTimer->SetVisible( false );
+		m_pRedKothTimer->SetVisible( false );
+		m_pGreenKothTimer->SetVisible( false );
+		m_pYellowKothTimer->SetVisible( false );
+		m_pPurpleKothTimer->SetVisible( false );
+		m_pPinkKothTimer->SetVisible( false );
+		m_pActiveTimerBG->SetVisible( false );
+		return;
+	}
+
+	C_TeamRoundTimer *pTimer = dynamic_cast< C_TeamRoundTimer* >( ClientEntityList().GetEnt( m_pBlueKothTimer->GetTimerIndex() ) );
+
+	CTFHudTimeStatus *pActiveTimer = NULL;
+	if ( !pTimer )
+	{
+		pTimer = TFGameRules()->GetBlueKothRoundTimer();
+		if ( pTimer )
+		{
+			if ( m_pBlueKothTimer->GetTimerIndex() != pTimer->index )
+			{
+				m_pBlueKothTimer->SetTimerIndex( pTimer->index );
+			}
+		}
+	}
+
+	if ( pTimer && !pTimer->IsDormant() && !pTimer->IsDisabled() && !pTimer->IsTimerPaused() )
+	{
+		pActiveTimer = m_pBlueKothTimer;
+	}
+
+	pTimer = dynamic_cast< C_TeamRoundTimer* >( ClientEntityList().GetEnt( m_pRedKothTimer->GetTimerIndex() ) );
+	if ( !pTimer )
+	{
+		pTimer = TFGameRules()->GetRedKothRoundTimer();
+		if ( pTimer )
+		{
+			if ( m_pRedKothTimer->GetTimerIndex() != pTimer->index )
+			{
+				m_pRedKothTimer->SetTimerIndex( pTimer->index );
+			}
+		}
+	}
+
+	if ( pTimer && !pTimer->IsDormant() && !pTimer->IsDisabled() && !pTimer->IsTimerPaused() )
+	{
+		pActiveTimer = m_pRedKothTimer;
+	}
+
+	pTimer = dynamic_cast< C_TeamRoundTimer* >( ClientEntityList().GetEnt( m_pGreenKothTimer->GetTimerIndex() ) );
+	if ( !pTimer )
+	{
+		pTimer = TFGameRules()->GetGreenKothRoundTimer();
+		if ( pTimer )
+		{
+			m_pGreenKothTimer->SetTimerIndex( pTimer->index );
+		}
+	}
+
+	if ( pTimer && !pTimer->IsDormant() && !pTimer->IsDisabled() && !pTimer->IsTimerPaused() )
+	{
+		pActiveTimer = m_pGreenKothTimer;
+	}
+
+	pTimer = dynamic_cast< C_TeamRoundTimer* >( ClientEntityList().GetEnt( m_pYellowKothTimer->GetTimerIndex() ) );
+	if ( !pTimer )
+	{
+		pTimer = TFGameRules()->GetYellowKothRoundTimer();
+		if ( pTimer )
+		{
+			m_pYellowKothTimer->SetTimerIndex( pTimer->index );
+		}
+	}
+
+	if ( pTimer && !pTimer->IsDormant() && !pTimer->IsDisabled() && !pTimer->IsTimerPaused() )
+	{
+		pActiveTimer = m_pYellowKothTimer;
+	}
+
+	pTimer = dynamic_cast< C_TeamRoundTimer* >( ClientEntityList().GetEnt( m_pPurpleKothTimer->GetTimerIndex() ) );
+	if ( !pTimer )
+	{
+		pTimer = TFGameRules()->GetPurpleKothRoundTimer();
+		if ( pTimer )
+		{
+			m_pPurpleKothTimer->SetTimerIndex( pTimer->index );
+		}
+	}
+
+	if ( pTimer && !pTimer->IsDormant() && !pTimer->IsDisabled() && !pTimer->IsTimerPaused() )
+	{
+		pActiveTimer = m_pPurpleKothTimer;
+	}
+
+	pTimer = dynamic_cast< C_TeamRoundTimer* >( ClientEntityList().GetEnt( m_pPinkKothTimer->GetTimerIndex() ) );
+	if ( !pTimer )
+	{
+		pTimer = TFGameRules()->GetPinkKothRoundTimer();
+		if ( pTimer )
+		{
+			m_pPinkKothTimer->SetTimerIndex( pTimer->index );
+		}
+	}
+
+	if ( pTimer && !pTimer->IsDormant() && !pTimer->IsDisabled() && !pTimer->IsTimerPaused() )
+	{
+		pActiveTimer = m_pPinkKothTimer;
+	}
+
+	if ( !m_pBlueKothTimer->IsVisible() || !m_pRedKothTimer->IsVisible() )
+	{
+		m_pBlueKothTimer->SetVisible( true );
+		m_pRedKothTimer->SetVisible( true );
+
+		// If our spectator GUI is visible, invalidate its layout so that it moves the reinforcement label
+		if ( g_pSpectatorGUI )
+		{
+			g_pSpectatorGUI->InvalidateLayout();
+		}
+	}
+
+	if ( TFGameRules()->m_nExtraTeamMode > 0 )
+	{
+		if ( !m_pGreenKothTimer->IsVisible() )
+		{
+			m_pGreenKothTimer->SetVisible( true );
+
+			if ( g_pSpectatorGUI )
+			{
+				g_pSpectatorGUI->InvalidateLayout();
+			}
+		}
+
+		if ( TFGameRules()->m_nExtraTeamMode == 2 && ( !m_pYellowKothTimer->IsVisible() || !m_pPurpleKothTimer->IsVisible() || !m_pPinkKothTimer->IsVisible() ) )
+		{
+			m_pYellowKothTimer->SetVisible( true );
+			m_pPurpleKothTimer->SetVisible( true );
+			m_pPinkKothTimer->SetVisible( true );
+
+			if ( g_pSpectatorGUI )
+			{
+				g_pSpectatorGUI->InvalidateLayout();
+			}
+		}
+	}
+	else
+	{
+		m_pGreenKothTimer->SetVisible( false );
+		m_pYellowKothTimer->SetVisible( false );
+		m_pPurpleKothTimer->SetVisible( false );
+		m_pPinkKothTimer->SetVisible( false );
+	}
+
+	if ( m_pActiveKothTimerPanel )
+	{
+		m_pActiveKothTimerPanel->SetExtraTimePanels();
+	}
+
+	if ( pActiveTimer != m_pActiveKothTimerPanel )
+	{
+		m_pActiveKothTimerPanel = pActiveTimer;
+		UpdateActiveTeam();
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFHudKothTimeStatus::UpdateActiveTeam( void )
+{
+	if ( !m_pActiveTimerBG )
+		return;
+
+	if ( m_pActiveKothTimerPanel )
+	{
+		m_pActiveTimerBG->SetVisible( true );
+
+		int iTeam = m_pActiveKothTimerPanel->GetTeam();
+		if ( iTeam == TF_TEAM_BLUE )
+		{
+			if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 1 )
+				m_pActiveTimerBG->SetPos( m_n3BlueActiveXPos, m_nOriginalActiveTimerBGYPos );
+			else if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 2 )
+				m_pActiveTimerBG->SetPos( m_n6BlueActiveXPos, m_nOriginalActiveTimerBGYPos );
+			else
+				m_pActiveTimerBG->SetPos( m_nBlueActiveXPos, m_nOriginalActiveTimerBGYPos );
+		}
+		else if ( iTeam == TF_TEAM_RED )
+		{
+			if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 1 )
+				m_pActiveTimerBG->SetPos( m_n3RedActiveXPos, m_nOriginalActiveTimerBGYPos );
+			else if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 2 )
+				m_pActiveTimerBG->SetPos( m_n6RedActiveXPos, m_nOriginalActiveTimerBGYPos );
+			else
+				m_pActiveTimerBG->SetPos( m_nRedActiveXPos, m_nOriginalActiveTimerBGYPos );
+		}
+		else if ( iTeam == FO_TEAM_GREEN )
+		{
+			if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 2 )
+				m_pActiveTimerBG->SetPos( m_n6GreenActiveXPos, m_nOriginalActiveTimerBGYPos );
+			else
+				m_pActiveTimerBG->SetPos( m_nGreenActiveXPos, m_nOriginalActiveTimerBGYPos );
+		}
+		else if ( iTeam == FO_TEAM_YELLOW )
+		{
+			m_pActiveTimerBG->SetPos( m_nYellowActiveXPos, m_nOriginalActiveTimerBGYPos );
+		}
+		else if ( iTeam == FO_TEAM_PURPLE )
+		{
+			m_pActiveTimerBG->SetPos( m_nPurpleActiveXPos, m_nOriginalActiveTimerBGYPos );
+		}
+		else if ( iTeam == FO_TEAM_PINK )
+		{
+			m_pActiveTimerBG->SetPos( m_nPinkActiveXPos, m_nOriginalActiveTimerBGYPos );
+		}
+
+		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( this, "ActiveTimerBGPulse" );
+	}
+	else
+	{
+		m_pActiveTimerBG->SetVisible( false );
+	}
+}
+
 DECLARE_HUDELEMENT( CTFHudObjectiveStatus );
 
 //-----------------------------------------------------------------------------
@@ -632,6 +1066,7 @@ CTFHudObjectiveStatus::CTFHudObjectiveStatus( const char *pElementName ) : CHudE
 	m_p3GeneratorPanel = new CFOHud3GeneratorObjectives(this, "ObjectiveStatus3GeneratorPanel");
 	m_p6GeneratorPanel = new CFOHud6GeneratorObjectives(this, "ObjectiveStatus6GeneratorPanel");
 	m_pTimePanel = new CTFHudTimeStatus( this, "ObjectiveStatusTimePanel" );
+	m_pKothTimePanel = new CTFHudKothTimeStatus( "HudKothTimeStatus" );
 	m_pEscortPanel = new CTFHudEscort(this, "ObjectiveStatusEscort", TF_TEAM_BLUE, false);
 	m_pEscortRacePanel = new CTFHudMultipleEscort(this, "ObjectiveStatusMultipleEscort");
 	m_pControlPointIconsPanel = NULL;
@@ -695,6 +1130,11 @@ void CTFHudObjectiveStatus::Reset()
 	if (m_pEscortRacePanel)
 	{
 		m_pEscortRacePanel->Reset();
+	}
+
+	if ( m_pKothTimePanel )
+	{
+		m_pKothTimePanel->Reset();
 	}
 }
 
@@ -768,6 +1208,12 @@ void CTFHudObjectiveStatus::SetVisiblePanels( void )
 		m_p6GeneratorPanel->SetVisible(false);
 	}
 
+	// turn off the koth timers
+	if ( m_pKothTimePanel && m_pKothTimePanel->IsVisible() )
+	{
+		m_pKothTimePanel->SetVisible( false );
+	}
+
 
 	// only draw the flag panel for CTF maps
 	if ( TFGameRules()->GetGameType() == TF_GAMETYPE_CTF )
@@ -799,6 +1245,12 @@ void CTFHudObjectiveStatus::SetVisiblePanels( void )
 	}
 	else if ( TFGameRules()->GetGameType() == TF_GAMETYPE_CP || TFGameRules()->GetGameType() == TF_GAMETYPE_ARENA)
 	{
+		// turn on the koth timers
+		if ( TFGameRules()->IsInKothMode() && m_pKothTimePanel && !m_pKothTimePanel->IsVisible() )
+		{
+			m_pKothTimePanel->SetVisible( true );
+		}
+
 		// turn on the control point icons
 		if ( m_pControlPointIconsPanel && !m_pControlPointIconsPanel->IsVisible() )
 		{
@@ -900,6 +1352,36 @@ void CTFHudObjectiveStatus::SetVisiblePanels( void )
 	}
 	else if (TFGameRules()->GetGameType() == FO_GAMETYPE_DITR)
 	{
+		// turn on the control point icons
+		if (m_pControlPointIconsPanel && !m_pControlPointIconsPanel->IsVisible())
+		{
+			m_pControlPointIconsPanel->SetVisible(true);
+		}
+
+		if (TFGameRules()->ExtraTeamMode() == 1)
+		{
+			// turn on the 3flag panel
+			if (m_p3FlagPanel && !m_p3FlagPanel->IsVisible())
+			{
+				m_p3FlagPanel->SetVisible(true);
+			}
+		}
+		else if (TFGameRules()->ExtraTeamMode() == 2)
+		{
+			// turn on the 6flag panel
+			if (m_p6FlagPanel && !m_p6FlagPanel->IsVisible())
+			{
+				m_p6FlagPanel->SetVisible(true);
+			}
+		}
+		else
+		{
+			// turn on the flag panel
+			if (m_pFlagPanel && !m_pFlagPanel->IsVisible())
+			{
+				m_pFlagPanel->SetVisible(true);
+			}
+		}
 	}
 }
 

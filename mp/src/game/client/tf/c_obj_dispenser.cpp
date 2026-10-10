@@ -163,17 +163,40 @@ void C_ObjectDispenser::UpdateEffects( void )
 				continue;
 
 			const char *pszEffectName;
-			if ( GetTeamNumber() == TF_TEAM_RED )
+			switch ( GetTeamNumber() )
 			{
+			case TF_TEAM_RED:
 				pszEffectName = "dispenser_heal_red";
+				break;
+			case FO_TEAM_GREEN:
+				pszEffectName = "dispenser_heal_green";
+				break;
+			case FO_TEAM_YELLOW:
+				pszEffectName = "dispenser_heal_yellow";
+				break;
+			case FO_TEAM_PURPLE:
+				pszEffectName = "dispenser_heal_purple";
+				break;
+			case FO_TEAM_PINK:
+				pszEffectName = "dispenser_heal_pink";
+				break;
+			default:
+				pszEffectName = "dispenser_heal_blue";
+				break;
+			}
+
+			CNewParticleEffect *pEffect = NULL;
+			if ( GetObjectFlags() & OF_IS_CART_OBJECT )
+			{
+				// Cart dispensers have no heal_origin attachment
+				pEffect = ParticleProp()->Create( pszEffectName, PATTACH_POINT_FOLLOW, 0 );
+				ParticleProp()->AddControlPoint( pEffect, 1, pTarget, PATTACH_ABSORIGIN_FOLLOW, NULL, Vector(0,0,50) );
 			}
 			else
 			{
-				pszEffectName = "dispenser_heal_blue";
+				pEffect = ParticleProp()->Create( pszEffectName, PATTACH_POINT_FOLLOW, "heal_origin" );
+				ParticleProp()->AddControlPoint( pEffect, 1, pTarget, PATTACH_ABSORIGIN_FOLLOW, NULL, Vector(0,0,50) );
 			}
-
-			CNewParticleEffect *pEffect = ParticleProp()->Create( pszEffectName, PATTACH_POINT_FOLLOW, "heal_origin" );
-			ParticleProp()->AddControlPoint( pEffect, 1, pTarget, PATTACH_ABSORIGIN_FOLLOW, NULL, Vector(0,0,50) );
 
 			int iIndex = m_hHealingTargetEffects.AddToTail();
 			m_hHealingTargetEffects[iIndex].pTarget = pTarget;
@@ -243,6 +266,10 @@ void C_ObjectDispenser::UpdateDamageEffects( BuildingDamageLevel_t damageLevel )
 
 DECLARE_VGUI_SCREEN_FACTORY( CDispenserControlPanel, "screen_obj_dispenser_blue" );
 DECLARE_VGUI_SCREEN_FACTORY( CDispenserControlPanel_Red, "screen_obj_dispenser_red" );
+DECLARE_VGUI_SCREEN_FACTORY( CDispenserControlPanel_Green, "screen_obj_dispenser_green" );
+DECLARE_VGUI_SCREEN_FACTORY( CDispenserControlPanel_Yellow, "screen_obj_dispenser_yellow" );
+DECLARE_VGUI_SCREEN_FACTORY( CDispenserControlPanel_Purple, "screen_obj_dispenser_purple" );
+DECLARE_VGUI_SCREEN_FACTORY( CDispenserControlPanel_Pink, "screen_obj_dispenser_pink" );
 
 //-----------------------------------------------------------------------------
 // Constructor: 

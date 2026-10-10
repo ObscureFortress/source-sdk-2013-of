@@ -68,6 +68,7 @@ IMPLEMENT_SERVERCLASS_ST( CObjectDispenser, DT_ObjectDispenser )
 END_SEND_TABLE()
 
 BEGIN_DATADESC( CObjectDispenser )
+	DEFINE_KEYFIELD( m_szTriggerName, FIELD_STRING, "touch_trigger" ),
 	DEFINE_THINKFUNC( RefillThink ),
 	DEFINE_THINKFUNC( DispenseThink ),
 END_DATADESC()
@@ -100,8 +101,6 @@ public:
 		BaseClass::Spawn();
 		AddSpawnFlags( SF_TRIGGER_ALLOW_CLIENTS );
 		InitTrigger();
-		SetSolid( SOLID_BBOX );
-		UTIL_SetSize(this, Vector(-70,-70,-70), Vector(70,70,70) );
 	}
 
 	virtual void StartTouch( CBaseEntity *pEntity )
@@ -187,6 +186,16 @@ bool CObjectDispenser::StartBuilding( CBaseEntity *pBuilder )
 	return BaseClass::StartBuilding( pBuilder );
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Dispensers placed in the map start out fully built
+//-----------------------------------------------------------------------------
+void CObjectDispenser::InitializeMapPlacedObject( void )
+{
+	SetModel( DISPENSER_MODEL );
+
+	BaseClass::InitializeMapPlacedObject();
+}
+
 void CObjectDispenser::SetModel( const char *pModel )
 {
 	BaseClass::SetModel( pModel );
@@ -198,13 +207,6 @@ void CObjectDispenser::SetModel( const char *pModel )
 //-----------------------------------------------------------------------------
 void CObjectDispenser::OnGoActive( void )
 {
-	CTFPlayer *pBuilder = GetBuilder();
-
-	Assert( pBuilder );
-
-	if ( !pBuilder )
-		return;
-
 	SetModel( DISPENSER_MODEL );
 
 	// Put some ammo in the Dispenser
@@ -216,7 +218,26 @@ void CObjectDispenser::OnGoActive( void )
 
 	m_flNextAmmoDispense = gpGlobals->curtime + 0.5;
 
-	m_hTouchTrigger = CBaseEntity::Create( "dispenser_touch_trigger", GetAbsOrigin(), vec3_angle, this );
+	if ( m_szTriggerName != NULL_STRING )
+	{
+		// Use the trigger the mapper placed for us
+		CDispenserTouchTrigger *pTrigger = dynamic_cast< CDispenserTouchTrigger* >( gEntList.FindEntityByName( NULL, m_szTriggerName ) );
+		if ( pTrigger )
+		{
+			pTrigger->SetOwnerEntity( this );
+			m_hTouchTrigger = pTrigger;
+		}
+	}
+	else
+	{
+		CDispenserTouchTrigger *pTrigger = dynamic_cast< CDispenserTouchTrigger* >( CBaseEntity::Create( "dispenser_touch_trigger", GetAbsOrigin(), vec3_angle, this ) );
+		if ( pTrigger )
+		{
+			pTrigger->SetSolid( SOLID_BBOX );
+			UTIL_SetSize( pTrigger, Vector( -70, -70, -70 ), Vector( 70, 70, 70 ) );
+			m_hTouchTrigger = pTrigger;
+		}
+	}
 
 	BaseClass::OnGoActive();
 
@@ -231,13 +252,26 @@ void CObjectDispenser::GetControlPanelInfo( int nPanelIndex, const char *&pPanel
 	// Panels 0 and 1 are both control panels for now
 	if ( nPanelIndex == 0 || nPanelIndex == 1 )
 	{
-		if ( GetTeamNumber() == TF_TEAM_RED )
+		switch ( GetTeamNumber() )
 		{
+		case TF_TEAM_RED:
 			pPanelName = "screen_obj_dispenser_red";
-		}
-		else
-		{
+			break;
+		case FO_TEAM_GREEN:
+			pPanelName = "screen_obj_dispenser_green";
+			break;
+		case FO_TEAM_YELLOW:
+			pPanelName = "screen_obj_dispenser_yellow";
+			break;
+		case FO_TEAM_PURPLE:
+			pPanelName = "screen_obj_dispenser_purple";
+			break;
+		case FO_TEAM_PINK:
+			pPanelName = "screen_obj_dispenser_pink";
+			break;
+		default:
 			pPanelName = "screen_obj_dispenser_blue";
+			break;
 		}
 	}
 	else
@@ -266,6 +300,10 @@ void CObjectDispenser::Precache()
 
 	PrecacheVGuiScreen( "screen_obj_dispenser_blue" );
 	PrecacheVGuiScreen( "screen_obj_dispenser_red" );
+	PrecacheVGuiScreen( "screen_obj_dispenser_green" );
+	PrecacheVGuiScreen( "screen_obj_dispenser_yellow" );
+	PrecacheVGuiScreen( "screen_obj_dispenser_purple" );
+	PrecacheVGuiScreen( "screen_obj_dispenser_pink" );
 
 	PrecacheScriptSound( "Building_Dispenser.Idle" );
 	PrecacheScriptSound( "Building_Dispenser.GenerateMetal" );
@@ -273,6 +311,10 @@ void CObjectDispenser::Precache()
 
 	PrecacheParticleSystem( "dispenser_heal_red" );
 	PrecacheParticleSystem( "dispenser_heal_blue" );
+	PrecacheParticleSystem( "dispenser_heal_green" );
+	PrecacheParticleSystem( "dispenser_heal_yellow" );
+	PrecacheParticleSystem( "dispenser_heal_purple" );
+	PrecacheParticleSystem( "dispenser_heal_pink" );
 }
 
 //-----------------------------------------------------------------------------
@@ -280,7 +322,6 @@ void CObjectDispenser::Precache()
 //-----------------------------------------------------------------------------
 void CObjectDispenser::DetonateObject( void )
 {
-	/*
 	float flDamage = min( 100 + m_iAmmoMetal, 250 );
 
 	ExplosionCreate( 
@@ -293,7 +334,6 @@ void CObjectDispenser::DetonateObject( void )
 		0.0f,				//explosion force
 		this,				//inflictor
 		DMG_BLAST | DMG_HALF_FALLOFF);
-	*/
 
 	BaseClass::DetonateObject();
 }
@@ -341,9 +381,11 @@ bool CObjectDispenser::DispenseAmmo( CTFPlayer *pPlayer )
 	iTotalPickedUp += iSecondary;
 
 	// metal
-	int iMetal = pPlayer->GiveAmmo( min( m_iAmmoMetal, DISPENSER_DROP_METAL ), TF_AMMO_METAL );
-	m_iAmmoMetal -= iMetal;
+	int iMetal = pPlayer->GiveAmmo( !( GetObjectFlags() & OF_IS_CART_OBJECT ) ? min( m_iAmmoMetal, DISPENSER_DROP_METAL ) : DISPENSER_DROP_METAL, TF_AMMO_METAL );
 	iTotalPickedUp += iMetal;
+
+	if ( !( GetObjectFlags() & OF_IS_CART_OBJECT ) )
+		m_iAmmoMetal -= iMetal;
 
 	if ( iTotalPickedUp > 0 )
 	{
@@ -357,6 +399,9 @@ bool CObjectDispenser::DispenseAmmo( CTFPlayer *pPlayer )
 
 void CObjectDispenser::RefillThink( void )
 {
+	if ( GetObjectFlags() & OF_IS_CART_OBJECT )
+		return;
+
 	SetContextThink( &CObjectDispenser::RefillThink, gpGlobals->curtime + 6, REFILL_CONTEXT );
 
 	if ( IsDisabled() )

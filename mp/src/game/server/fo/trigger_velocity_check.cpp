@@ -21,7 +21,8 @@ public:
 
 	virtual void Spawn( void );
 
-	bool CheckVelocity( CBaseEntity *pOther, bool bNewVelocity );
+	bool CheckThreshold( float flVel, float flTarget, float flThres, bool bMustThres );
+	bool CheckVelocity( CBaseEntity *pEntity, bool bNew );
 	void BrushTouch( CBaseEntity *pOther );
 	void BrushThink( void );
 
@@ -29,7 +30,7 @@ private:
 	struct velentities_t
 	{
 		CHandle<CBaseEntity> hEntity;
-		float flTime;
+		float flFirstTime;
 	};
 
 	// Primary velocity requirements.
@@ -129,93 +130,100 @@ void CTriggerVelocityCheck::Spawn( void )
 // Purpose: Test an entity's velocity against either the primary or the "new"
 //			set of requirements.
 //-----------------------------------------------------------------------------
-bool CTriggerVelocityCheck::CheckVelocity( CBaseEntity *pOther, bool bNewVelocity )
+bool CTriggerVelocityCheck::CheckThreshold( float flVel, float flTarget, float flThres, bool bMustThres )
+{
+	// Within the threshold band of the target, and the threshold is required
+	if ( ( flVel >= flTarget - flThres || flThres + flTarget >= flVel ) && bMustThres )
+		return true;
+
+	// Otherwise anything at or above the target counts, if the threshold isn't required
+	if ( flVel >= flTarget && !bMustThres )
+		return true;
+
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Test an entity's velocity against either the primary or the "new"
+//			set of requirements.
+//-----------------------------------------------------------------------------
+bool CTriggerVelocityCheck::CheckVelocity( CBaseEntity *pEntity, bool bNew )
 {
 	float flLVel, flXVel, flYVel, flZVel;
 	float flLThres, flXThres, flYThres, flZThres;
 	bool bLMust, bXMust, bYMust, bZMust;
 
-	if ( bNewVelocity )
+	bool bResult = false;
+
+	if ( bNew )
 	{
-		flLVel = m_flNewLVel;	flXVel = m_flNewXVel;	flYVel = m_flNewYVel;	flZVel = m_flNewZVel;
-		bLMust = m_bNewLMustThres;	bXMust = m_bNewXMustThres;	bYMust = m_bNewYMustThres;	bZMust = m_bNewZMustThres;
-		flLThres = m_flNewLThres;	flXThres = m_flNewXThres;	flYThres = m_flNewYThres;	flZThres = m_flNewZThres;
+		flLVel = m_flNewLVel;
+		flLThres = m_flNewLThres;
+		bLMust = m_bNewLMustThres;
+		flXVel = m_flNewXVel;
+		flXThres = m_flNewXThres;
+		bXMust = m_bNewXMustThres;
+		flYVel = m_flNewYVel;
+		flYThres = m_flNewYThres;
+		bYMust = m_bNewYMustThres;
+		flZVel = m_flNewZVel;
+		flZThres = m_flNewZThres;
+		bZMust = m_bNewZMustThres;
 	}
 	else
 	{
-		flLVel = m_flLVel;	flXVel = m_flXVel;	flYVel = m_flYVel;	flZVel = m_flZVel;
-		bLMust = m_bLMustThres;	bXMust = m_bXMustThres;	bYMust = m_bYMustThres;	bZMust = m_bZMustThres;
-		flLThres = m_flLThres;	flXThres = m_flXThres;	flYThres = m_flYThres;	flZThres = m_flZThres;
+		flLVel = m_flLVel;
+		flXVel = m_flXVel;
+		flYVel = m_flYVel;
+		flZVel = m_flZVel;
+		flLThres = m_flLThres;
+		flXThres = m_flXThres;
+		flYThres = m_flYThres;
+		flZThres = m_flZThres;
+		bLMust = m_bLMustThres;
+		bXMust = m_bXMustThres;
+		bYMust = m_bYMustThres;
+		bZMust = m_bZMustThres;
 	}
-
-	bool bResult = false;
 
 	// Overall speed check takes priority when it is set.
 	if ( flLVel > 0.0f )
 	{
-		float flSpeed = pOther->GetAbsVelocity().Length();
-		if ( flSpeed < flLVel )
-			return false;
-
-		flSpeed = pOther->GetAbsVelocity().Length();
-
-		bool bInBand = ( flSpeed >= flLVel - flLThres ) || ( flLVel + flLThres >= flSpeed );
-		if ( bInBand && bLMust )
-			return true;
-
-		if ( flSpeed < flLVel )
-			return false;
-
-		return !bLMust;
+		if ( pEntity->GetAbsVelocity().Length() >= flLVel )
+			return CheckThreshold( pEntity->GetAbsVelocity().Length(), flLVel, flLThres, bLMust );
 	}
-
-	// Per-axis checks.
-	bool bX = false;
-	bool bY = false;
-	bool bZ = false;
-
-	float flVelX = pOther->GetAbsVelocity().x;
-	if ( flVelX >= flXVel )
+	else
 	{
-		bool bInBand = ( flVelX >= flXVel - flXThres ) || ( flXThres + flXVel >= flVelX );
-		if ( bInBand && bXMust )
-			bX = true;
-		else
-			bX = ( flVelX >= flXVel ) && !bXMust;
-	}
+		// Per-axis checks.
+		bool bX = false;
+		bool bY = false;
+		bool bZ = false;
 
-	float flVelY = pOther->GetAbsVelocity().y;
-	if ( flVelY >= flYVel )
-	{
-		bool bInBand = ( flVelY >= flYVel - flYThres ) || ( flYThres + flYVel >= flVelY );
-		if ( bInBand && bYMust )
-			bY = true;
-		else
-			bY = ( flVelY >= flYVel ) && !bYMust;
-	}
+		if ( pEntity->GetAbsVelocity().x >= flXVel )
+			bX = CheckThreshold( pEntity->GetAbsVelocity().x, flXVel, flXThres, bXMust );
 
-	float flVelZ = pOther->GetAbsVelocity().z;
-	if ( flVelZ >= flZVel )
-	{
-		bool bInBand = ( flVelZ >= flZVel - flZThres ) || ( flZThres + flZVel >= flVelZ );
-		if ( bInBand && bZMust )
-			bZ = true;
-		else
-			bZ = ( flVelZ >= flZVel ) && !bZMust;
-	}
+		if ( pEntity->GetAbsVelocity().y >= flYVel )
+			bY = CheckThreshold( pEntity->GetAbsVelocity().y, flYVel, flYThres, bYMust );
 
-	if ( bX || bY || bZ )
-	{
-		bResult = true;
-	}
+		if ( pEntity->GetAbsVelocity().z >= flZVel )
+			bZ = CheckThreshold( pEntity->GetAbsVelocity().z, flZVel, flZThres, bZMust );
 
-	// Axes flagged as required must all have passed.
-	if ( m_bXMustThres )
-		bResult = bX ? bResult : false;
-	if ( m_bYMustThres )
-		bResult = bY ? bResult : false;
-	if ( m_bZMustThres )
-		bResult = bZ ? bResult : false;
+		if ( bX || bY || bZ )
+			bResult = true;
+
+		// Axes flagged as required must all have passed.
+		if ( m_bXMustThres && !bX )
+			bResult = false;
+		if ( m_bYMustThres && !bY )
+			bResult = false;
+		if ( m_bZMustThres )
+		{
+			if ( !bZ )
+				bResult = false;
+
+			return bResult;
+		}
+	}
 
 	return bResult;
 }
@@ -234,27 +242,28 @@ void CTriggerVelocityCheck::BrushTouch( CBaseEntity *pOther )
 
 	bool bPassed = CheckVelocity( pOther, false );
 
-	if ( !m_bVelTransCheck )
+	if ( m_bVelTransCheck )
+	{
+		if ( !bPassed )
+			return;
+
+		// Already waiting on this entity?
+		for ( int i = 0; i < m_VelEntities.Count(); i++ )
+		{
+			if ( m_VelEntities[i].hEntity.Get() == pOther )
+				return;
+		}
+
+		int iIndex = m_VelEntities.AddToTail();
+		m_VelEntities[iIndex].flFirstTime = gpGlobals->curtime;
+		m_VelEntities[iIndex].hEntity = pOther;
+
+		m_OnVelocityTransitionStart.FireOutput( this, this );
+	}
+	else
 	{
 		m_OnVelocity.FireOutput( this, this );
-		return;
 	}
-
-	if ( !bPassed )
-		return;
-
-	// Already waiting on this entity?
-	for ( int i = 0; i < m_VelEntities.Count(); i++ )
-	{
-		if ( m_VelEntities[i].hEntity.Get() == pOther )
-			return;
-	}
-
-	int iIndex = m_VelEntities.AddToTail();
-	m_VelEntities[iIndex].hEntity = pOther;
-	m_VelEntities[iIndex].flTime = gpGlobals->curtime;
-
-	m_OnVelocityTransitionStart.FireOutput( this, this );
 }
 
 //-----------------------------------------------------------------------------
@@ -269,7 +278,7 @@ void CTriggerVelocityCheck::BrushThink( void )
 	{
 		CBaseEntity *pEntity = m_VelEntities[i].hEntity.Get();
 
-		if ( gpGlobals->curtime > m_VelEntities[i].flTime + m_flVelTransMaxS )
+		if ( gpGlobals->curtime > m_VelEntities[i].flFirstTime + m_flVelTransMaxS )
 		{
 			CHandle<CBaseEntity> hEntity;
 			hEntity = pEntity;
@@ -283,7 +292,8 @@ void CTriggerVelocityCheck::BrushThink( void )
 				else
 				{
 					m_OnVelocityTransitionFail.FireOutput( this, this );
-					m_FailEntities.AddToTail( hEntity );
+					int iFail = m_FailEntities.AddToTail();
+					m_FailEntities[iFail] = pEntity;
 				}
 			}
 

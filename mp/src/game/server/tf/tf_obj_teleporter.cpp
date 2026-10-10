@@ -106,6 +106,22 @@ void CObjectTeleporter_Entrance::TeleporterSend( CTFPlayer *pPlayer )
 		TE_TFParticleEffect( filter, 0.0, "teleported_blue", origin, vec3_angle );
 		TE_TFParticleEffect( filter, 0.0, "player_sparkles_blue", origin, vec3_angle, pPlayer, PATTACH_POINT );
 		break;
+	case FO_TEAM_GREEN:
+		TE_TFParticleEffect( filter, 0.0, "teleported_green", origin, vec3_angle );
+		TE_TFParticleEffect( filter, 0.0, "player_sparkles_green", origin, vec3_angle, pPlayer, PATTACH_POINT );
+		break;
+	case FO_TEAM_YELLOW:
+		TE_TFParticleEffect( filter, 0.0, "teleported_yellow", origin, vec3_angle );
+		TE_TFParticleEffect( filter, 0.0, "player_sparkles_yellow", origin, vec3_angle, pPlayer, PATTACH_POINT );
+		break;
+	case FO_TEAM_PURPLE:
+		TE_TFParticleEffect( filter, 0.0, "teleported_purple", origin, vec3_angle );
+		TE_TFParticleEffect( filter, 0.0, "player_sparkles_purple", origin, vec3_angle, pPlayer, PATTACH_POINT );
+		break;
+	case FO_TEAM_PINK:
+		TE_TFParticleEffect( filter, 0.0, "teleported_pink", origin, vec3_angle );
+		TE_TFParticleEffect( filter, 0.0, "player_sparkles_pink", origin, vec3_angle, pPlayer, PATTACH_POINT );
+		break;
 	default:
 		break;
 	}
@@ -155,6 +171,18 @@ void CObjectTeleporter_Exit::TeleporterReceive( CTFPlayer *pPlayer, float flDela
 		break;
 	case TF_TEAM_BLUE:
 		TE_TFParticleEffect( filter, 0.0, "teleportedin_blue", origin, vec3_angle );
+		break;
+	case FO_TEAM_GREEN:
+		TE_TFParticleEffect( filter, 0.0, "teleportedin_green", origin, vec3_angle );
+		break;
+	case FO_TEAM_YELLOW:
+		TE_TFParticleEffect( filter, 0.0, "teleportedin_yellow", origin, vec3_angle );
+		break;
+	case FO_TEAM_PURPLE:
+		TE_TFParticleEffect( filter, 0.0, "teleportedin_purple", origin, vec3_angle );
+		break;
+	case FO_TEAM_PINK:
+		TE_TFParticleEffect( filter, 0.0, "teleportedin_pink", origin, vec3_angle );
 		break;
 	default:
 		break;
@@ -308,12 +336,28 @@ void CObjectTeleporter::Precache()
 
 	PrecacheParticleSystem( "teleporter_red_charged" );
 	PrecacheParticleSystem( "teleporter_blue_charged" );
+	PrecacheParticleSystem( "teleporter_green_charged" );
+	PrecacheParticleSystem( "teleporter_yellow_charged" );
+	PrecacheParticleSystem( "teleporter_purple_charged" );
+	PrecacheParticleSystem( "teleporter_pink_charged" );
 	PrecacheParticleSystem( "teleporter_red_entrance" );
 	PrecacheParticleSystem( "teleporter_blue_entrance" );
+	PrecacheParticleSystem( "teleporter_green_entrance" );
+	PrecacheParticleSystem( "teleporter_yellow_entrance" );
+	PrecacheParticleSystem( "teleporter_purple_entrance" );
+	PrecacheParticleSystem( "teleporter_pink_entrance" );
 	PrecacheParticleSystem( "teleporter_red_exit" );
 	PrecacheParticleSystem( "teleporter_blue_exit" );
+	PrecacheParticleSystem( "teleporter_green_exit" );
+	PrecacheParticleSystem( "teleporter_yellow_exit" );
+	PrecacheParticleSystem( "teleporter_purple_exit" );
+	PrecacheParticleSystem( "teleporter_pink_exit" );
 	PrecacheParticleSystem( "teleporter_arms_circle_red" );
 	PrecacheParticleSystem( "teleporter_arms_circle_blue" );
+	PrecacheParticleSystem( "teleporter_arms_circle_green" );
+	PrecacheParticleSystem( "teleporter_arms_circle_yellow" );
+	PrecacheParticleSystem( "teleporter_arms_circle_purple" );
+	PrecacheParticleSystem( "teleporter_arms_circle_pink" );
 	PrecacheParticleSystem( "tpdamage_1" );
 	PrecacheParticleSystem( "tpdamage_2" );
 	PrecacheParticleSystem( "tpdamage_3" );
@@ -322,8 +366,20 @@ void CObjectTeleporter::Precache()
 	PrecacheParticleSystem( "player_sparkles_red" );
 	PrecacheParticleSystem( "teleported_blue" );
 	PrecacheParticleSystem( "player_sparkles_blue" );
+	PrecacheParticleSystem( "teleported_green" );
+	PrecacheParticleSystem( "player_sparkles_green" );
+	PrecacheParticleSystem( "teleported_yellow" );
+	PrecacheParticleSystem( "player_sparkles_yellow" );
+	PrecacheParticleSystem( "teleported_purple" );
+	PrecacheParticleSystem( "player_sparkles_purple" );
+	PrecacheParticleSystem( "teleported_pink" );
+	PrecacheParticleSystem( "player_sparkles_pink" );
 	PrecacheParticleSystem( "teleportedin_red" );
 	PrecacheParticleSystem( "teleportedin_blue" );
+	PrecacheParticleSystem( "teleportedin_green" );
+	PrecacheParticleSystem( "teleportedin_yellow" );
+	PrecacheParticleSystem( "teleportedin_purple" );
+	PrecacheParticleSystem( "teleportedin_pink" );
 }
 
 //-----------------------------------------------------------------------------

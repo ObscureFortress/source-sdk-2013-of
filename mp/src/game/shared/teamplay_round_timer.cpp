@@ -957,9 +957,10 @@ void CTeamRoundTimer::AddTimerSeconds( int iSecondsToAdd, int iTeamResponsible /
 	m_nTimerLength += iSecondsToAdd;
 	CalculateOutputMessages();
 
-	if ( ObjectiveResource() && ObjectiveResource()->GetTimerInHUD() == entindex() )
+	// KOTH timers aren't the HUD timer, but still tell the HUD about added time
+	if ( ( ObjectiveResource() && ObjectiveResource()->GetTimerInHUD() == entindex() ) || TeamplayRoundBasedRules()->IsInKothMode() )
 	{
-		if ( !TeamplayRoundBasedRules()->InStalemate() && !TeamplayRoundBasedRules()->RoundHasBeenWon() )
+		if ( !TeamplayRoundBasedRules()->InStalemate() && !TeamplayRoundBasedRules()->RoundHasBeenWon() && !TeamplayRoundBasedRules()->IsInKothMode() )
 		{
 			if ( iTeamResponsible >= LAST_SHARED_TEAM+1 )
 			{

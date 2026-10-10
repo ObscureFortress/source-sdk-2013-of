@@ -307,7 +307,7 @@ void CFOHudDominationScore::OnThink()
 {
 	if (TFGameRules() != nullptr)
 	{
-		if (TFGameRules()->GetGameType() == FO_GAMETYPE_DOM)
+		if (TFGameRules()->GetGameType() == FO_GAMETYPE_DOM || TFGameRules()->GetGameType() == FO_GAMETYPE_FW)
 		{
 			if (fo_extrateammode.GetInt() == 1)
 			{

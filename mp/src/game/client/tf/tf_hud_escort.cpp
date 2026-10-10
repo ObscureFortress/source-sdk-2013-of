@@ -99,18 +99,81 @@ void CTFHudEscort::ApplySchemeSettings( IScheme *pScheme )
 	{
 		pConditions = new KeyValues( "conditions" );
 
-		AddSubKeyNamed( pConditions, m_iTeamNum == TF_TEAM_RED ? "if_team_red" : "if_team_blue" );
+		switch ( m_iTeamNum )
+		{
+		case TF_TEAM_RED:
+			AddSubKeyNamed( pConditions, "if_team_red" );
+			break;
+		case TF_TEAM_BLUE:
+			AddSubKeyNamed( pConditions, "if_team_blue" );
+			break;
+		case FO_TEAM_GREEN:
+			AddSubKeyNamed( pConditions, "if_team_green" );
+			break;
+		case FO_TEAM_YELLOW:
+			AddSubKeyNamed( pConditions, "if_team_yellow" );
+			break;
+		case FO_TEAM_PURPLE:
+			AddSubKeyNamed( pConditions, "if_team_purple" );
+			break;
+		case FO_TEAM_PINK:
+			AddSubKeyNamed( pConditions, "if_team_pink" );
+			break;
+		}
 
 		if ( m_bMultipleTrains )
 		{
 			AddSubKeyNamed( pConditions, "if_multiple_trains" );
-			AddSubKeyNamed( pConditions, m_iTeamNum == TF_TEAM_RED ? "if_multiple_trains_red" : "if_multiple_trains_blue" );
+
+			switch ( m_iTeamNum )
+			{
+			case TF_TEAM_RED:
+				AddSubKeyNamed( pConditions, "if_multiple_trains_red" );
+				break;
+			case TF_TEAM_BLUE:
+				AddSubKeyNamed( pConditions, "if_multiple_trains_blue" );
+				break;
+			case FO_TEAM_GREEN:
+				AddSubKeyNamed( pConditions, "if_multiple_trains_green" );
+				break;
+			case FO_TEAM_YELLOW:
+				AddSubKeyNamed( pConditions, "if_multiple_trains_yellow" );
+				break;
+			case FO_TEAM_PURPLE:
+				AddSubKeyNamed( pConditions, "if_multiple_trains_purple" );
+				break;
+			case FO_TEAM_PINK:
+				AddSubKeyNamed( pConditions, "if_multiple_trains_pink" );
+				break;
+			}
+
 			AddSubKeyNamed( pConditions, m_bOnTop ? "if_multiple_trains_top" : "if_multiple_trains_bottom" );
 		}
 		else if ( m_iNumHills > 0 )
 		{
 			AddSubKeyNamed( pConditions, "if_single_with_hills" );
-			AddSubKeyNamed( pConditions, m_iTeamNum == TF_TEAM_RED ? "if_single_with_hills_red" : "if_single_with_hills_blue" );
+
+			switch ( m_iTeamNum )
+			{
+			case TF_TEAM_RED:
+				AddSubKeyNamed( pConditions, "if_single_with_hills_red" );
+				break;
+			case TF_TEAM_BLUE:
+				AddSubKeyNamed( pConditions, "if_single_with_hills_blue" );
+				break;
+			case FO_TEAM_GREEN:
+				AddSubKeyNamed( pConditions, "if_single_with_hills_green" );
+				break;
+			case FO_TEAM_YELLOW:
+				AddSubKeyNamed( pConditions, "if_single_with_hills_yellow" );
+				break;
+			case FO_TEAM_PURPLE:
+				AddSubKeyNamed( pConditions, "if_single_with_hills_purple" );
+				break;
+			case FO_TEAM_PINK:
+				AddSubKeyNamed( pConditions, "if_single_with_hills_pink" );
+				break;
+			}
 		}
 	}
 
@@ -534,6 +597,18 @@ void CTFHudEscort::UpdateCPImages( bool bUpdatePositions, int iIndex )
 		case TF_TEAM_BLUE:
 			pszImage = bOpaque ? "../hud/cart_point_blue_opaque" : "../hud/cart_point_blue";
 			break;
+		case FO_TEAM_GREEN:
+			pszImage = bOpaque ? "../hud/cart_point_green_opaque" : "../hud/cart_point_green";
+			break;
+		case FO_TEAM_YELLOW:
+			pszImage = bOpaque ? "../hud/cart_point_yellow_opaque" : "../hud/cart_point_yellow";
+			break;
+		case FO_TEAM_PURPLE:
+			pszImage = bOpaque ? "../hud/cart_point_purple_opaque" : "../hud/cart_point_purple";
+			break;
+		case FO_TEAM_PINK:
+			pszImage = bOpaque ? "../hud/cart_point_pink_opaque" : "../hud/cart_point_pink";
+			break;
 		default:
 			pszImage = bOpaque ? "../hud/cart_point_neutral_opaque" : "../hud/cart_point_neutral";
 			break;
@@ -605,9 +680,13 @@ void CTFHudEscort::UpdateAlarmAnimations( void )
 //=============================================================================
 CTFHudMultipleEscort::CTFHudMultipleEscort( Panel *pParent, const char *pszName ) : EditablePanel( pParent, pszName )
 {
-	m_pRedEscort = new CTFHudEscort( this, "RedEscortPanel", TF_TEAM_RED, true );
-
 	m_pBlueEscort = new CTFHudEscort( this, "BlueEscortPanel", TF_TEAM_BLUE, true );
+	m_pRedEscort = new CTFHudEscort( this, "RedEscortPanel", TF_TEAM_RED, true );
+	m_pGreenEscort = new CTFHudEscort( this, "GreenEscortPanel", FO_TEAM_GREEN, true );
+	m_pYellowEscort = new CTFHudEscort( this, "YellowEscortPanel", FO_TEAM_YELLOW, true );
+	m_pPurpleEscort = new CTFHudEscort( this, "PurpleEscortPanel", FO_TEAM_PURPLE, true );
+	m_pPinkEscort = new CTFHudEscort( this, "PinkEscortPanel", FO_TEAM_PINK, true );
+
 	m_pRedEscort->SetOnTop( false );
 
 	ListenForGameEvent( "localplayer_changeteam" );
@@ -623,8 +702,66 @@ void CTFHudMultipleEscort::ApplySchemeSettings( IScheme *pScheme )
 	// Setup conditions.
 	KeyValues *pConditions = new KeyValues( "conditions" );
 
+	if ( TFGameRules() )
+	{
+		if ( TFGameRules()->m_nExtraTeamMode == 1 )
+			AddSubKeyNamed( pConditions, "if_3team" );
+		else if ( TFGameRules()->m_nExtraTeamMode == 2 )
+			AddSubKeyNamed( pConditions, "if_6team" );
+	}
+
 	int iTeam = GetLocalPlayerTeam();
-	AddSubKeyNamed( pConditions, iTeam == TF_TEAM_BLUE ? "if_blue_is_top" : "if_red_is_top" );
+	switch ( iTeam )
+	{
+	case TF_TEAM_RED:
+		if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 1 )
+			AddSubKeyNamed( pConditions, "if_red_is_top_3" );
+		else if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 2 )
+			AddSubKeyNamed( pConditions, "if_red_is_top_6" );
+		else
+			AddSubKeyNamed( pConditions, "if_red_is_top" );
+		break;
+	case TF_TEAM_BLUE:
+		if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 1 )
+			AddSubKeyNamed( pConditions, "if_blue_is_top_3" );
+		else if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 2 )
+			AddSubKeyNamed( pConditions, "if_blue_is_top_6" );
+		else
+			AddSubKeyNamed( pConditions, "if_blue_is_top" );
+		break;
+	case FO_TEAM_GREEN:
+		if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 1 )
+			AddSubKeyNamed( pConditions, "if_green_is_top_3" );
+		else if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 2 )
+			AddSubKeyNamed( pConditions, "if_green_is_top_6" );
+		else
+			AddSubKeyNamed( pConditions, "if_green_is_top" );
+		break;
+	case FO_TEAM_YELLOW:
+		if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 1 )
+			AddSubKeyNamed( pConditions, "if_yellow_is_top_3" );
+		else if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 2 )
+			AddSubKeyNamed( pConditions, "if_yellow_is_top_6" );
+		else
+			AddSubKeyNamed( pConditions, "if_yellow_is_top" );
+		break;
+	case FO_TEAM_PURPLE:
+		if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 1 )
+			AddSubKeyNamed( pConditions, "if_purple_is_top_3" );
+		else if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 2 )
+			AddSubKeyNamed( pConditions, "if_purple_is_top_6" );
+		else
+			AddSubKeyNamed( pConditions, "if_purple_is_top" );
+		break;
+	case FO_TEAM_PINK:
+		if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 1 )
+			AddSubKeyNamed( pConditions, "if_pink_is_top_3" );
+		else if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode == 2 )
+			AddSubKeyNamed( pConditions, "if_pink_is_top_6" );
+		else
+			AddSubKeyNamed( pConditions, "if_pink_is_top" );
+		break;
+	}
 
 	LoadControlSettings( "resource/ui/ObjectiveStatusMultipleEscort.res", NULL, NULL, pConditions );
 
@@ -638,15 +775,31 @@ void CTFHudMultipleEscort::FireGameEvent( IGameEvent *event )
 {
 	if ( V_strcmp( event->GetName(), "localplayer_changeteam" ) == 0 )
 	{
-		// Show the cart of the local player's team on top.
+		// Show the cart of the local player's team on top. Red is on top for spectators.
 		int iTeam = GetLocalPlayerTeam();
 		if ( m_pRedEscort )
 		{
-			m_pRedEscort->SetOnTop( iTeam != TF_TEAM_BLUE );
+			m_pRedEscort->SetOnTop( iTeam == TF_TEAM_RED || iTeam == TEAM_SPECTATOR || iTeam == TEAM_UNASSIGNED );
 		}
 		if ( m_pBlueEscort )
 		{
 			m_pBlueEscort->SetOnTop( iTeam == TF_TEAM_BLUE );
+		}
+		if ( m_pGreenEscort )
+		{
+			m_pGreenEscort->SetOnTop( iTeam == FO_TEAM_GREEN );
+		}
+		if ( m_pYellowEscort )
+		{
+			m_pYellowEscort->SetOnTop( iTeam == FO_TEAM_YELLOW );
+		}
+		if ( m_pPurpleEscort )
+		{
+			m_pPurpleEscort->SetOnTop( iTeam == FO_TEAM_PURPLE );
+		}
+		if ( m_pPinkEscort )
+		{
+			m_pPinkEscort->SetOnTop( iTeam == FO_TEAM_PINK );
 		}
 
 		// Re-arrange panels when player changes teams.
@@ -659,7 +812,7 @@ void CTFHudMultipleEscort::FireGameEvent( IGameEvent *event )
 //-----------------------------------------------------------------------------
 void CTFHudMultipleEscort::SetVisible( bool bVisible )
 {
-	// Hide sub-panels as well.
+	// Hide sub-panels as well. The extra teams only show when they're playing.
 	if ( m_pRedEscort )
 	{
 		m_pRedEscort->SetVisible( bVisible );
@@ -667,6 +820,34 @@ void CTFHudMultipleEscort::SetVisible( bool bVisible )
 	if ( m_pBlueEscort )
 	{
 		m_pBlueEscort->SetVisible( bVisible );
+	}
+	if ( m_pGreenEscort )
+	{
+		if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode > 0 )
+			m_pGreenEscort->SetVisible( bVisible );
+		else
+			m_pGreenEscort->SetVisible( false );
+	}
+	if ( m_pYellowEscort )
+	{
+		if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode > 1 )
+			m_pYellowEscort->SetVisible( bVisible );
+		else
+			m_pYellowEscort->SetVisible( false );
+	}
+	if ( m_pPurpleEscort )
+	{
+		if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode > 1 )
+			m_pPurpleEscort->SetVisible( bVisible );
+		else
+			m_pPurpleEscort->SetVisible( false );
+	}
+	if ( m_pPinkEscort )
+	{
+		if ( TFGameRules() && TFGameRules()->m_nExtraTeamMode > 1 )
+			m_pPinkEscort->SetVisible( bVisible );
+		else
+			m_pPinkEscort->SetVisible( false );
 	}
 
 	BaseClass::SetVisible( bVisible );
@@ -693,6 +874,18 @@ void CTFHudMultipleEscort::Reset( void )
 
 	if ( m_pBlueEscort )
 		m_pBlueEscort->Reset();
+
+	if ( m_pGreenEscort )
+		m_pGreenEscort->Reset();
+
+	if ( m_pYellowEscort )
+		m_pYellowEscort->Reset();
+
+	if ( m_pPurpleEscort )
+		m_pPurpleEscort->Reset();
+
+	if ( m_pPinkEscort )
+		m_pPinkEscort->Reset();
 }
 
 
@@ -1035,7 +1228,31 @@ CTFHudEscortProgressBar::CTFHudEscortProgressBar( Panel *pParent, const char *ps
 {
 	m_iTeamNum = iTeam;
 
-	const char *pszTextureName = m_iTeamNum == TF_TEAM_RED ? "hud/cart_track_red_opaque" : "hud/cart_track_blue_opaque";
+	const char *pszTextureName;
+	switch ( m_iTeamNum )
+	{
+	case TF_TEAM_RED:
+		pszTextureName = "hud/cart_track_red_opaque";
+		break;
+	case TF_TEAM_BLUE:
+		pszTextureName = "hud/cart_track_blue_opaque";
+		break;
+	case FO_TEAM_GREEN:
+		pszTextureName = "hud/cart_track_green_opaque";
+		break;
+	case FO_TEAM_YELLOW:
+		pszTextureName = "hud/cart_track_yellow_opaque";
+		break;
+	case FO_TEAM_PURPLE:
+		pszTextureName = "hud/cart_track_purple_opaque";
+		break;
+	case FO_TEAM_PINK:
+		pszTextureName = "hud/cart_track_pink_opaque";
+		break;
+	default:
+		pszTextureName = "hud/cart_track_red_opaque";
+		break;
+	}
 
 	m_iTextureId = surface()->DrawGetTextureId( pszTextureName );
 	if ( m_iTextureId == -1 )

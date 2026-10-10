@@ -354,6 +354,22 @@ void CTFGameMovement::TeleportMove(bool alt)
 		TE_TFParticleEffect(filter, 0.0, "teleported_blue", origin, vec3_angle);
 		TE_TFParticleEffect(filter, 0.0, "player_sparkles_blue", origin, vec3_angle, player, PATTACH_POINT);
 		break;
+	case FO_TEAM_GREEN:
+		TE_TFParticleEffect(filter, 0.0, "teleported_green", origin, vec3_angle);
+		TE_TFParticleEffect(filter, 0.0, "player_sparkles_green", origin, vec3_angle, player, PATTACH_POINT);
+		break;
+	case FO_TEAM_YELLOW:
+		TE_TFParticleEffect(filter, 0.0, "teleported_yellow", origin, vec3_angle);
+		TE_TFParticleEffect(filter, 0.0, "player_sparkles_yellow", origin, vec3_angle, player, PATTACH_POINT);
+		break;
+	case FO_TEAM_PURPLE:
+		TE_TFParticleEffect(filter, 0.0, "teleported_purple", origin, vec3_angle);
+		TE_TFParticleEffect(filter, 0.0, "player_sparkles_purple", origin, vec3_angle, player, PATTACH_POINT);
+		break;
+	case FO_TEAM_PINK:
+		TE_TFParticleEffect(filter, 0.0, "teleported_pink", origin, vec3_angle);
+		TE_TFParticleEffect(filter, 0.0, "player_sparkles_pink", origin, vec3_angle, player, PATTACH_POINT);
+		break;
 	default:
 		TE_TFParticleEffect(filter, 0.0, "teleported_blue", origin, vec3_angle);
 		TE_TFParticleEffect(filter, 0.0, "player_sparkles_blue", origin, vec3_angle, player, PATTACH_POINT);
@@ -372,7 +388,7 @@ void CTFGameMovement::TeleportMove(bool alt)
 
 	AngleVectors(player->EyeAngles(), &vecForward, &vecRight, &vecUp);
 	Vector vecTeleportStart = player->GetAbsOrigin();
-	Vector vecTeleportEnd = vecTeleportStart + (vecForward * 450);
+	Vector vecTeleportEnd = vecTeleportStart + (vecForward * ((TFGameRules()->GetGameType() == FO_GAMETYPE_DITR && m_pTFPlayer->HasTheFlag()) ? 150 : 350));
 
 	int m_nUp = VEC_HULL_MAX.z + 30;
 
@@ -391,7 +407,10 @@ void CTFGameMovement::TeleportMove(bool alt)
 		}
 		*/
 
-		mv->m_vecVelocity.z += 600;
+		if (TFGameRules()->GetGameType() == FO_GAMETYPE_DITR && m_pTFPlayer->HasTheFlag())
+			mv->m_vecVelocity.z += 300;
+		else
+			mv->m_vecVelocity.z += 600;
 		vecTeleportEnd += (slightlyUp * m_nUp);
 	}
 	/*
@@ -410,7 +429,7 @@ void CTFGameMovement::TeleportMove(bool alt)
 	Msg("%.3f - trace.startpos \n", trace.startpos.z);
 	*/
 
-	UTIL_TraceHull(vecTeleportStart, vecTeleportEnd, player->GetPlayerMins(), player->GetPlayerMaxs(), MASK_SOLID, player, COLLISION_GROUP_PLAYER_MOVEMENT, &trace);
+	TracePlayerBBox(vecTeleportStart, vecTeleportEnd, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, trace);
 
 	if (alt)
 	{
@@ -431,7 +450,7 @@ void CTFGameMovement::TeleportMove(bool alt)
 					trace.endpos = trace.startpos;
 					notclear = false;
 				}
-				UTIL_TraceHull(vecTeleportStart, firstEnd - (vecForward * mult), player->GetPlayerMins(), player->GetPlayerMaxs(), MASK_SOLID, player, COLLISION_GROUP_PLAYER_MOVEMENT, &trace);
+				TracePlayerBBox(vecTeleportStart, firstEnd - (vecForward * mult), PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, trace);
 				secondEnd = trace.endpos;
 
 				if (!trace.DidHitWorld())
@@ -448,7 +467,7 @@ void CTFGameMovement::TeleportMove(bool alt)
 					{
 						notclear2 = false;
 					}
-					UTIL_TraceHull(vecTeleportStart, secondEnd + (slightlyUp * mult), player->GetPlayerMins(), player->GetPlayerMaxs(), MASK_SOLID, player, COLLISION_GROUP_PLAYER_MOVEMENT, &trace);
+					TracePlayerBBox(vecTeleportStart, secondEnd + (slightlyUp * mult), PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, trace);
 
 					if (!trace.DidHitWorld())
 					{
@@ -477,7 +496,7 @@ void CTFGameMovement::TeleportMove(bool alt)
 					trace.endpos = trace.startpos;
 					notclear = false;
 				}
-				UTIL_TraceHull(vecTeleportStart, firstEnd - (slightlyUp * mult), player->GetPlayerMins(), player->GetPlayerMaxs(), MASK_SOLID, player, COLLISION_GROUP_PLAYER_MOVEMENT, &trace);
+				TracePlayerBBox(vecTeleportStart, firstEnd - (slightlyUp * mult), PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, trace);
 
 				if (!trace.DidHitWorld())
 				{
@@ -495,7 +514,7 @@ void CTFGameMovement::TeleportMove(bool alt)
 	}
 	*/
 
-	player->SetFOV(player, 0, 0.4, player->GetFOV() + 30);
+	player->SetFOV(player, 0, 0.2, player->GetFOV() - 5);
 
 	#ifdef GAME_DLL
 		color32 fadeColor = { 255,255,255,15 };
@@ -518,6 +537,18 @@ void CTFGameMovement::TeleportMove(bool alt)
 		break;
 	case TF_TEAM_BLUE:
 		TE_TFParticleEffect(filter2, 0.0, "teleportedin_blue", origin2, vec3_angle);
+		break;
+	case FO_TEAM_GREEN:
+		TE_TFParticleEffect(filter2, 0.0, "teleportedin_green", origin2, vec3_angle);
+		break;
+	case FO_TEAM_YELLOW:
+		TE_TFParticleEffect(filter2, 0.0, "teleportedin_yellow", origin2, vec3_angle);
+		break;
+	case FO_TEAM_PURPLE:
+		TE_TFParticleEffect(filter2, 0.0, "teleportedin_purple", origin2, vec3_angle);
+		break;
+	case FO_TEAM_PINK:
+		TE_TFParticleEffect(filter2, 0.0, "teleportedin_pink", origin2, vec3_angle);
 		break;
 	default:
 		TE_TFParticleEffect(filter2, 0.0, "teleportedin_blue", origin2, vec3_angle);
@@ -626,7 +657,7 @@ bool CTFGameMovement::CheckJumpButton()
 		else if (bTelecon && !m_pTFPlayer->m_Shared.IsAirDashing())
 		{
 			if (m_pTFPlayer->m_Shared.GetTeleconTeleportMeter() < 50)
-				m_pTFPlayer->EmitSound("Hud.Warning");
+				m_pTFPlayer->EmitSound("WeaponMedigun.NoTarget");
 			else
 				bTeleportMove = true;
 		}
@@ -746,7 +777,7 @@ bool CTFGameMovement::CheckAltButton()
 		if (bTelecon && !m_pTFPlayer->m_Shared.IsAirDashing())
 		{
 			if (m_pTFPlayer->m_Shared.GetTeleconTeleportMeter() < 30)
-				m_pTFPlayer->EmitSound("Hud.Warning");
+				m_pTFPlayer->EmitSound("Player.DenyWeaponSelection");
 			else
 				bTeleportMove = true;
 		}
@@ -754,7 +785,7 @@ bool CTFGameMovement::CheckAltButton()
 		// Check for an air dash.
 		if (bTeleportMove)
 		{
-			m_pTFPlayer->m_Shared.SetTeleconTeleportMeter(m_pTFPlayer->m_Shared.GetTeleconTeleportMeter() - 50);
+			m_pTFPlayer->m_Shared.SetTeleconTeleportMeter(m_pTFPlayer->m_Shared.GetTeleconTeleportMeter() - 30);
 			TeleportMove(true);
 			return true;
 		}

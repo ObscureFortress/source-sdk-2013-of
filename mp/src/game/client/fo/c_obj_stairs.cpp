@@ -65,6 +65,20 @@ void C_ObjectWorkerStairs::GetStatusText( wchar_t *pStatus, int iMaxStatusLen )
 // Purpose: 
 // Input  : updateType - 
 //-----------------------------------------------------------------------------
+void C_ObjectWorkerStairs::OnGoActive( void )
+{
+	// Match the server's static physics so prediction can walk on us
+	SetSolid( SOLID_VPHYSICS );
+	VPhysicsInitStatic();
+	CollisionProp()->SetSurroundingBoundsType( USE_HITBOXES );
+
+	BaseClass::OnGoActive();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+// Input  : updateType - 
+//-----------------------------------------------------------------------------
 void C_ObjectWorkerStairs::OnDataChanged( DataUpdateType_t updateType )
 {
 	BaseClass::OnDataChanged( updateType );

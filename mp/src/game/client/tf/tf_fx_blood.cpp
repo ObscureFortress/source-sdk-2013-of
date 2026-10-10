@@ -45,7 +45,7 @@ void TFBloodSprayCallback( Vector vecOrigin, Vector vecNormal, ClientEntityHandl
 	}
 	else
 	{
-		DispatchParticleEffect( bUnderwater ? "water_blood_impact_red_01" : "blood_impact_red_01", vecOrigin, vecAngles, pPlayer );
+		DispatchParticleEffect( bUnderwater ? "lowV_water_blood_impact_red_01" : "lowV_blood_impact_red_01", vecOrigin, vecAngles, pPlayer );
 	}
 
 	// if underwater, don't add additional spray
@@ -96,11 +96,11 @@ void TFBloodSprayCallback( Vector vecOrigin, Vector vecNormal, ClientEntityHandl
 
 	if ( flDistance < 400 )
 	{
-		DispatchParticleEffect( "blood_spray_red_01", vecOrigin, vecAngles, pPlayer );
+		DispatchParticleEffect( "lowV_blood_spray_red_01", vecOrigin, vecAngles, pPlayer );
 	}
 	else
 	{
-		DispatchParticleEffect( "blood_spray_red_01_far", vecOrigin, vecAngles, pPlayer );
+		DispatchParticleEffect( "lowV_blood_spray_red_01_far", vecOrigin, vecAngles, pPlayer );
 	}
 }
 

@@ -20,6 +20,7 @@
 	#define CTFWeaponPDA_Engineer_Destroy	C_TFWeaponPDA_Engineer_Destroy
 	#define CTFWeaponPDA_Spy		C_TFWeaponPDA_Spy
 	#define CFOWeaponPDA_Automaton	C_FOWeaponPDA_Automaton
+	#define CFOWeaponPDA_WorkerNode_Build	C_FOWeaponPDA_WorkerNode_Build
 #endif
 
 class CTFWeaponPDA : public CTFWeaponBase
@@ -130,6 +131,17 @@ public:
 
 	virtual const char *GetPanelName() { return ""; }
 	virtual int		GetWeaponID(void) const { return FO_WEAPON_PDA_AUTOMATON; }
+};
+
+class CFOWeaponPDA_WorkerNode_Build : public CTFWeaponPDA
+{
+public:
+	DECLARE_CLASS( CFOWeaponPDA_WorkerNode_Build, CTFWeaponPDA );
+	DECLARE_NETWORKCLASS();
+	DECLARE_PREDICTABLE();
+
+	virtual const char *GetPanelName() { return ""; }
+	virtual int		GetWeaponID( void ) const { return FO_WEAPON_PDA_WORKERNODE_BUILD; }
 };
 
 #endif // TF_WEAPON_PDA_H

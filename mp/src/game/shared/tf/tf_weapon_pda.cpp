@@ -167,6 +167,19 @@ END_PREDICTION_DATA()
 LINK_ENTITY_TO_CLASS(fo_weapon_pda_automaton, CFOWeaponPDA_Automaton);
 PRECACHE_WEAPON_REGISTER(fo_weapon_pda_automaton);
 
+//==============================
+
+IMPLEMENT_NETWORKCLASS_ALIASED( FOWeaponPDA_WorkerNode_Build, DT_FOWeaponPDA_WorkerNode_Build )
+
+BEGIN_NETWORK_TABLE( CFOWeaponPDA_WorkerNode_Build, DT_FOWeaponPDA_WorkerNode_Build )
+END_NETWORK_TABLE()
+
+BEGIN_PREDICTION_DATA( CFOWeaponPDA_WorkerNode_Build )
+END_PREDICTION_DATA()
+
+LINK_ENTITY_TO_CLASS( fo_weapon_pda_workernode_build, CFOWeaponPDA_WorkerNode_Build );
+PRECACHE_WEAPON_REGISTER( fo_weapon_pda_workernode_build );
+
 #ifdef CLIENT_DLL
 
 bool CTFWeaponPDA_Spy::Deploy( void )

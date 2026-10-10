@@ -17,7 +17,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-static ConVar mat_slopescaledepthbias_shadowmap( "mat_slopescaledepthbias_shadowmap", "16", FCVAR_CHEAT );
+static ConVar mat_slopescaledepthbias_shadowmap( "mat_slopescaledepthbias_shadowmap", "10", FCVAR_CHEAT );
 static ConVar mat_depthbias_shadowmap(	"mat_depthbias_shadowmap", "0.0005", FCVAR_CHEAT  );
 
 //-----------------------------------------------------------------------------
@@ -51,6 +51,10 @@ private:
 	bool	m_bLightOnlyTarget;
 	bool	m_bLightWorld;
 	bool	m_bCameraSpace;
+	int		m_nLinearAtten;
+	float	m_flShadowRes;
+	float	m_flShadowFilter;
+	float	m_flBrightness;
 	Vector	m_LinearFloatLightColor;
 	float	m_flAmbient;
 	float	m_flNearZ;
@@ -68,6 +72,10 @@ IMPLEMENT_CLIENTCLASS_DT( C_EnvProjectedTexture, DT_EnvProjectedTexture, CEnvPro
 	RecvPropBool(	 RECVINFO( m_bLightOnlyTarget ) ),
 	RecvPropBool(	 RECVINFO( m_bLightWorld )		),
 	RecvPropBool(	 RECVINFO( m_bCameraSpace )		),
+	RecvPropInt(	 RECVINFO( m_nLinearAtten )		),
+	RecvPropFloat(	 RECVINFO( m_flShadowRes )		),
+	RecvPropFloat(	 RECVINFO( m_flShadowFilter )	),
+	RecvPropFloat(	 RECVINFO( m_flBrightness )		),
 	RecvPropVector(	 RECVINFO( m_LinearFloatLightColor )		),
 	RecvPropFloat(	 RECVINFO( m_flAmbient )		),
 	RecvPropString(  RECVINFO( m_SpotlightTextureName ) ),
@@ -80,6 +88,10 @@ END_RECV_TABLE()
 C_EnvProjectedTexture::C_EnvProjectedTexture( void )
 {
 	m_LightHandle = CLIENTSHADOW_INVALID_HANDLE;
+
+	// Scissoring cuts projected textures off at the screen edges
+	ConVarRef r_flashlightscissor( "r_flashlightscissor" );
+	r_flashlightscissor.SetValue( "0" );
 }
 
 C_EnvProjectedTexture::~C_EnvProjectedTexture( void )
@@ -153,21 +165,19 @@ void C_EnvProjectedTexture::UpdateLight( bool bForceUpdate )
 		}
 		else
 		{
-			vForward = m_hTargetEntity->GetAbsOrigin() - GetAbsOrigin();
-			VectorNormalize( vForward );
-
-			// JasonM - unimplemented
-			Assert (0);
-
-			//Quaternion q = DirectionToOrientation( dir );
-
-
-			//
-			// JasonM - set up vRight, vUp
-			//
-
-//			VectorNormalize( vRight );
-//			VectorNormalize( vUp );
+			// Point at the target
+			Vector vecToTarget;
+			QAngle vecAngles;
+			if ( m_hTargetEntity == NULL )
+			{
+				vecAngles = GetAbsAngles();
+			}
+			else
+			{
+				vecToTarget = m_hTargetEntity->GetAbsOrigin() - GetAbsOrigin();
+				VectorAngles( vecToTarget, vecAngles );
+			}
+			AngleVectors( vecAngles, &vForward, &vRight, &vUp );
 		}
 	}
 	else
@@ -182,14 +192,16 @@ void C_EnvProjectedTexture::UpdateLight( bool bForceUpdate )
 	BasisToQuaternion( vForward, vRight, vUp, state.m_quatOrientation );
 
 	state.m_fQuadraticAtten = 0.0;
-	state.m_fLinearAtten = 100;
+	state.m_fLinearAtten = m_nLinearAtten;
 	state.m_fConstantAtten = 0.0f;
-	state.m_Color[0] = m_LinearFloatLightColor.x;
-	state.m_Color[1] = m_LinearFloatLightColor.y;
-	state.m_Color[2] = m_LinearFloatLightColor.z;
+	state.m_Color[0] = m_LinearFloatLightColor.x * m_flBrightness;
+	state.m_Color[1] = m_LinearFloatLightColor.y * m_flBrightness;
+	state.m_Color[2] = m_LinearFloatLightColor.z * m_flBrightness;
 	state.m_Color[3] = 0.0f; // fixme: need to make ambient work m_flAmbient;
 	state.m_NearZ = m_flNearZ;
 	state.m_FarZ = m_flFarZ;
+	state.m_flShadowMapResolution = m_flShadowRes;
+	state.m_flShadowFilterSize = m_flShadowFilter;
 	state.m_flShadowSlopeScaleDepthBias = mat_slopescaledepthbias_shadowmap.GetFloat();
 	state.m_flShadowDepthBias = mat_depthbias_shadowmap.GetFloat();
 	state.m_bEnableShadows = m_bEnableShadows;

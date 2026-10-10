@@ -4,6 +4,8 @@
 #include "cbase.h"
 #include "entity_capture_flag.h"
 
+extern ConVar fo_ditr_is_diamond_out;
+
 class CFOGamemodeDiamondInTheRough : public CLogicalEntity
 {
 public:
@@ -123,6 +125,8 @@ END_DATADESC()
 void CFOGamemodeDiamondInTheRough::Activate(void)
 {
 	BaseClass::Activate();
+
+	fo_ditr_is_diamond_out.SetValue(0);
 
 	if (m_nNumberOfHoles > 10)
 	{
@@ -387,6 +391,7 @@ void CFOGamemodeDiamondInTheRough::Activate(void)
 void CFOGamemodeDiamondInTheRough::InitiateDiamondHide(inputdata_t &inputData)
 {
 	m_hAssociatedFlag->SetDisabled(true);
+	fo_ditr_is_diamond_out.SetValue(0);
 
 	int m_nHoleChosen = RandomInt(1, m_nNumberOfHoles);
 
@@ -471,5 +476,6 @@ void CFOGamemodeDiamondInTheRough::InitiateDiamondHide(inputdata_t &inputData)
 void CFOGamemodeDiamondInTheRough::InitiateDiamondExtracted(inputdata_t &inputData)
 {
 	m_hAssociatedFlag->SetDisabled(false);
+	fo_ditr_is_diamond_out.SetValue(1);
 	m_DiamondExtracted.FireOutput(this, this);
 }

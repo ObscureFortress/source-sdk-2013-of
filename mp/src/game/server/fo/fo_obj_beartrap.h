@@ -21,10 +21,10 @@ class CTFPlayer;
 class CObjectBeartrap : public CBaseObject
 {
 	DECLARE_CLASS( CObjectBeartrap, CBaseObject );
+	DECLARE_DATADESC();
 
 public:
 	DECLARE_SERVERCLASS();
-	DECLARE_DATADESC();
 
 	CObjectBeartrap();
 

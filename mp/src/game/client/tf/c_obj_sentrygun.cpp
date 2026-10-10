@@ -198,7 +198,7 @@ void C_ObjectSentrygun::DisplayHintTo( C_BasePlayer *pPlayer )
 	if ( InSameTeam( pPlayer ) )
 	{
 		// We're looking at a friendly object. 
-		if ( pTFPlayer->IsPlayerClass( TF_CLASS_ENGINEER ) || pTFPlayer->IsPlayerClass(FO_CLASS_SENTRONIC + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_DISMATIC + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_TELECON + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_WORKERNODE + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_SAPTRAP + 1))
+		if ( pTFPlayer->IsPlayerClass( TF_CLASS_ENGINEER ) || pTFPlayer->IsPlayerClass(FO_CLASS_SENTRONIC + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_DISMATIC + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_TELECON + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_WORKERNODE + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_SAPTRAP + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_CUSTOM1 + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_CUSTOM2 + 1) || pTFPlayer->IsPlayerClass(FO_CLASS_CUSTOM3 + 1))
 		{
 			// If the sentrygun can be upgraded, and I can afford it, let me know
 			if ( GetHealth() == GetMaxHealth() && GetUpgradeLevel() < 3 )

@@ -53,6 +53,7 @@ CREATE_SIMPLE_WEAPON_TABLE( TFShotgun_Soldier, tf_weapon_shotgun_soldier )
 CREATE_SIMPLE_WEAPON_TABLE( TFShotgun_HWG, tf_weapon_shotgun_hwg )
 CREATE_SIMPLE_WEAPON_TABLE( TFShotgun_Pyro, tf_weapon_shotgun_pyro )
 CREATE_SIMPLE_WEAPON_TABLE( TFScatterGun, tf_weapon_scattergun )
+CREATE_SIMPLE_WEAPON_TABLE( FODipperGun, fo_weapon_dippergun )
 
 
 //=============================================================================
@@ -78,6 +79,40 @@ void CTFShotgun::PrimaryAttack()
 
 	// Set the weapon mode.
 	m_iWeaponMode = TF_WEAPON_PRIMARY_MODE;
+
+	if ( GetWeaponID() == FO_WEAPON_DIPPERGUN )
+	{
+		CTFPlayer *pPlayer = ToTFPlayer( GetOwner() );
+		if ( !pPlayer )
+			return;
+
+#ifdef GAME_DLL
+		// Shove the player backwards, harder if they're firing into a wall.
+		EntityMatrix matrix;
+		matrix.InitFromEntity( pPlayer );
+
+		Vector vecLocalTranslation = pPlayer->GetAbsOrigin() + pPlayer->GetAbsVelocity();
+
+		Vector vecMuzzlePos = pPlayer->Weapon_ShootPosition();
+		Vector forward;
+		pPlayer->EyeVectors( &forward );
+		Vector vecEndPos = vecMuzzlePos + forward * 64.0f;
+
+		trace_t trace;
+		UTIL_TraceLine( vecMuzzlePos, vecEndPos, MASK_SHOT, GetOwner(), COLLISION_GROUP_NONE, &trace );
+
+		vecLocalTranslation = matrix.WorldToLocal( vecLocalTranslation );
+		vecLocalTranslation.x = trace.DidHitWorld() ? -750.0f : -600.0f;
+
+		Vector vecVelocity = matrix.LocalToWorld( vecLocalTranslation );
+		vecVelocity -= pPlayer->GetAbsOrigin();
+		pPlayer->SetAbsVelocity( vecVelocity );
+
+		// Pop them off the ground a little.
+		pPlayer->ApplyAbsVelocityImpulse( Vector( 0, 0, 50.0f ) );
+		pPlayer->RemoveFlag( FL_ONGROUND );
+#endif
+	}
 
 	BaseClass::PrimaryAttack();
 }

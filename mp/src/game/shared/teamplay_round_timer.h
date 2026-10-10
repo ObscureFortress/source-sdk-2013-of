@@ -36,6 +36,7 @@ public:
 	virtual bool StartPaused( void ){ return m_bStartPaused; }
 
 	bool IsDisabled( void ) { return m_bIsDisabled; }
+	bool IsTimerPaused( void ) { return m_bTimerPaused; }
 	int GetTimerState( void ){ return m_nState; }
 
 #ifdef CLIENT_DLL

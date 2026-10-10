@@ -167,6 +167,9 @@ class CTFWeaponBase : public CBaseCombatWeapon
 	CBasePlayer *GetPlayerOwner() const;
 	CTFPlayer *GetTFPlayerOwner() const;
 
+	// Direction to send an airblasted projectile: toward whatever the player is aiming at.
+	void GetProjectileAirblastSetup( CTFPlayer *pPlayer, Vector vecOffset, Vector *vecSrc, bool bHitTeammates );
+
 #ifdef CLIENT_DLL
 	C_BaseEntity *GetWeaponForEffect();
 #endif
@@ -283,5 +286,9 @@ private:
 };
 
 #define WEAPON_RANDOM_RANGE 10000
+
+#ifdef GAME_DLL
+void AirBlastProjectile( CBaseEntity *pEntity, CBaseEntity *pOwnerEnt, CTFWeaponBase *pWeapon, const Vector &vec_in );
+#endif
 
 #endif // TF_WEAPONBASE_H

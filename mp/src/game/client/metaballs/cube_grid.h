@@ -10,33 +10,52 @@
 #pragma once
 #endif
 
-#include "metaball.h"
+// One lattice point of the grid.
+class CUBE_GRID_VERTEX
+{
+public:
+	Vector position;
+	float value;	// the value of the scalar field at this point
+	Vector normal;
+};
+
+// One cell of the grid, points at its 8 corner vertices.
+class CUBE_GRID_CUBE
+{
+public:
+	CUBE_GRID_VERTEX *vertices[8];
+};
 
 class CUBE_GRID
 {
 public:
-	CUBE_GRID();
-	~CUBE_GRID();
+	unsigned int numVertices;
+	CUBE_GRID_VERTEX *vertices;
 
-	// Allocates storage for the largest grid allowed by cl_blobs_resolution_max.
+	int numCubes;
+	CUBE_GRID_CUBE *cubes;
+
 	bool CreateMemory();
+	bool Init( int gridSize, Vector Pos, Vector Bounds );
+	void DrawSurface( float threshold );
 	void FreeMemory();
 
-	// Builds an n x n x n cell grid starting at origin and spanning extents.
-	bool Init( int n, const Vector &origin, const Vector &extents );
+	CUBE_GRID() : numVertices( 0 ), vertices( NULL ), numCubes( 0 ), cubes( NULL ), numFacesDrawn( 0 )
+	{}
+	~CUBE_GRID()
+	{
+		FreeMemory();
+	}
 
-	SURFACE_VERTEX	*vertices;
-	CUBE			*cubes;
-	int				numVertices;
-	int				numCubes;
-	int				gridSize;
-	int				maxGridSize;
+	int numFacesDrawn;
 };
 
-// Marching cubes lookup tables (classic edge / triangle tables).
-extern const int g_BlobEdgeTable[256];
-extern const int g_BlobTriTable[256][16];
-// Pairs of corner indices joined by each of the 12 cube edges.
-extern const unsigned char g_BlobEdgeCorners[12][2];
+// A vertex generated on a cube edge.
+class SURFACE_VERTEX
+{
+public:
+	Vector position;
+	Vector normal;
+};
 
 #endif // CUBE_GRID_H

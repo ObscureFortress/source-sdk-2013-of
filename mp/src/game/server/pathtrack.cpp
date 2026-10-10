@@ -8,6 +8,7 @@
 #include "pathtrack.h"
 #include "entitylist.h"
 #include "ndebugoverlay.h"
+#include "tf_gamerules.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -567,11 +568,15 @@ void CPathTrack::InputPass( inputdata_t &inputdata )
 {
 	m_OnPass.FireOutput( inputdata.pActivator, this );
 
-	IGameEvent * event = gameeventmanager->CreateEvent( "path_track_passed" );
-	if ( event )
+	// Only payload maps care about this
+	if ( TFGameRules()->IsInEscortMode() )
 	{
-		event->SetInt( "index", entindex() );
-		gameeventmanager->FireEvent( event, true );
+		IGameEvent * event = gameeventmanager->CreateEvent( "path_track_passed" );
+		if ( event )
+		{
+			event->SetInt( "index", entindex() );
+			gameeventmanager->FireEvent( event, true );
+		}
 	}
 }
 

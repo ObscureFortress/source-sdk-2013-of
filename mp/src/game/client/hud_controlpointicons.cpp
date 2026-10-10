@@ -929,6 +929,16 @@ void CHudControlPointIcons::PerformLayout( void )
 		else
 			SetPos(GetXPos(), GetYPos() - YRES(30));
 	}
+
+	if (TFGameRules() && TFGameRules()->GetGameType() == FO_GAMETYPE_DITR)
+	{
+		if (TFGameRules()->ExtraTeamMode() == 1)
+			SetPos(GetXPos(), GetYPos() - YRES(45));
+		else if (TFGameRules()->ExtraTeamMode() == 2)
+			SetPos(GetXPos(), GetYPos() - YRES(50));
+		else
+			SetPos(GetXPos(), GetYPos() - YRES(40));
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -951,7 +961,7 @@ void CHudControlPointIcons::UpdateProgressBarFor( int iIndex )
 	if ( pStatus && pStatus->GetControlPointProgressBar() )
 	{
 		CControlPointProgressBar *pProgressBar = pStatus->GetControlPointProgressBar();
-		if ( iIndex < 0 || iIndex >= ObjectiveResource()->GetNumControlPoints() )
+		if ( !IsVisible() || iIndex < 0 || iIndex >= ObjectiveResource()->GetNumControlPoints() )
 		{
 			pProgressBar->SetupForPoint( NULL );
 		}
@@ -1148,7 +1158,7 @@ void CControlPointProgressBar::PerformLayout( void )
 {
 	BaseClass::PerformLayout();
 
-	if ( m_pAttachedToIcon && m_pTeardrop && m_pTeardropSide )
+	if ( m_pAttachedToIcon && m_pTeardrop && m_pTeardropSide && m_pAttachedToIcon->GetVPanel() )
 	{
 		int iIconX, iIconY;
 		ipanel()->GetAbsPos(m_pAttachedToIcon->GetVPanel(), iIconX, iIconY );
@@ -1222,6 +1232,14 @@ void CControlPointProgressBar::Paint( void )
 	}
 
 	BaseClass::Paint();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CControlPointProgressBar::Reset( void )
+{
+	m_pAttachedToIcon = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -1329,7 +1347,15 @@ void CControlPointProgressBar::UpdateBarText( void )
 
 	if ( !TeamplayGameRules()->TeamMayCapturePoint( iPlayerTeam, iCP ) )
 	{
-		m_pBarText->SetText( "#Team_Capture_Linear" );
+		if ( TeamplayRoundBasedRules() && TeamplayRoundBasedRules()->IsInArenaMode() == true )
+		{
+			m_pBarText->SetText( "#Team_Capture_NotNow" );
+		}
+		else
+		{
+			m_pBarText->SetText( "#Team_Capture_Linear" );
+		}
+
 		return;
 	}
 

@@ -302,7 +302,7 @@ public:
 
 	bool CanHaveAmmo( CBaseCombatCharacter *pPlayer, int iAmmoIndex );
 
-	virtual const char *GetGameDescription( void ){ return "Team Fortress"; }
+	virtual const char *GetGameDescription( void ){ return "Fortress Obscura"; }
 
 	// Sets up g_pPlayerResource.
 	virtual void CreateStandardEntities();
@@ -380,12 +380,12 @@ private:
 	CNetworkString(m_pszTeamGoalStringPink, MAX_TEAMGOAL_STRING);
 
 	CNetworkVar( bool, m_bPlayingKoth );
-	CNetworkHandle( CTeamRoundTimer, m_hBlueKothTimer );
-	CNetworkHandle( CTeamRoundTimer, m_hRedKothTimer );
-	CNetworkHandle( CTeamRoundTimer, m_hGreenKothTimer );
-	CNetworkHandle( CTeamRoundTimer, m_hYellowKothTimer );
-	CNetworkHandle( CTeamRoundTimer, m_hPurpleKothTimer );
-	CNetworkHandle( CTeamRoundTimer, m_hPinkKothTimer );
+	CNetworkVar( CHandle<CTeamRoundTimer>, m_hBlueKothTimer );
+	CNetworkVar( CHandle<CTeamRoundTimer>, m_hRedKothTimer );
+	CNetworkVar( CHandle<CTeamRoundTimer>, m_hGreenKothTimer );
+	CNetworkVar( CHandle<CTeamRoundTimer>, m_hYellowKothTimer );
+	CNetworkVar( CHandle<CTeamRoundTimer>, m_hPurpleKothTimer );
+	CNetworkVar( CHandle<CTeamRoundTimer>, m_hPinkKothTimer );
 
 public:
 

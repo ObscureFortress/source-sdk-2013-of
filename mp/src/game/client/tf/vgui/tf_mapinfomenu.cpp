@@ -358,13 +358,42 @@ void CTFMapInfoMenu::LoadMapPage( const char *mapName )
 
 		if ( TFGameRules() )
 		{
-			if ( TFGameRules()->GetGameType() == TF_GAMETYPE_CTF )
+			switch ( TFGameRules()->GetGameType() )
 			{
+			case TF_GAMETYPE_CTF:
 				pszDefault = "maps/default_ctf.txt";
-			}
-			else if ( TFGameRules()->GetGameType() == TF_GAMETYPE_CP || TFGameRules()->GetGameType() == FO_GAMETYPE_DOM || TFGameRules()->GetGameType() == FO_GAMETYPE_CTP) // CHECKPOINT: change to own file later
-			{
-				pszDefault = "maps/default_cp.txt";
+				break;
+			case TF_GAMETYPE_CP:
+				if ( TFGameRules()->IsInKothMode() )
+				{
+					pszDefault = "maps/default_koth.txt";
+				}
+				else
+				{
+					pszDefault = "maps/default_cp.txt";
+				}
+				break;
+			case TF_GAMETYPE_ARENA:
+				pszDefault = "maps/default_arena.txt";
+				break;
+			case TF_GAMETYPE_HUNTED:
+				pszDefault = "maps/default_esc.txt";
+				break;
+			case FO_GAMETYPE_CTP:
+				pszDefault = "maps/default_ctp.txt";
+				break;
+			case FO_GAMETYPE_GD:
+				pszDefault = "maps/default_gd.txt";
+				break;
+			case FO_GAMETYPE_DITR:
+				pszDefault = "maps/default_ditr.txt";
+				break;
+			case FO_GAMETYPE_DOM:
+				pszDefault = "maps/default_dom.txt";
+				break;
+			case FO_GAMETYPE_FW:
+				pszDefault = "maps/default_fw.txt";
+				break;
 			}
 		}
 
@@ -389,29 +418,22 @@ void CTFMapInfoMenu::LoadMapPage( const char *mapName )
 		}
 	}
 
-	FileHandle_t f = g_pFullFileSystem->Open( mapRES, "rb" );
-
 	// read into a memory block
-	int fileSize = g_pFullFileSystem->Size(f);
-	int bufSize = fileSize + 2;
-	char *memBlock = new char[bufSize];
-	g_pFullFileSystem->Read(memBlock, fileSize, f);
-	ucs2 *pUCS2 = (ucs2 *)memBlock;
-
-	// null-terminate the stream
-	pUCS2[bufSize - 1] = 0;
+	int iLength = 0;
+	ucs2 *pUCS2 = (ucs2 *)UTIL_LoadFileForMe( mapRES, &iLength );
 
 	// check the first character, make sure this a little-endian unicode file
 	if ( LittleShort( pUCS2[0] ) != 0xFEFF )
 	{
 		// its a ascii char file
-		m_pMapInfo->SetText( memBlock );
+		m_pMapInfo->SetText( reinterpret_cast<char *>( pUCS2 ) );
 	}
 	else
 	{
 		// convert UCS-2 LE buffer to wide string
-		wchar_t *wBuf = new wchar_t[bufSize];
-		V_UCS2ToUnicode( pUCS2, wBuf, bufSize * sizeof( wchar_t ) );
+		int bufSize = iLength + 2;
+		wchar_t *wBuf = new wchar_t[bufSize]();
+		V_UCS2ToUnicode( pUCS2, wBuf, iLength * sizeof( wchar_t ) );
 
 		// ensure little-endian unicode reads correctly on all platforms
 		CByteswap byteSwap;
@@ -424,8 +446,7 @@ void CTFMapInfoMenu::LoadMapPage( const char *mapName )
 	// go back to the top of the text buffer
 	m_pMapInfo->GotoTextStart();
 
-	g_pFullFileSystem->Close( f );
-	delete[] memBlock;
+	UTIL_FreeFile( (byte *)pUCS2 );
 
 	// we haven't loaded a valid map image for the current map
 	if ( m_pMapImage && !m_pMapImage->IsVisible() )

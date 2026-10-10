@@ -678,15 +678,18 @@ void CTeamControlPointMaster::CheckWinConditions( void )
 			{
 				CTeamRoundTimer *pTimer = NULL;
 
-				switch ( iWinners )
-				{
-				case TF_TEAM_RED:		pTimer = TFGameRules()->GetRedKothRoundTimer();		break;
-				case TF_TEAM_BLUE:		pTimer = TFGameRules()->GetBlueKothRoundTimer();	break;
-				case FO_TEAM_GREEN:		pTimer = TFGameRules()->GetGreenKothRoundTimer();	break;
-				case FO_TEAM_YELLOW:	pTimer = TFGameRules()->GetYellowKothRoundTimer();	break;
-				case FO_TEAM_PURPLE:	pTimer = TFGameRules()->GetPurpleKothRoundTimer();	break;
-				case FO_TEAM_PINK:		pTimer = TFGameRules()->GetPinkKothRoundTimer();	break;
-				}
+				if ( iWinners == TF_TEAM_RED )
+					pTimer = TFGameRules()->GetRedKothRoundTimer();
+				else if ( iWinners == TF_TEAM_BLUE )
+					pTimer = TFGameRules()->GetBlueKothRoundTimer();
+				else if ( iWinners == FO_TEAM_GREEN )
+					pTimer = TFGameRules()->GetGreenKothRoundTimer();
+				else if ( iWinners == FO_TEAM_YELLOW )
+					pTimer = TFGameRules()->GetYellowKothRoundTimer();
+				else if ( iWinners == FO_TEAM_PURPLE )
+					pTimer = TFGameRules()->GetPurpleKothRoundTimer();
+				else if ( iWinners == FO_TEAM_PINK )
+					pTimer = TFGameRules()->GetPinkKothRoundTimer();
 
 				if ( pTimer )
 				{

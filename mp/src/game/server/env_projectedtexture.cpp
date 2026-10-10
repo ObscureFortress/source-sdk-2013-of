@@ -53,6 +53,7 @@ private:
 	CNetworkVar( bool, m_bLightOnlyTarget );
 	CNetworkVar( bool, m_bLightWorld );
 	CNetworkVar( bool, m_bCameraSpace );
+	CNetworkVar( int, m_nLinearAtten );
 	CNetworkVector( m_LinearFloatLightColor );
 	CNetworkVar( float, m_flAmbient );
 	CNetworkString( m_SpotlightTextureName, MAX_PATH );
@@ -60,6 +61,9 @@ private:
 	CNetworkVar( float, m_flNearZ );
 	CNetworkVar( float, m_flFarZ );
 	CNetworkVar( int, m_nShadowQuality );
+	CNetworkVar( float, m_flShadowRes );
+	CNetworkVar( float, m_flShadowFilter );
+	CNetworkVar( float, m_flBrightness );
 };
 
 LINK_ENTITY_TO_CLASS( env_projectedtexture, CEnvProjectedTexture );
@@ -73,11 +77,15 @@ BEGIN_DATADESC( CEnvProjectedTexture )
 	DEFINE_KEYFIELD( m_bLightWorld, FIELD_BOOLEAN, "lightworld" ),
 	DEFINE_KEYFIELD( m_bCameraSpace, FIELD_BOOLEAN, "cameraspace" ),
 	DEFINE_KEYFIELD( m_flAmbient, FIELD_FLOAT, "ambient" ),
-	DEFINE_AUTO_ARRAY_KEYFIELD( m_SpotlightTextureName, FIELD_CHARACTER, "texturename" ),
+	DEFINE_AUTO_ARRAY( m_SpotlightTextureName, FIELD_CHARACTER ),
 	DEFINE_KEYFIELD( m_nSpotlightTextureFrame, FIELD_INTEGER, "textureframe" ),
 	DEFINE_KEYFIELD( m_flNearZ, FIELD_FLOAT, "nearz" ),
 	DEFINE_KEYFIELD( m_flFarZ, FIELD_FLOAT, "farz" ),
 	DEFINE_KEYFIELD( m_nShadowQuality, FIELD_INTEGER, "shadowquality" ),
+	DEFINE_KEYFIELD( m_nLinearAtten, FIELD_INTEGER, "linearatten" ),
+	DEFINE_KEYFIELD( m_flShadowRes, FIELD_FLOAT, "shadowres" ),
+	DEFINE_KEYFIELD( m_flShadowFilter, FIELD_FLOAT, "shadowfilter" ),
+	DEFINE_KEYFIELD( m_flBrightness, FIELD_FLOAT, "brightness" ),
 	DEFINE_FIELD( m_LinearFloatLightColor, FIELD_VECTOR ), 
 
 	DEFINE_INPUTFUNC( FIELD_VOID, "TurnOn", InputTurnOn ),
@@ -103,12 +111,16 @@ IMPLEMENT_SERVERCLASS_ST( CEnvProjectedTexture, DT_EnvProjectedTexture )
 	SendPropBool( SENDINFO( m_bLightOnlyTarget ) ),
 	SendPropBool( SENDINFO( m_bLightWorld ) ),
 	SendPropBool( SENDINFO( m_bCameraSpace ) ),
+	SendPropInt( SENDINFO( m_nLinearAtten ) ),
+	SendPropFloat( SENDINFO( m_flShadowRes ) ),
+	SendPropFloat( SENDINFO( m_flShadowFilter ) ),
+	SendPropFloat( SENDINFO( m_flBrightness ) ),
 	SendPropVector( SENDINFO( m_LinearFloatLightColor ) ),
 	SendPropFloat( SENDINFO( m_flAmbient ) ),
 	SendPropString( SENDINFO( m_SpotlightTextureName ) ),
 	SendPropInt( SENDINFO( m_nSpotlightTextureFrame ) ),
 	SendPropFloat( SENDINFO( m_flNearZ ), 16, SPROP_ROUNDDOWN, 0.0f,  500.0f ),
-	SendPropFloat( SENDINFO( m_flFarZ ),  18, SPROP_ROUNDDOWN, 0.0f, 1500.0f ),
+	SendPropFloat( SENDINFO( m_flFarZ ),  18, SPROP_ROUNDDOWN, 0.0f, 90000.0f ),
 	SendPropInt( SENDINFO( m_nShadowQuality ), 1, SPROP_UNSIGNED ),  // Just one bit for now
 END_SEND_TABLE()
 
@@ -132,11 +144,15 @@ CEnvProjectedTexture::CEnvProjectedTexture( void )
 #endif
 
 	m_nSpotlightTextureFrame = 0;
+	m_nLinearAtten = 100;
 	m_LinearFloatLightColor.Init( 1.0f, 1.0f, 1.0f );
 	m_flAmbient = 0.0f;
 	m_flNearZ = 4.0f;
 	m_flFarZ = 750.0f;
 	m_nShadowQuality = 0;
+	m_flShadowRes = 512.0f;
+	m_flShadowFilter = 3.0f;
+	m_flBrightness = 1.0f;
 }
 
 void UTIL_ColorStringToLinearFloatColor( Vector &color, const char *pString )
@@ -160,6 +176,10 @@ bool CEnvProjectedTexture::KeyValue( const char *szKeyName, const char *szValue 
 		Vector tmp;
 		UTIL_ColorStringToLinearFloatColor( tmp, szValue );
 		m_LinearFloatLightColor = tmp;
+	}
+	else if ( FStrEq( szKeyName, "texturename" ) )
+	{
+		Q_strcpy( m_SpotlightTextureName.GetForModify(), szValue );
 	}
 	else
 	{
@@ -226,9 +246,15 @@ void CEnvProjectedTexture::InputSetSpotlightTexture( inputdata_t &inputdata )
 
 void CEnvProjectedTexture::Activate( void )
 {
+	m_bState = false;
+
 	if ( GetSpawnFlags() & ENV_PROJECTEDTEXTURE_STARTON )
 	{
 		m_bState = true;
+	}
+	else
+	{
+		m_bState = false;
 	}
 
 	SetThink( &CEnvProjectedTexture::InitialThink );
@@ -239,7 +265,18 @@ void CEnvProjectedTexture::Activate( void )
 
 void CEnvProjectedTexture::InitialThink( void )
 {
-	m_hTargetEntity = gEntList.FindEntityByName( NULL, m_target );
+	if ( m_hTargetEntity == NULL && m_target != NULL_STRING )
+		m_hTargetEntity = gEntList.FindEntityByName( NULL, m_target );
+
+	if ( m_hTargetEntity == NULL )
+		return;
+
+	Vector vecToTarget = ( m_hTargetEntity->GetAbsOrigin() - GetAbsOrigin() );
+	QAngle vecAngles;
+	VectorAngles( vecToTarget, vecAngles );
+	SetAbsAngles( vecAngles );
+
+	SetNextThink( gpGlobals->curtime + 0.1 );
 }
 
 int CEnvProjectedTexture::UpdateTransmitState()

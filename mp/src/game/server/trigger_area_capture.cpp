@@ -91,6 +91,7 @@ LINK_ENTITY_TO_CLASS( trigger_capture_area, CTriggerAreaCapture );
 CTriggerAreaCapture::CTriggerAreaCapture()
 {
 	m_TeamData.SetSize( GetNumberOfTeams() );
+	m_hTrainWatcher = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -201,9 +202,9 @@ void CTriggerAreaCapture::StartTouch(CBaseEntity *pOther)
 		CaptureThink();
 
 		// If a capture is already running, start scoring for the player walking in
-		if ( m_bCapturing && g_hControlPointMasters.Count() )
+		if ( m_bCapturing )
 		{
-			CTeamControlPointMaster *pMaster = g_hControlPointMasters[0];
+			CTeamControlPointMaster *pMaster = g_hControlPointMasters.Count() ? g_hControlPointMasters[0] : NULL;
 			if ( pMaster )
 			{
 				float flRate = pMaster->GetPartialCapturePointRate();
@@ -774,24 +775,21 @@ void CTriggerAreaCapture::StartCapture( int team, int capmode )
 	}
 
 	// Start scoring escort points for everyone of the capturing team that is already in the zone
-	if ( g_hControlPointMasters.Count() )
+	CTeamControlPointMaster *pMaster = g_hControlPointMasters.Count() ? g_hControlPointMasters[0] : NULL;
+	if ( pMaster )
 	{
-		CTeamControlPointMaster *pMaster = g_hControlPointMasters[0];
-		if ( pMaster )
+		float flRate = pMaster->GetPartialCapturePointRate();
+		if ( flRate > 0.0f )
 		{
-			float flRate = pMaster->GetPartialCapturePointRate();
-			if ( flRate > 0.0f )
+			CTeam *pTeam = GetGlobalTeam( m_nCapturingTeam );
+			if ( pTeam )
 			{
-				CTeam *pTeam = GetGlobalTeam( m_nCapturingTeam );
-				if ( pTeam )
+				for ( int i = 0; i < pTeam->GetNumPlayers(); i++ )
 				{
-					for ( int i = 0; i < pTeam->GetNumPlayers(); i++ )
+					CBaseMultiplayerPlayer *pPlayer = ToBaseMultiplayerPlayer( pTeam->GetPlayer( i ) );
+					if ( pPlayer && IsTouching( pPlayer ) )
 					{
-						CBaseMultiplayerPlayer *pPlayer = ToBaseMultiplayerPlayer( pTeam->GetPlayer( i ) );
-						if ( pPlayer && IsTouching( pPlayer ) )
-						{
-							pPlayer->StartScoringEscortPoints( flRate );
-						}
+						pPlayer->StartScoringEscortPoints( flRate );
 					}
 				}
 			}

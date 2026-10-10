@@ -49,7 +49,7 @@ void CFOMeleeCustom2::PrimaryAttack()
 	if ( !pPlayer )
 		return;
 
-	m_iWeaponMode = TF_WEAPON_PRIMARY_MODE;
+	m_flNextSecondaryAttack = m_flNextPrimaryAttack;
 
 	Swing( pPlayer );
 }

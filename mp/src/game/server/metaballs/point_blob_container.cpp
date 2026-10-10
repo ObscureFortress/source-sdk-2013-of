@@ -39,11 +39,14 @@ END_SEND_TABLE()
 CPointBlobContainer::CPointBlobContainer()
 {
 	GridSize = 10;
+	GridBounds = Vector( 50, 50, 50 );
+
+	color32 ambientColor = { 0x50, 0x50, 0x50, 0 };
+	Ambcolor = ambientColor;
 	colorBoost = 1.0f;
-	GridBounds.Init( 50, 50, 50 );
-	BlobMaterialName = NULL_STRING;
-	color.Init( 100, 100, 100, 0 );
-	Ambcolor.Init( 0x50, 0x50, 0x50, 0 );
+
+	color32 blobColor = { 0x64, 0x64, 0x64, 0 };
+	color = blobColor;
 	attraction = 1.0f;
 }
 
@@ -52,7 +55,7 @@ CPointBlobContainer::CPointBlobContainer()
 //-----------------------------------------------------------------------------
 void CPointBlobContainer::Spawn( void )
 {
-	SetTransmitState( FL_EDICT_ALWAYS );
+	SetTransmitState( FL_EDICT_PVSCHECK );
 
 	m_nRenderMode = kRenderNormal;
 	m_nRenderFX = 2;

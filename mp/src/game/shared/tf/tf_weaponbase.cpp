@@ -1284,6 +1284,92 @@ const Vector &CTFWeaponBase::GetBulletSpread( void )
 	return cone;
 }
 
+class CTraceFilterIgnoreTeammates : public CTraceFilterSimple
+{
+public:
+	// It does have a base, but we'll never network anything below here..
+	DECLARE_CLASS( CTraceFilterIgnoreTeammates, CTraceFilterSimple );
+
+	CTraceFilterIgnoreTeammates( const IHandleEntity *passentity, int collisionGroup, int iIgnoreTeam )
+		: CTraceFilterSimple( passentity, collisionGroup ), m_iIgnoreTeam( iIgnoreTeam )
+	{
+	}
+
+	virtual bool ShouldHitEntity( IHandleEntity *pServerEntity, int contentsMask )
+	{
+		CBaseEntity *pEntity = EntityFromEntityHandle( pServerEntity );
+
+		if ( pEntity->IsPlayer() && pEntity->GetTeamNumber() == m_iIgnoreTeam )
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	int m_iIgnoreTeam;
+};
+
+//-----------------------------------------------------------------------------
+// Purpose: Work out which way an airblasted projectile at vecOffset should go
+//-----------------------------------------------------------------------------
+void CTFWeaponBase::GetProjectileAirblastSetup( CTFPlayer *pPlayer, Vector vecOffset, Vector *vecSrc, bool bHitTeammates )
+{
+	Vector vecForward, vecRight, vecUp;
+	AngleVectors( pPlayer->EyeAngles(), &vecForward, &vecRight, &vecUp );
+
+	Vector vecShootPos = pPlayer->Weapon_ShootPosition();
+
+	// Estimate end point
+	Vector endPos = vecShootPos + vecForward * 2000;
+
+	// Trace forward and find what's in front of us, and aim at that
+	trace_t tr;
+
+	if ( bHitTeammates )
+	{
+		CTraceFilterSimple filter( pPlayer, COLLISION_GROUP_NONE );
+		UTIL_TraceLine( vecShootPos, endPos, MASK_SOLID, &filter, &tr );
+	}
+	else
+	{
+		CTraceFilterIgnoreTeammates filter( pPlayer, COLLISION_GROUP_NONE, pPlayer->GetTeamNumber() );
+		UTIL_TraceLine( vecShootPos, endPos, MASK_SOLID, &filter, &tr );
+	}
+
+	// Only use the trace end if it wasn't too close, which results
+	// in visually bizarre forward angles
+	if ( tr.fraction > 0.1 )
+	{
+		*vecSrc = tr.endpos - vecOffset;
+	}
+	else
+	{
+		*vecSrc = endPos - vecOffset;
+	}
+
+	VectorNormalize( *vecSrc );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Send an enemy projectile back the way the airblaster is aiming
+//-----------------------------------------------------------------------------
+void AirBlastProjectile( CBaseEntity *pEntity, CBaseEntity *pOwnerEnt, CTFWeaponBase *pWeapon, const Vector &vec_in )
+{
+	if ( !pOwnerEnt || !pOwnerEnt->IsPlayer() )
+		return;
+
+	pOwnerEnt->OnAirblast( pEntity );
+
+	// Don't deflect our own team's projectiles.
+	if ( !pEntity->InSameTeam( pOwnerEnt ) )
+	{
+		Vector vec = vec_in;
+		pEntity->Deflected( pEntity, vec );
+		pEntity->SetOwnerEntity( pOwnerEnt );
+	}
+}
+
 #else
 
 void TE_DynamicLight( IRecipientFilter& filter, float delay,

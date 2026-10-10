@@ -12,7 +12,10 @@
 
 #include "c_baseanimating.h"
 #include "cube_grid.h"
-#include "utlvector.h"
+
+#include "tier0/valve_minmax_off.h"
+#include <vector>
+#include "tier0/valve_minmax_on.h"
 
 class C_PointBlobElement;
 class IMesh;
@@ -27,33 +30,35 @@ public:
 	C_PointBlobContainer();
 	virtual ~C_PointBlobContainer();
 
-	virtual void Spawn( void );
-	virtual bool ShouldDraw( void ) { return true; }
-	virtual void GetRenderBounds( Vector &mins, Vector &maxs );
-	virtual void Simulate( void );
-	virtual int DrawModel( int flags );
-
 	void UpdateContainer( void );
-	void UpdateMeshData( int iFirst, int iLast );
+	void UpdateMeshData( unsigned int startpoint, unsigned int nOfIterations );
+	void UpdateResolution( void );
 
-	CUBE_GRID	cubeGrid;
-	int			GridSize;
-	float		colorBoost;
-	Vector		GridBounds;
-	color32		Ambcolor;
-	color32		color;
-	float		attraction;
+	virtual int DrawModel( int flags );
+	virtual void GetRenderBounds( Vector &mins, Vector &maxs );
+	virtual void Spawn( void );
+	virtual void ClientThink( void );
+	virtual bool ShouldDraw( void );
+	virtual void Simulate( void );
+	virtual void OnDataChanged( DataUpdateType_t updateType );
 
-	CUtlVector<C_PointBlobElement *> metaballs;
-	IMesh		*pMesh;
+	CUBE_GRID cubeGrid;
+	int GridSize;
+	float colorBoost;
+	Vector GridBounds;
+	CNetworkColor32( Ambcolor );
+	CNetworkColor32( color );
+	float attraction;
+
+	std::vector<C_PointBlobElement *> metaballs;
+	IMesh *pMesh;
 	C_PointBlobContainer *parentedContainer;
-	char		BlobMaterialName[260];
-	KeyValues	*kval;
-	IMaterial	*CustomMat;
-
-private:
-	bool		first;
-	int			m_nLastUpdateFrame;
+	Vector white[6];
+	char BlobMaterialName[260];
+	KeyValues *kval;
+	IMaterial *CustomMat;
+	SURFACE_VERTEX edgeVertices[12];
+	bool first;
 };
 
 #endif // C_POINT_BLOB_CONTAINER_H

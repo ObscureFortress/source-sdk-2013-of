@@ -21,10 +21,10 @@ class CTFPlayer;
 class CObjectWorkerFort : public CBaseObject
 {
 	DECLARE_CLASS( CObjectWorkerFort, CBaseObject );
+	DECLARE_DATADESC();
 
 public:
 	DECLARE_SERVERCLASS();
-	DECLARE_DATADESC();
 
 	CObjectWorkerFort();
 

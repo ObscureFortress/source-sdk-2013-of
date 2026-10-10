@@ -20,8 +20,8 @@
 
 // Ground placed version
 #define REPAIR_MODEL_PLACEMENT	"models/buildables/repair_level1.mdl"
-#define REPAIR_MODEL_BUILDING	"models/buildables/repair_level1.mdl"
-#define REPAIR_MODEL				"models/buildables/repair_level3.mdl"
+#define REPAIR_MODEL_BUILDING	"models/buildables/repairnode_heavy.mdl"
+#define REPAIR_MODEL				"models/buildables/repairnode_light.mdl"
 
 #define REPAIR_MINS			Vector( -20, -20, 0)
 #define REPAIR_MAXS			Vector( 20, 20, 55)	// tweak me
@@ -214,10 +214,10 @@ void CObjectRepairnode::Precache()
 
 	PrecacheModel(REPAIR_MODEL_PLACEMENT);
 
-	iModelIndex = PrecacheModel(REPAIR_MODEL_BUILDING);
+	iModelIndex = PrecacheModel("models/buildables/repairnode_heavy.mdl");
 	PrecacheGibsForModel(iModelIndex);
 
-	iModelIndex = PrecacheModel(REPAIR_MODEL);
+	iModelIndex = PrecacheModel("models/buildables/repairnode_light.mdl");
 	PrecacheGibsForModel(iModelIndex);
 
 	PrecacheScriptSound("Building_Dispenser.Idle");
@@ -226,10 +226,10 @@ void CObjectRepairnode::Precache()
 
 	PrecacheParticleSystem("dispenser_heal_red");
 	PrecacheParticleSystem("dispenser_heal_blue");
-	//PrecacheParticleSystem("dispenser_heal_green");
-	//PrecacheParticleSystem("dispenser_heal_yellow");
-	//PrecacheParticleSystem("dispenser_heal_purple");
-	//PrecacheParticleSystem("dispenser_heal_pink");
+	PrecacheParticleSystem("dispenser_heal_green");
+	PrecacheParticleSystem("dispenser_heal_yellow");
+	PrecacheParticleSystem("dispenser_heal_purple");
+	PrecacheParticleSystem("dispenser_heal_pink");
 }
 
 //-----------------------------------------------------------------------------
@@ -405,13 +405,7 @@ void CObjectRepairnode::StartHealing(CBaseEntity *pOther)
 
 	if (pBuilding)
 	{
-		//pBuilding->InputAddHealth()
-		//pBuilding->Repair(obj_repairnode_heal_rate.GetFloat());
-		//pBuilding->Command_Repair(pBuilder);
-		if (pBuilding->GetHealth() <= pBuilding->GetMaxHealth())
-			pBuilding->SetHealth(pBuilding->GetHealth() + 10);
-
-		//pPlayer->m_Shared.Heal(GetOwner(), obj_dispenser_heal_rate.GetFloat(), true);
+		pBuilding->m_bHealing = true;
 	}
 }
 
@@ -425,17 +419,15 @@ void CObjectRepairnode::StopHealing(CBaseEntity *pOther)
 	EHANDLE hOther = pOther;
 	bFound = m_hRepairTargets.FindAndRemove(hOther);
 
-	/*
 	if (bFound)
 	{
-		CTFPlayer *pPlayer = ToTFPlayer(pOther);
+		CBaseObject *pBuilding = ToBaseObject(pOther);
 
-		if (pPlayer)
+		if (pBuilding)
 		{
-			pPlayer->m_Shared.StopHealing(GetOwner());
+			pBuilding->m_bHealing = false;
 		}
 	}
-	*/
 }
 
 //-----------------------------------------------------------------------------
@@ -448,19 +440,15 @@ bool CObjectRepairnode::CouldHealTarget(CBaseEntity *pTarget)
 
 	if (!pTarget->IsPlayer() && pTarget->IsAlive())
 	{
-		//CBaseObject *pBuilding = ToBaseObject(pTarget);
-		//CTFPlayer *pTFPlayer = ToTFPlayer(pTarget);
-
-		// don't heal enemies unless they are disguised as our team
-		/*
-		int iTeam = GetTeamNumber();
-		int iBuildingTeam = pBuilding->GetTeamNumber();
-
-		if (iBuildingTeam != iTeam)
-		{
+		CBaseObject *pBuilding = ToBaseObject(pTarget);
+		if (!pBuilding)
 			return false;
-		}
-		*/
+
+		// don't heal enemy buildings
+		int iBuildingTeam = pBuilding->GetTeamNumber();
+		int iTeam = GetTeamNumber();
+		if (iBuildingTeam != iTeam)
+			return false;
 
 		return true;
 	}

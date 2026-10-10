@@ -91,6 +91,8 @@ private:
 	CTFImagePanel	*m_pBriefcase;
 	CTFImagePanel	*m_p6StatusIcon;
 	CTFImagePanel	*m_p6Briefcase;
+	CTFImagePanel	*m_pDiamondStatusIcon;
+	CTFImagePanel	*m_pDiamond;
 };
 
 //-----------------------------------------------------------------------------
@@ -126,12 +128,16 @@ private:
 
 	CTFFlagStatus			*m_pRedFlag;
 	CTFFlagStatus			*m_pBlueFlag;
+	CTFFlagStatus			*m_pDiamondFlag;
 	CTFArrowPanel			*m_pCapturePoint;
 
 	CTFLabel						*m_pRedTimer;
 	CTFLabel						*m_pRedTimerShadow;
 	CTFLabel						*m_pBlueTimer;
 	CTFLabel						*m_pBlueTimerShadow;
+
+	CTFLabel						*m_pDiamondProgress;
+	CTFLabel						*m_pDiamondProgressShadow;
 
 	bool					m_bFlagAnimationPlayed;
 	bool					m_bCarryingFlag;

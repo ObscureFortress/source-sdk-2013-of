@@ -53,6 +53,7 @@ ConVar tf_damage_events_track_for( "tf_damage_events_track_for", "30",  FCVAR_DE
 
 ConVar tf_useparticletracers( "tf_useparticletracers", "1", FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED, "Use particle tracers instead of old style ones." );
 ConVar tf_spy_cloak_consume_rate( "tf_spy_cloak_consume_rate", "10.0", FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED, "cloak to use per second while cloaked, from 100 max )" );	// 10 seconds of invis
+ConVar fo_saptrap_cloak_consume_rate( "fo_saptrap_cloak_consume_rate", "4.0", FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED, "cloak to use per second while cloaked, from 100 max" );
 ConVar tf_spy_cloak_regen_rate( "tf_spy_cloak_regen_rate", "3.3", FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED, "cloak to regen per second, up to 100 max" );		// 30 seconds to full charge
 ConVar tf_spy_cloak_no_attack_time( "tf_spy_cloak_no_attack_time", "2.0", FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED, "time after uncloaking that the spy is prohibited from attacking" );
 
@@ -538,6 +539,18 @@ void CTFPlayerShared::ConditionGameRulesThink( void )
 	// Dispensers can give us the TF_COND_HEALTH_BUFF, but will not maintain or give us health above 100%s
 	bool bDecayHealth = true;
 
+	// Stealing health with the hands overheals us and charges the energy meter
+	if ( InCond( FO_COND_STEALING_HEALTH ) && gpGlobals->curtime > m_flNextStealHealthUpdate )
+	{
+		if ( m_pOuter->GetHealth() < m_pOuter->GetMaxHealth() * 2 )
+		{
+			m_pOuter->TakeHealth( 3.0f, DMG_IGNORE_MAXHEALTH );
+		}
+
+		m_flEnergyMeter += 1.0f;
+		m_flNextStealHealthUpdate = gpGlobals->curtime + 0.25f;
+	}
+
 	// If we're being healed, heal ourselves
 	if ( InCond( TF_COND_HEALTH_BUFF ) )
 	{
@@ -758,7 +771,7 @@ void CTFPlayerShared::ConditionThink( void )
 	bIsLocalPlayer = true;
 #endif
 
-	if ( ( m_pOuter->IsPlayerClass(FO_CLASS_SAPTRAP + 1))  && bIsLocalPlayer )
+	if ( m_pOuter->IsPlayerClass( TF_CLASS_SPY ) && bIsLocalPlayer )
 	{
 		if ( InCond( TF_COND_STEALTHED ) )
 		{
@@ -780,7 +793,29 @@ void CTFPlayerShared::ConditionThink( void )
 		}
 	}
 
-	if (m_pOuter->IsPlayerClass(FO_CLASS_TELECON + 1))
+#ifdef GAME_DLL
+	if ( m_pOuter->IsPlayerClass( FO_CLASS_SAPTRAP + 1 ) )
+	{
+		// Staying cloaked costs the Saptrap health.
+		if ( InCond( TF_COND_STEALTHED ) && gpGlobals->curtime >= m_flCloakHurtTime )
+		{
+			CTakeDamageInfo info( m_pOuter, m_pOuter, fo_saptrap_cloak_consume_rate.GetFloat(), DMG_PREVENT_PHYSICS_FORCE );
+			m_pOuter->TakeDamage( info );
+			m_flCloakHurtTime = gpGlobals->curtime + 0.5f;
+		}
+
+		if ( m_flEnergyMeter >= 100.0f )
+		{
+			m_flEnergyMeter = 100.0f;
+		}
+		else if ( m_flEnergyMeter < 0.0f )
+		{
+			m_flEnergyMeter = 0.0f;
+		}
+	}
+#endif
+
+	if ( m_pOuter->IsPlayerClass( FO_CLASS_TELECON + 1 ) && bIsLocalPlayer )
 	{
 		m_flTeleportMeter += gpGlobals->frametime * (tf_spy_cloak_regen_rate.GetFloat() * 2);
 
@@ -2111,6 +2146,12 @@ void CTFPlayer::TeamFortress_SetSpeed()
 			{
 				maxfbspeed *= 0.5;
 			}
+
+			// The diamond slows its carrier down too.
+			if ( TFGameRules() && TFGameRules()->GetGameType() == FO_GAMETYPE_DITR )
+			{
+				maxfbspeed *= 0.5;
+			}
 		}
 	}
 
@@ -2398,7 +2439,8 @@ bool CTFPlayer::CanAttack( void )
 #ifdef CLIENT_DLL
 		HintMessage( HINT_CANNOT_ATTACK_WHILE_CLOAKED, true, true );
 #endif
-		return false;
+		if ( GetActiveTFWeapon()->GetWeaponID() != FO_WEAPON_HANDS )
+			return false;
 	}
 
 	if ( ( pRules->State_Get() == GR_STATE_TEAM_WIN ) && ( pRules->GetWinningTeam() != GetTeamNumber() ) )
@@ -2451,7 +2493,7 @@ bool CTFPlayer::DoClassSpecialSkill( void )
 					m_Shared.FadeInvis(tf_spy_invis_unstealth_time.GetFloat());
 					bDoSkill = true;
 				}
-				else if (CanGoInvisible() && (m_Shared.GetSpyCloakMeter() > 8.0f))	// must have over 10% cloak to start
+				else if (CanGoInvisible())
 				{
 					m_Shared.AddCond(TF_COND_STEALTHED);
 					bDoSkill = true;
@@ -2523,11 +2565,6 @@ const Vector& CTFPlayer::GetClassEyeHeight( void )
 	//	vecTestViewHeight.z = test.GetFloat();
 	//	return vecTestViewHeight;
 	//}
-
-	int iClassIndex = pClass->GetClassIndex();
-
-	if ( iClassIndex < TF_FIRST_NORMAL_CLASS || iClassIndex > TF_LAST_NORMAL_CLASS )
-		return VEC_VIEW;
 
 	return g_TFClassViewVectors[pClass->GetClassIndex()];
 }

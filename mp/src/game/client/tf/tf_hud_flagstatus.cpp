@@ -53,6 +53,9 @@ extern ConVar fo_ctp_scorelimit;
 
 extern ConVar fo_ctp_red_timer;
 extern ConVar fo_ctp_blue_timer;
+extern ConVar fo_ditr_is_diamond_out;
+extern ConVar fo_ditr_diamond_progress;
+extern ConVar fo_ditr_diamond_digging;
 extern ConVar fo_ctp_green_timer;
 extern ConVar fo_ctp_yellow_timer;
 extern ConVar fo_ctp_purple_timer;
@@ -302,6 +305,25 @@ void CTFArrowPanel::Paint()
 			}
 		}
 	}
+	else if (pEnt->GetTeamNumber() == TEAM_UNASSIGNED) // the diamond
+	{
+		pMaterial = m_NeutralMaterial;
+
+		if (pLocalPlayer && (pLocalPlayer->GetObserverMode() == OBS_MODE_IN_EYE))
+		{
+			// is our target a player?
+			C_BaseEntity *pTargetEnt = pLocalPlayer->GetObserverTarget();
+			if (pTargetEnt && pTargetEnt->IsPlayer())
+			{
+				// does our target have the flag and are they carrying the flag we're currently drawing?
+				C_TFPlayer *pTarget = static_cast<C_TFPlayer*>(pTargetEnt);
+				if (pTarget->HasTheFlag() && (pTarget->GetItem() == pEnt))
+				{
+					pMaterial = m_RedMaterialNoArrow;
+				}
+			}
+		}
+	}
 
 	int x = 0;
 	int y = 0;
@@ -390,6 +412,8 @@ void CTFFlagStatus::ApplySchemeSettings( IScheme *pScheme )
 	m_pBriefcase = dynamic_cast<CTFImagePanel *>( FindChildByName( "Briefcase" ) );
 	m_p6StatusIcon = dynamic_cast<CTFImagePanel *>(FindChildByName("6StatusIcon"));
 	m_p6Briefcase = dynamic_cast<CTFImagePanel *>(FindChildByName("6Briefcase"));
+	m_pDiamondStatusIcon = dynamic_cast<CTFImagePanel *>(FindChildByName("DiamondStatusIcon"));
+	m_pDiamond = dynamic_cast<CTFImagePanel *>(FindChildByName("Diamond"));
 }
 
 //-----------------------------------------------------------------------------
@@ -397,6 +421,10 @@ void CTFFlagStatus::ApplySchemeSettings( IScheme *pScheme )
 //-----------------------------------------------------------------------------
 bool CTFFlagStatus::IsVisible( void )
 {
+	// Only flag game modes use this panel
+	if ( !TFGameRules() || ( TFGameRules()->GetGameType() != FO_GAMETYPE_DITR && TFGameRules()->GetGameType() != TF_GAMETYPE_CTF && TFGameRules()->GetGameType() != FO_GAMETYPE_CTP ) )
+		return false;
+
 	if (TFGameRules() && TFGameRules()->ExtraTeamMode() == 2)
 	{
 		if (m_p6Briefcase && m_p6StatusIcon && m_pBriefcase && m_pStatusIcon)
@@ -415,6 +443,51 @@ bool CTFFlagStatus::IsVisible( void )
 			m_p6StatusIcon->SetVisible(false);
 			m_pBriefcase->SetVisible(true);
 			m_pStatusIcon->SetVisible(true);
+		}
+	}
+
+	if (TFGameRules() && TFGameRules()->GetGameType() == FO_GAMETYPE_DITR)
+	{
+		if (m_p6Briefcase && m_p6StatusIcon && m_pBriefcase && m_pStatusIcon)
+		{
+			m_p6Briefcase->SetVisible(false);
+			m_p6StatusIcon->SetVisible(false);
+			m_pBriefcase->SetVisible(false);
+			m_pStatusIcon->SetVisible(false);
+			m_pDiamond->SetVisible(false);
+			m_pDiamondStatusIcon->SetVisible(false);
+
+			if ( m_hEntity.Get() )
+			{
+				// The diamond is the teamless flag
+				CCaptureFlag *pFlag = dynamic_cast<CCaptureFlag *>( m_hEntity.Get() );
+				if ( pFlag )
+				{
+					if ( pFlag->GetTeamNumber() == TEAM_UNASSIGNED )
+					{
+						m_pDiamond->SetVisible(true);
+						m_pDiamondStatusIcon->SetVisible(true);
+					}
+					else
+					{
+						m_pDiamond->SetVisible(false);
+						m_pDiamondStatusIcon->SetVisible(false);
+					}
+				}
+				else
+				{
+					m_pDiamond->SetVisible(false);
+					m_pDiamondStatusIcon->SetVisible(false);
+				}
+			}
+		}
+	}
+	else
+	{
+		if (m_pDiamond && m_pDiamondStatusIcon)
+		{
+			m_pDiamond->SetVisible(false);
+			m_pDiamondStatusIcon->SetVisible(false);
 		}
 	}
 
@@ -453,6 +526,7 @@ void CTFFlagStatus::UpdateStatus( void )
 			{
 				m_pStatusIcon->SetImage(pszImage);
 				m_p6StatusIcon->SetImage(psz6Image);
+				m_pDiamondStatusIcon->SetImage(pszImage);
 			}
 		}
 	}
@@ -506,6 +580,7 @@ void CTFHudFlagObjectives::ApplySchemeSettings( IScheme *pScheme )
 
 	m_pRedFlag = dynamic_cast<CTFFlagStatus *>( FindChildByName( "RedFlag" ) );
 	m_pBlueFlag = dynamic_cast<CTFFlagStatus *>( FindChildByName( "BlueFlag" ) );
+	m_pDiamondFlag = dynamic_cast<CTFFlagStatus *>( FindChildByName( "DiamondFlag" ) );
 
 	m_pCapturePoint = dynamic_cast<CTFArrowPanel *>( FindChildByName( "CaptureFlag" ) );
 
@@ -515,6 +590,8 @@ void CTFHudFlagObjectives::ApplySchemeSettings( IScheme *pScheme )
 	m_pRedTimerShadow = dynamic_cast<CTFLabel *>(FindChildByName("RedTimerShadow"));
 	m_pBlueTimer = dynamic_cast<CTFLabel *>(FindChildByName("BlueTimer"));
 	m_pBlueTimerShadow = dynamic_cast<CTFLabel *>(FindChildByName("BlueTimerShadow"));
+	m_pDiamondProgress = dynamic_cast<CTFLabel *>(FindChildByName("DiamondProgress"));
+	m_pDiamondProgressShadow = dynamic_cast<CTFLabel *>(FindChildByName("DiamondProgressShadow"));
 
 	// outline is always on, so we need to init the alpha to 0
 	CTFImagePanel *pOutline = dynamic_cast<CTFImagePanel *>( FindChildByName( "OutlineImage" ) );
@@ -544,6 +621,11 @@ void CTFHudFlagObjectives::Reset()
 	if ( m_pRedFlag && !m_pRedFlag->IsVisible() )
 	{
 		m_pRedFlag->SetVisible( true );
+	}
+
+	if ( TFGameRules() && TFGameRules()->GetGameType() == FO_GAMETYPE_DITR && m_pDiamondFlag && !m_pDiamondFlag->IsVisible() )
+	{
+		m_pDiamondFlag->SetVisible( true );
 	}
 
 	if ( m_pSpecCarriedImage && m_pSpecCarriedImage->IsVisible() )
@@ -593,6 +675,10 @@ void CTFHudFlagObjectives::OnTick()
 				{
 					m_pBlueFlag->SetEntity( pFlag );
 				}
+				else if ( m_pDiamondFlag && pFlag->GetTeamNumber() == TEAM_UNASSIGNED )
+				{
+					m_pDiamondFlag->SetEntity( pFlag );
+				}
 			}
 		}
 		else
@@ -604,6 +690,52 @@ void CTFHudFlagObjectives::OnTick()
 
 	SetDialogVariable("redtimer", fo_ctp_red_timer.GetInt());
 	SetDialogVariable("bluetimer", fo_ctp_blue_timer.GetInt());
+	SetDialogVariable("diamondprogress", fo_ditr_diamond_progress.GetInt());
+
+	if (TFGameRules() && TFGameRules()->GetGameType() == FO_GAMETYPE_DITR)
+	{
+		if (m_pDiamondFlag && !fo_ditr_is_diamond_out.GetBool())
+		{
+			// Still buried: show the dig progress while someone is digging
+			m_pDiamondFlag->SetVisible(false);
+
+			if (fo_ditr_diamond_digging.GetBool())
+			{
+				m_pDiamondProgress->SetVisible(true);
+				m_pDiamondProgressShadow->SetVisible(true);
+			}
+			else
+			{
+				m_pDiamondProgress->SetVisible(false);
+				m_pDiamondProgressShadow->SetVisible(false);
+			}
+		}
+		else if (m_pDiamondFlag)
+		{
+			// Dug up: line the capture arrow and carried icon up with the diamond
+			m_pDiamondProgress->SetVisible(false);
+			m_pDiamondProgressShadow->SetVisible(false);
+
+			m_pCapturePoint->SetPos(m_pCapturePoint->GetXPos(), m_pDiamondFlag->GetYPos());
+			m_pCarriedImage->SetPos((double)m_pDiamondFlag->GetXPos() - (ScreenWidth() / 640.0f) * 40.0f, m_pDiamondFlag->GetYPos() + YRES(10));
+
+			if (!m_bCarryingFlag)
+				m_pDiamondFlag->SetVisible(true);
+			else
+				m_pDiamondFlag->SetVisible(false);
+		}
+	}
+	else
+	{
+		if (m_pDiamondFlag)
+			m_pDiamondFlag->SetVisible(false);
+
+		if (m_pDiamondProgress && m_pDiamondProgressShadow)
+		{
+			m_pDiamondProgress->SetVisible(false);
+			m_pDiamondProgressShadow->SetVisible(false);
+		}
+	}
 
 
 	if (TFGameRules() && TFGameRules()->GetGameType() == FO_GAMETYPE_CTP)
@@ -815,6 +947,11 @@ void CTFHudFlagObjectives::UpdateStatus( void )
 				m_pCarriedImage->SetVisible( true );
 			}
 
+			if ( m_pDiamondFlag && m_pDiamondFlag->IsVisible() )
+			{
+				m_pDiamondFlag->SetVisible( false );
+			}
+
 			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "FlagOutline" );
 
 			if ( m_pCapturePoint )
@@ -882,6 +1019,16 @@ void CTFHudFlagObjectives::UpdateStatus( void )
 			}
 
 			m_pRedFlag->UpdateStatus();
+		}
+
+		if ( m_pDiamondFlag )
+		{
+			if ( !m_pDiamondFlag->IsVisible() )
+			{
+				m_pDiamondFlag->SetVisible( true );
+			}
+
+			m_pDiamondFlag->UpdateStatus();
 		}
 	}
 }

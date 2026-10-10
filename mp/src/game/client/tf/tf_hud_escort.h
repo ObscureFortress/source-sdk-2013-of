@@ -100,6 +100,10 @@ public:
 private:
 	CTFHudEscort *m_pRedEscort;
 	CTFHudEscort *m_pBlueEscort;
+	CTFHudEscort *m_pGreenEscort;
+	CTFHudEscort *m_pYellowEscort;
+	CTFHudEscort *m_pPurpleEscort;
+	CTFHudEscort *m_pPinkEscort;
 };
 
 

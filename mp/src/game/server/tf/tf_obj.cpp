@@ -172,8 +172,6 @@ CBaseObject::CBaseObject()
 	m_bBuilding = false;
 	m_Activity = ACT_INVALID;
 	m_bDisabled = false;
-	m_bHealing = false;
-	m_bWasMapPlaced = false;
 	m_SolidToPlayers = SOLID_TO_PLAYER_USE_DEFAULT;
 	m_bPlacementOK = false;
 	m_aGibs.Purge();
@@ -1131,8 +1129,8 @@ const char *CBaseObject::GetResponseRulesModifier( void )
 	case OBJ_TELEPORTER_EXIT: return "objtype:teleporter_exit"; break;
 	case OBJ_SENTRYGUN: return "objtype:sentrygun"; break;
 	case OBJ_ATTACHMENT_SAPPER: return "objtype:sapper"; break;
-	case OBJ_FORT: return "objtype:fort"; break;
 	case OBJ_WALL: return "objtype:wall"; break;
+	case OBJ_FORT: return "objtype:fort"; break;
 	case OBJ_STAIRS: return "objtype:stairs"; break;
 	case OBJ_REPAIRNODE: return "objtype:repairnode"; break;
 	case OBJ_BEARTRAP: return "objtype:beartrap"; break;

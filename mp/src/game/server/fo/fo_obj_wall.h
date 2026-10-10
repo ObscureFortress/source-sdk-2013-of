@@ -21,10 +21,10 @@ class CTFPlayer;
 class CObjectWorkerWall : public CBaseObject
 {
 	DECLARE_CLASS( CObjectWorkerWall, CBaseObject );
+	DECLARE_DATADESC();
 
 public:
 	DECLARE_SERVERCLASS();
-	DECLARE_DATADESC();
 
 	CObjectWorkerWall();
 

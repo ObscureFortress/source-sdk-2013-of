@@ -616,7 +616,7 @@ void CTFGameStats::Event_PlayerDamage( CBasePlayer *pBasePlayer, const CTakeDama
 	} 
 	else if ( dynamic_cast<CObjectDispenser *>( pInflictor ) )
 	{
-		damage.iAttackClass = FO_CLASS_SENTRONIC;
+		damage.iAttackClass = FO_CLASS_DISMATIC;
 		damage.iWeapon = TF_WEAPON_DISPENSER;
 	}
 	else

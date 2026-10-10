@@ -28,9 +28,17 @@ void SetExtraConditionalFunc( bool (*pfnEvaluate)( const char * ) );
 //-----------------------------------------------------------------------------
 static bool EvaluateExtraConditionals( const char *pszConditional )
 {
-	bool bNot = ( pszConditional[0] == '!' );
+	bool bNot = false; // should we negate this command?
+	if ( *pszConditional == '!' )
+		bNot = true;
 
-	return bNot && V_stristr( pszConditional, "$DEDICATED" );
+	if ( V_stristr( pszConditional, "$DEDICATED" ) )
+	{
+		// a game client is never a dedicated server
+		return false ^ bNot;
+	}
+
+	return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -65,17 +73,17 @@ static void MountPathLocal( KeyValues *pGame )
 			{
 				for ( KeyValues *pPath = pPaths->GetFirstSubKey(); pPath; pPath = pPath->GetNextKey() )
 				{
-					if ( V_stricmp( pPath->GetName(), "local" ) != 0 )
+					if ( !FStrEq( pPath->GetName(), "local" ) )
 						continue;
 
 					char szPath[ 520 ];
 					V_strncpy( szPath, szInstallPath, sizeof( szPath ) );
 					V_AppendSlash( szPath, sizeof( szPath ) );
-					V_strncat( szPath, pPath->GetString( NULL, "" ), sizeof( szPath ) );
+					V_strncat( szPath, pPath->GetString(), sizeof( szPath ) );
 
 					g_pFullFileSystem->AddSearchPath( szPath, "GAME", PATH_ADD_TO_TAIL );
 
-					ConColorMsg( Color( 144, 238, 144, 255 ), "\tAdding path: %s\n", pPath->GetString( NULL, "" ) );
+					ConColorMsg( Color( 144, 238, 144, 255 ), "\tAdding path: %s\n", pPath->GetString() );
 				}
 			}
 		}

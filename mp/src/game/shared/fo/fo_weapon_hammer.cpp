@@ -56,6 +56,7 @@ void CFOHammer::PrimaryAttack()
 	if (!pPlayer)
 		return;
 
+	m_flNextSecondaryAttack = m_flNextPrimaryAttack;
 	m_iWeaponMode = TF_WEAPON_PRIMARY_MODE;
 
 	Swing(pPlayer);
@@ -73,12 +74,25 @@ void CFOHammer::SecondaryAttack()
 	if (!pPlayer)
 		return;
 
+	m_flNextSecondaryAttack = m_flNextPrimaryAttack;
 	m_iWeaponMode = TF_WEAPON_PRIMARY_MODE;
 
 	DoViewModelAnimation();
 	Swing(pPlayer);
 
 	m_iWeaponMode = TF_WEAPON_SECONDARY_MODE;
+}
+
+// -----------------------------------------------------------------------------
+// Purpose: Crits use the hard swing
+// -----------------------------------------------------------------------------
+void CFOHammer::DoViewModelAnimation( void )
+{
+	Activity act = ACT_VM_HITCENTER;
+	if ( IsCurrentAttackACrit() )
+		act = ACT_VM_SWINGHARD;
+
+	SendWeaponAnim( act );
 }
 
 #ifdef GAME_DLL
@@ -106,14 +120,8 @@ void CFOHammer::OnFriendlyBuildingHit(CBaseObject *pObject, CTFPlayer *pPlayer)
 	{
 		if (pObject->GetOwner() == pPlayer)
 		{
-			if (pObject->GetHealth() > 0)
-			{
-				pObject->SetHealth(pObject->m_iHealth - 50);
-			}
-			else
-			{
-				pObject->DetonateObject();
-			}
+			pObject->DetonateObject();
+			WeaponSound(SPECIAL1);
 		}
 	}
 }

@@ -61,9 +61,7 @@ CObjectWorkerStairs::~CObjectWorkerStairs()
 void CObjectWorkerStairs::Spawn()
 {
 	SetModel(STAIRS_MODEL_PLACEMENT);
-	//SetSolid(SOLID_VPHYSICS);
-	VPhysicsInitNormal(SOLID_VPHYSICS, 0, true);
-	SetCollisionGroup(COLLISION_GROUP_PLAYER_MOVEMENT);
+	SetSolid(SOLID_BBOX);
 
 	UTIL_SetSize(this, STAIRS_MINS, STAIRS_MAXS);
 	m_takedamage = DAMAGE_YES;
@@ -102,6 +100,11 @@ void CObjectWorkerStairs::OnGoActive(void)
 		return;
 
 	SetModel(STAIRS_MODEL);
+
+	// Players can walk on the finished stairs
+	SetSolid(SOLID_VPHYSICS);
+	VPhysicsInitStatic();
+	CollisionProp()->SetSurroundingBoundsType(USE_HITBOXES);
 
 	BaseClass::OnGoActive();
 }

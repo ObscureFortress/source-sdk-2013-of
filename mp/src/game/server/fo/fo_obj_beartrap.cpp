@@ -24,7 +24,7 @@
 #define BEARTRAP_MAX_HEALTH		25
 
 // What the builder gets when an enemy steps on the trap.
-#define BEARTRAP_ENERGY_REWARD		30.0f
+#define BEARTRAP_ENERGY_REWARD		30.0
 #define BEARTRAP_HEALTH_REWARD		60.0f
 #define BEARTRAP_TRIGGER_DAMAGE		60.0f
 
@@ -33,6 +33,7 @@ IMPLEMENT_SERVERCLASS_ST( CObjectBeartrap, DT_ObjectBeartrap )
 END_SEND_TABLE()
 
 BEGIN_DATADESC( CObjectBeartrap )
+	DEFINE_ENTITYFUNC( BeartrapTouch ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( obj_beartrap, CObjectBeartrap );
@@ -43,8 +44,6 @@ PRECACHE_REGISTER( obj_beartrap );
 //-----------------------------------------------------------------------------
 CObjectBeartrap::CObjectBeartrap()
 {
-	m_iState = 0;
-
 	SetMaxHealth( BEARTRAP_MAX_HEALTH );
 	m_iHealth = BEARTRAP_MAX_HEALTH;
 
@@ -62,8 +61,7 @@ void CObjectBeartrap::Spawn()
 	SetSolid( SOLID_BBOX );
 
 	m_takedamage = DAMAGE_YES;
-	m_iState = 0;
-	m_flLastStateChangeTime = gpGlobals->curtime;
+	SetState( 0 );
 	m_flNextEnemyTouchHint = gpGlobals->curtime;
 
 	BaseClass::Spawn();
@@ -76,7 +74,14 @@ void CObjectBeartrap::Precache()
 {
 	BaseClass::Precache();
 
-	int iModelIndex = PrecacheModel( BEARTRAP_MODEL );
+	int iModelIndex;
+
+	PrecacheModel( BEARTRAP_MODEL );
+
+	iModelIndex = PrecacheModel( BEARTRAP_MODEL );
+	PrecacheGibsForModel( iModelIndex );
+
+	iModelIndex = PrecacheModel( BEARTRAP_MODEL );
 	PrecacheGibsForModel( iModelIndex );
 
 	PrecacheScriptSound( "Building_Teleporter.Ready" );
@@ -153,7 +158,7 @@ void CObjectBeartrap::BeartrapTouch( CBaseEntity *pOther )
 	CTakeDamageInfo info( this, pBuilder, BEARTRAP_TRIGGER_DAMAGE, DMG_SLASH | DMG_PREVENT_PHYSICS_FORCE, 0 );
 	pVictim->TakeDamage( info );
 
-	DetonateObject();
+	BaseClass::DetonateObject();
 }
 
 //-----------------------------------------------------------------------------
@@ -182,15 +187,10 @@ void CObjectBeartrap::SetModel( const char *pModel )
 //-----------------------------------------------------------------------------
 int CObjectBeartrap::OnTakeDamage( const CTakeDamageInfo &info )
 {
-	CBaseEntity *pAttacker = info.GetAttacker();
-	if ( pAttacker && !pAttacker->IsPlayer() )
-	{
-		pAttacker = NULL;
-	}
-
+	CTFPlayer *pAttacker = ToTFPlayer( info.GetAttacker() );
 	if ( pAttacker == GetBuilder() )
 	{
-		DetonateObject();
+		BaseClass::DetonateObject();
 	}
 
 	return BaseClass::OnTakeDamage( info );

@@ -342,6 +342,11 @@ void CTFGamemodeHunted::Think( void )
 				TeamWin(FO_TEAM_PURPLE, m_bPurplePlaying);
 				m_OnPurpleWin.FireOutput(this, this);
 			}
+			if (m_nPinkScore >= m_nScoreLimitPink)
+			{
+				TeamWin(FO_TEAM_PINK, m_bPinkPlaying);
+				m_OnPinkWin.FireOutput(this, this);
+			}
 		}
 	}
 

@@ -469,6 +469,8 @@ void CTeamControlPoint::SetOwner( int iCapTeam, bool bMakeSound, int iNumCappers
 //-----------------------------------------------------------------------------
 void CTeamControlPoint::CaptureStart( int iCapTeam, int iNumCappingPlayers, int *pCappingPlayers )
 {
+	int iNumCappers = iNumCappingPlayers;
+
 	IGameEvent *event = gameeventmanager->CreateEvent( "teamplay_point_startcapture" );
 	if ( event )
 	{
@@ -481,13 +483,13 @@ void CTeamControlPoint::CaptureStart( int iCapTeam, int iNumCappingPlayers, int 
 
 		char cappers[9];	// pCappingPlayers is max length 8
 
-		if ( iNumCappingPlayers > 8 )
+		if ( iNumCappers > 8 )
 		{
-			iNumCappingPlayers = 8;
+			iNumCappers = 8;
 		}
 
 		int i;
-		for( i=0;i<iNumCappingPlayers;i++ )
+		for( i=0;i<iNumCappers;i++ )
 		{
 			cappers[i] = (char)pCappingPlayers[i];
 		}

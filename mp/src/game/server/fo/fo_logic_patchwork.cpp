@@ -258,14 +258,16 @@ void CFOLogicPatchwork::HackThink(void)
 				{
 					for (int i = 1; i <= gpGlobals->maxClients; i++)
 					{
-						CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
+						CTFPlayer *pPlayer = ToTFPlayer(UTIL_PlayerByIndex(i));
 
-						if (pPlayer && pPlayer->IsPlayer() && pPlayer->GetTeamNumber() == TF_TEAM_RED && pPlayer->IsDead())
+						if (pPlayer && pPlayer->GetTeamNumber() == TF_TEAM_RED && pPlayer->IsDead())
 						{
-							if (pGameRules->GetNextRespawnWave(TF_TEAM_RED, pPlayer) > 30.0f)
+							if (TeamplayRoundBasedRules()->GetNextRespawnWave(TF_TEAM_RED, pPlayer) > 30.0f)
 							{
-								pGameRules->SetTeamRespawnWaveTime(TF_TEAM_RED, 10.0f);
-								pPlayer->ForceRespawn();
+								TeamplayRoundBasedRules()->SetTeamRespawnWaveTime(TF_TEAM_RED, 10.0f);
+
+								if (pPlayer->GetPlayerClass() || pPlayer->GetPlayerClass()->GetClassIndex() != TF_CLASS_UNDEFINED)
+									pPlayer->ForceRespawn();
 							}
 						}
 					}
@@ -274,14 +276,16 @@ void CFOLogicPatchwork::HackThink(void)
 				{
 					for (int i = 1; i <= gpGlobals->maxClients; i++)
 					{
-						CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
+						CTFPlayer *pPlayer = ToTFPlayer(UTIL_PlayerByIndex(i));
 
-						if (pPlayer && pPlayer->IsPlayer() && pPlayer->GetTeamNumber() == TF_TEAM_BLUE && pPlayer->IsDead())
+						if (pPlayer && pPlayer->GetTeamNumber() == TF_TEAM_BLUE && pPlayer->IsDead())
 						{
-							if (pGameRules->GetNextRespawnWave(TF_TEAM_BLUE, pPlayer) > 30.0f)
+							if (TeamplayRoundBasedRules()->GetNextRespawnWave(TF_TEAM_BLUE, pPlayer) > 30.0f)
 							{
-								pGameRules->SetTeamRespawnWaveTime(TF_TEAM_BLUE, 10.0f);
-								pPlayer->ForceRespawn();
+								TeamplayRoundBasedRules()->SetTeamRespawnWaveTime(TF_TEAM_BLUE, 10.0f);
+
+								if (pPlayer->GetPlayerClass() || pPlayer->GetPlayerClass()->GetClassIndex() != TF_CLASS_UNDEFINED)
+									pPlayer->ForceRespawn();
 							}
 						}
 					}
@@ -290,14 +294,16 @@ void CFOLogicPatchwork::HackThink(void)
 				{
 					for (int i = 1; i <= gpGlobals->maxClients; i++)
 					{
-						CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
+						CTFPlayer *pPlayer = ToTFPlayer(UTIL_PlayerByIndex(i));
 
-						if (pPlayer && pPlayer->IsPlayer() && pPlayer->GetTeamNumber() == FO_TEAM_GREEN && pPlayer->IsDead())
+						if (pPlayer && pPlayer->GetTeamNumber() == FO_TEAM_GREEN && pPlayer->IsDead())
 						{
-							if (pGameRules->GetNextRespawnWave(FO_TEAM_GREEN, pPlayer) > 30.0f)
+							if (TeamplayRoundBasedRules()->GetNextRespawnWave(FO_TEAM_GREEN, pPlayer) > 30.0f)
 							{
-								pGameRules->SetTeamRespawnWaveTime(FO_TEAM_GREEN, 10.0f);
-								pPlayer->ForceRespawn();
+								TeamplayRoundBasedRules()->SetTeamRespawnWaveTime(FO_TEAM_GREEN, 10.0f);
+
+								if (pPlayer->GetPlayerClass() || pPlayer->GetPlayerClass()->GetClassIndex() != TF_CLASS_UNDEFINED)
+									pPlayer->ForceRespawn();
 							}
 						}
 					}
@@ -306,14 +312,16 @@ void CFOLogicPatchwork::HackThink(void)
 				{
 					for (int i = 1; i <= gpGlobals->maxClients; i++)
 					{
-						CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
+						CTFPlayer *pPlayer = ToTFPlayer(UTIL_PlayerByIndex(i));
 
-						if (pPlayer && pPlayer->IsPlayer() && pPlayer->GetTeamNumber() == FO_TEAM_YELLOW && pPlayer->IsDead())
+						if (pPlayer && pPlayer->GetTeamNumber() == FO_TEAM_YELLOW && pPlayer->IsDead())
 						{
-							if (pGameRules->GetNextRespawnWave(FO_TEAM_YELLOW, pPlayer) > 30.0f)
+							if (TeamplayRoundBasedRules()->GetNextRespawnWave(FO_TEAM_YELLOW, pPlayer) > 30.0f)
 							{
-								pGameRules->SetTeamRespawnWaveTime(FO_TEAM_YELLOW, 10.0f);
-								pPlayer->ForceRespawn();
+								TeamplayRoundBasedRules()->SetTeamRespawnWaveTime(FO_TEAM_YELLOW, 10.0f);
+
+								if (pPlayer->GetPlayerClass() || pPlayer->GetPlayerClass()->GetClassIndex() != TF_CLASS_UNDEFINED)
+									pPlayer->ForceRespawn();
 							}
 						}
 					}
@@ -322,14 +330,16 @@ void CFOLogicPatchwork::HackThink(void)
 				{
 					for (int i = 1; i <= gpGlobals->maxClients; i++)
 					{
-						CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
+						CTFPlayer *pPlayer = ToTFPlayer(UTIL_PlayerByIndex(i));
 
-						if (pPlayer && pPlayer->IsPlayer() && pPlayer->GetTeamNumber() == FO_TEAM_PURPLE && pPlayer->IsDead())
+						if (pPlayer && pPlayer->GetTeamNumber() == FO_TEAM_PURPLE && pPlayer->IsDead())
 						{
-							if (pGameRules->GetNextRespawnWave(FO_TEAM_PURPLE, pPlayer) > 30.0f)
+							if (TeamplayRoundBasedRules()->GetNextRespawnWave(FO_TEAM_PURPLE, pPlayer) > 30.0f)
 							{
-								pGameRules->SetTeamRespawnWaveTime(FO_TEAM_PURPLE, 10.0f);
-								pPlayer->ForceRespawn();
+								TeamplayRoundBasedRules()->SetTeamRespawnWaveTime(FO_TEAM_PURPLE, 10.0f);
+
+								if (pPlayer->GetPlayerClass() || pPlayer->GetPlayerClass()->GetClassIndex() != TF_CLASS_UNDEFINED)
+									pPlayer->ForceRespawn();
 							}
 						}
 					}
@@ -338,14 +348,16 @@ void CFOLogicPatchwork::HackThink(void)
 				{
 					for (int i = 1; i <= gpGlobals->maxClients; i++)
 					{
-						CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
+						CTFPlayer *pPlayer = ToTFPlayer(UTIL_PlayerByIndex(i));
 
-						if (pPlayer && pPlayer->IsPlayer() && pPlayer->GetTeamNumber() == FO_TEAM_PINK && pPlayer->IsDead())
+						if (pPlayer && pPlayer->GetTeamNumber() == FO_TEAM_PINK && pPlayer->IsDead())
 						{
-							if (pGameRules->GetNextRespawnWave(FO_TEAM_PINK, pPlayer) > 30.0f)
+							if (TeamplayRoundBasedRules()->GetNextRespawnWave(FO_TEAM_PINK, pPlayer) > 30.0f)
 							{
-								pGameRules->SetTeamRespawnWaveTime(FO_TEAM_PINK, 10.0f);
-								pPlayer->ForceRespawn();
+								TeamplayRoundBasedRules()->SetTeamRespawnWaveTime(FO_TEAM_PINK, 10.0f);
+
+								if (pPlayer->GetPlayerClass() || pPlayer->GetPlayerClass()->GetClassIndex() != TF_CLASS_UNDEFINED)
+									pPlayer->ForceRespawn();
 							}
 						}
 					}

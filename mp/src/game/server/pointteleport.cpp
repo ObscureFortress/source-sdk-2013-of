@@ -24,6 +24,7 @@ public:
 	void	Activate( void );
 
 	void InputTeleport( inputdata_t &inputdata );
+	void InputTeleportEntity( inputdata_t &inputdata );
 
 private:
 	
@@ -45,6 +46,7 @@ BEGIN_DATADESC( CPointTeleport )
 	DEFINE_FIELD( m_vSaveAngles, FIELD_VECTOR ),
 
 	DEFINE_INPUTFUNC( FIELD_VOID, "Teleport", InputTeleport ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "TeleportEntity", InputTeleportEntity ),
 
 END_DATADESC()
 
@@ -141,6 +143,31 @@ void CPointTeleport::InputTeleport( inputdata_t &inputdata )
 		}
 	}		
 #endif
+
+	// Teleport to the entity named by the input's parameter
+	CBaseEntity *pDest = gEntList.FindEntityByName( NULL, inputdata.value.String(), this, inputdata.pActivator, inputdata.pCaller );
+	if ( pDest )
+	{
+		pTarget->Teleport( &pDest->GetAbsOrigin(), &pDest->GetAbsAngles(), NULL );
+	}
+}
+
+//------------------------------------------------------------------------------
+// Purpose: Teleport the target to our saved position
+//------------------------------------------------------------------------------
+void CPointTeleport::InputTeleportEntity( inputdata_t &inputdata )
+{
+	// Attempt to find the entity in question
+	CBaseEntity *pTarget = gEntList.FindEntityByName( NULL, m_target, this, inputdata.pActivator, inputdata.pCaller );
+	if ( pTarget == NULL )
+		return;
+
+	// If teleport object is in a movement hierarchy, remove it first
+	if ( EntityMayTeleport( pTarget ) == false )
+	{
+		Warning("ERROR: (%s) can't teleport object (%s) as it has a parent (%s)!\n",GetDebugName(),pTarget->GetDebugName(),pTarget->GetMoveParent()->GetDebugName());
+		return;
+	}
 
 	pTarget->Teleport( &m_vSaveOrigin, &m_vSaveAngles, NULL );
 }

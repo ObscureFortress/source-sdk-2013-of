@@ -87,15 +87,6 @@ PRECACHE_REGISTER( func_nobuild );
 //-----------------------------------------------------------------------------
 CFuncNoBuild::CFuncNoBuild()
 {
-	m_bAllowSentry = false;
-	m_bAllowDispenser = false;
-	m_bAllowTeleporters = false;
-	m_bAllowTeleporterEntrances = false;
-	m_bAllowTeleporterExits = false;
-	m_bAllowForts = false;
-	m_bAllowWalls = false;
-	m_bAllowStairs = false;
-	m_bAllowRepairNodes = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -228,7 +219,7 @@ bool CFuncNoBuild::PreventsBuildOf( int iObjectType )
 //-----------------------------------------------------------------------------
 // Purpose: Does a nobuild zone prevent us from building?
 //-----------------------------------------------------------------------------
-bool PointInNoBuild( const Vector &vecBuildOrigin, CBaseObject *pObject )
+bool PointInNoBuild( const Vector &vecBuildOrigin, const CBaseObject *pObject )
 {
 	// Find out whether we're in a resource zone or not
 	CBaseEntity *pEntity = NULL;
@@ -240,7 +231,10 @@ bool PointInNoBuild( const Vector &vecBuildOrigin, CBaseObject *pObject )
 		if ( pNoBuild->GetActive() && pNoBuild->PointIsWithin( vecBuildOrigin ) )
 		{
 			// The zone may explicitly allow this type of object
-			return !pNoBuild->PreventsBuildOf( pObject->ObjectType() );
+			if ( pNoBuild->PreventsBuildOf( pObject->ObjectType() ) )
+				return false;
+
+			return true;
 		}
 	}
 

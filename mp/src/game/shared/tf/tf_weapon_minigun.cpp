@@ -185,25 +185,22 @@ void CTFMinigun::SharedAttack()
 		}
 	case AC_STATE_STARTFIRING:
 		{
+			if ( m_iWeaponMode == TF_WEAPON_SECONDARY_MODE )
+				m_iWeaponState = AC_STATE_SPINNING;
+			else
+				m_iWeaponState = AC_STATE_FIRING;
+
 			// Start playing the looping fire sound
 			if ( m_flNextPrimaryAttack <= gpGlobals->curtime )
 			{
+#ifdef GAME_DLL
 				if ( m_iWeaponMode == TF_WEAPON_SECONDARY_MODE )
-				{
-					m_iWeaponState = AC_STATE_SPINNING;
-#ifdef GAME_DLL
 					pPlayer->SpeakWeaponFire( MP_CONCEPT_WINDMINIGUN );
-#endif
-				}
 				else
-				{
-					m_iWeaponState = AC_STATE_FIRING;
-#ifdef GAME_DLL
 					pPlayer->SpeakWeaponFire( MP_CONCEPT_FIREMINIGUN );
 #endif
-				}
 
-				m_flNextSecondaryAttack = m_flNextPrimaryAttack = m_flTimeWeaponIdle = gpGlobals->curtime + 0.1;
+				m_flNextSecondaryAttack = m_flNextPrimaryAttack = m_flTimeWeaponIdle = gpGlobals->curtime + 0.3;
 			}
 			break;
 		}
@@ -217,7 +214,7 @@ void CTFMinigun::SharedAttack()
 #endif
 				m_iWeaponState = AC_STATE_SPINNING;
 
-				m_flNextSecondaryAttack = m_flNextPrimaryAttack = m_flTimeWeaponIdle = gpGlobals->curtime + 0.1;
+				m_flNextSecondaryAttack = m_flNextPrimaryAttack = m_flTimeWeaponIdle = gpGlobals->curtime + 0.3;
 			}
 			else if ( pPlayer->GetAmmoCount(m_iPrimaryAmmoType) <= 0 )
 			{

@@ -76,6 +76,10 @@ CHudMenuEngyBuild::CHudMenuEngyBuild( const char *pElementName ) : CHudElement( 
 //-----------------------------------------------------------------------------
 void CHudMenuEngyBuild::ApplySchemeSettings( IScheme *pScheme )
 {
+	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
+	if ( !pLocalPlayer )
+		return;
+
 	bool b360Style = ( IsConsole() || tf_build_menu_controller_mode.GetBool() );
 
 	// load control settings...
@@ -116,21 +120,44 @@ void CHudMenuEngyBuild::ApplySchemeSettings( IScheme *pScheme )
 	{
 		LoadControlSettings( "resource/UI/build_menu/HudMenuEngyBuild.res" );
 
-		// Load the already built images, not destroyable
-		m_pAlreadyBuiltObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_already_built.res" );
-		m_pAlreadyBuiltObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_already_built.res" );
-		m_pAlreadyBuiltObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_already_built.res" );
-		m_pAlreadyBuiltObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_already_built.res" );
+		if ( pLocalPlayer->GetPlayerClass()->GetClassIndex() != FO_CLASS_WORKERNODE + 1 )
+		{
+			// Load the already built images, not destroyable
+			m_pAlreadyBuiltObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_already_built.res" );
+			m_pAlreadyBuiltObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_already_built.res" );
+			m_pAlreadyBuiltObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_already_built.res" );
+			m_pAlreadyBuiltObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_already_built.res" );
 
-		m_pAvailableObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_active.res" );
-		m_pAvailableObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_active.res" );
-		m_pAvailableObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_active.res" );
-		m_pAvailableObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_active.res" );
+			m_pAvailableObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_active.res" );
+			m_pAvailableObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_active.res" );
+			m_pAvailableObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_active.res" );
+			m_pAvailableObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_active.res" );
 
-		m_pCantAffordObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_cant_afford.res" );
-		m_pCantAffordObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_cant_afford.res" );
-		m_pCantAffordObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_cant_afford.res" );
-		m_pCantAffordObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_cant_afford.res" );
+			m_pCantAffordObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_cant_afford.res" );
+			m_pCantAffordObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_cant_afford.res" );
+			m_pCantAffordObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_cant_afford.res" );
+			m_pCantAffordObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_cant_afford.res" );
+
+		}
+		else
+		{
+			// Worker Node: forts, walls, stairs and repair nodes
+			m_pAlreadyBuiltObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_already_built.res" );
+			m_pAlreadyBuiltObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_already_built.res" );
+			m_pAlreadyBuiltObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_already_built.res" );
+			m_pAlreadyBuiltObjects[3]->LoadControlSettings( "resource/UI/build_menu/repairnode_already_built.res" );
+
+			m_pAvailableObjects[0]->LoadControlSettings( "resource/UI/build_menu/fort_active.res" );
+			m_pAvailableObjects[1]->LoadControlSettings( "resource/UI/build_menu/wall_active.res" );
+			m_pAvailableObjects[2]->LoadControlSettings( "resource/UI/build_menu/stairs_active.res" );
+			m_pAvailableObjects[3]->LoadControlSettings( "resource/UI/build_menu/repairnode_active.res" );
+
+			m_pCantAffordObjects[0]->LoadControlSettings( "resource/UI/build_menu/fort_cant_afford.res" );
+			m_pCantAffordObjects[1]->LoadControlSettings( "resource/UI/build_menu/wall_cant_afford.res" );
+			m_pCantAffordObjects[2]->LoadControlSettings( "resource/UI/build_menu/stairs_cant_afford.res" );
+			m_pCantAffordObjects[3]->LoadControlSettings( "resource/UI/build_menu/repairnode_cant_afford.res" );
+
+		}
 
 		m_pActiveSelection = NULL;
 
@@ -175,7 +202,7 @@ bool CHudMenuEngyBuild::ShouldDraw( void )
 	if ( !CHudElement::ShouldDraw() )
 		return false;
 
-	return ( pWpn->GetWeaponID() == TF_WEAPON_PDA_ENGINEER_BUILD );
+	return ( pWpn->GetWeaponID() == TF_WEAPON_PDA_ENGINEER_BUILD || pWpn->GetWeaponID() == FO_WEAPON_PDA_WORKERNODE_BUILD );
 }
 
 //-----------------------------------------------------------------------------
@@ -183,20 +210,25 @@ bool CHudMenuEngyBuild::ShouldDraw( void )
 //-----------------------------------------------------------------------------
 int CHudMenuEngyBuild::GetBuildingIDFromSlot( int iSlot )
 {
+	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
+	if ( !pLocalPlayer )
+		return OBJ_SENTRYGUN;
+
+	// Worker Nodes build their own set of objects
 	int iBuilding = OBJ_LAST;
 	switch( iSlot )
 	{
 	case 1:
-		iBuilding = OBJ_SENTRYGUN;
+		iBuilding = ( pLocalPlayer->GetPlayerClass()->GetClassIndex() == FO_CLASS_WORKERNODE + 1 ) ? OBJ_FORT : OBJ_SENTRYGUN;
 		break;
 	case 2:
-		iBuilding = OBJ_DISPENSER;
+		iBuilding = ( pLocalPlayer->GetPlayerClass()->GetClassIndex() == FO_CLASS_WORKERNODE + 1 ) ? OBJ_WALL : OBJ_DISPENSER;
 		break;
 	case 3:
-		iBuilding = OBJ_TELEPORTER_ENTRANCE;
+		iBuilding = ( pLocalPlayer->GetPlayerClass()->GetClassIndex() == FO_CLASS_WORKERNODE + 1 ) ? OBJ_STAIRS : OBJ_TELEPORTER_ENTRANCE;
 		break;
 	case 4:
-		iBuilding = OBJ_TELEPORTER_EXIT;
+		iBuilding = ( pLocalPlayer->GetPlayerClass()->GetClassIndex() == FO_CLASS_WORKERNODE + 1 ) ? OBJ_REPAIRNODE : OBJ_TELEPORTER_EXIT;
 		break;
 
 	default:
@@ -342,55 +374,19 @@ void CHudMenuEngyBuild::SendBuildMessage( int iSlot )
 
 	int iBuilding = GetBuildingIDFromSlot( iSlot );
 
-	if (pLocalPlayer->GetPlayerClass()->GetClassIndex() == FO_CLASS_WORKERNODE + 1)
-	{
-		switch (iBuilding)
-		{
-		case OBJ_SENTRYGUN:
-			iBuilding = OBJ_FORT;
-			break;
-		case OBJ_DISPENSER:
-			iBuilding = OBJ_WALL;
-			break;
-		case OBJ_TELEPORTER_ENTRANCE:
-			iBuilding = OBJ_STAIRS;
-			break;
-		case OBJ_TELEPORTER_EXIT:
-			iBuilding = OBJ_REPAIRNODE;
-			break;
-		default:
-			break;
-		}
-	}
-
 	C_BaseObject *pObj = pLocalPlayer->GetObjectOfType( iBuilding );
 	int iCost = GetObjectInfo( iBuilding )->m_Cost;
 
-	if (pLocalPlayer->GetAmmoCount(TF_AMMO_METAL) >= iCost)
+	// Worker Nodes can build more than one of each object
+	if ( pLocalPlayer->GetAmmoCount( TF_AMMO_METAL ) >= iCost && ( pObj == NULL || pLocalPlayer->GetPlayerClass()->GetClassIndex() == FO_CLASS_WORKERNODE + 1 ) )
 	{
-		if (pObj == NULL) // Worker Node hack
-		{
-			char szCmd[128];
-			Q_snprintf(szCmd, sizeof(szCmd), "build %d", iBuilding);
-			engine->ClientCmd(szCmd);
-		}
-		else
-		{
-			if (pLocalPlayer->GetPlayerClass()->GetClassIndex() == FO_CLASS_WORKERNODE + 1)
-			{
-				char szCmd[128];
-				Q_snprintf(szCmd, sizeof(szCmd), "build %d", iBuilding);
-				engine->ClientCmd(szCmd);
-			}
-			else
-			{
-				pLocalPlayer->EmitSound("Player.DenyWeaponSelection");
-			}
-		}
+		char szCmd[128];
+		Q_snprintf( szCmd, sizeof(szCmd), "build %d", iBuilding );
+		engine->ClientCmd( szCmd );
 	}
 	else
 	{
-		pLocalPlayer->EmitSound("Player.DenyWeaponSelection");
+		pLocalPlayer->EmitSound( "Player.DenyWeaponSelection" );
 	}
 }
 
@@ -450,7 +446,18 @@ void CHudMenuEngyBuild::OnTick( void )
 		// If the building is already built
 		if ( pObj != NULL && !pObj->IsPlacing() )
 		{
-			m_pAlreadyBuiltObjects[i]->SetVisible( true );
+			// Worker Nodes can keep building forts, walls and stairs
+			if ( pObj->GetType() == OBJ_FORT || pObj->GetType() == OBJ_WALL || pObj->GetType() == OBJ_STAIRS )
+			{
+				if ( iAccount < GetObjectInfo( iRemappedObjectID )->m_Cost )
+					m_pCantAffordObjects[i]->SetVisible( true );
+				else
+					m_pAvailableObjects[i]->SetVisible( true );
+			}
+			else
+			{
+				m_pAlreadyBuiltObjects[i]->SetVisible( true );
+			}
 		}
 		// See if we can afford it
 		else if ( iAccount < GetObjectInfo( iRemappedObjectID )->m_Cost )
@@ -495,6 +502,46 @@ void CHudMenuEngyBuild::SetVisible( bool state )
 
 		if ( !pLocalPlayer )
 			return;
+
+		// The menu's contents depend on our class
+		if ( pLocalPlayer->GetPlayerClass()->GetClassIndex() == FO_CLASS_WORKERNODE + 1 )
+		{
+			m_pAlreadyBuiltObjects[3]->LoadControlSettings( "resource/UI/build_menu/repairnode_already_built.res" );
+
+			m_pAvailableObjects[0]->LoadControlSettings( "resource/UI/build_menu/fort_active.res" );
+			m_pAvailableObjects[1]->LoadControlSettings( "resource/UI/build_menu/wall_active.res" );
+			m_pAvailableObjects[2]->LoadControlSettings( "resource/UI/build_menu/stairs_active.res" );
+			m_pAvailableObjects[3]->LoadControlSettings( "resource/UI/build_menu/repairnode_active.res" );
+
+			m_pCantAffordObjects[0]->LoadControlSettings( "resource/UI/build_menu/fort_cant_afford.res" );
+			m_pCantAffordObjects[1]->LoadControlSettings( "resource/UI/build_menu/wall_cant_afford.res" );
+			m_pCantAffordObjects[2]->LoadControlSettings( "resource/UI/build_menu/stairs_cant_afford.res" );
+			m_pCantAffordObjects[3]->LoadControlSettings( "resource/UI/build_menu/repairnode_cant_afford.res" );
+		}
+		else
+		{
+			m_pAlreadyBuiltObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_already_built.res" );
+
+			m_pAvailableObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_active.res" );
+			m_pAvailableObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_active.res" );
+			m_pAvailableObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_active.res" );
+			m_pAvailableObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_active.res" );
+
+			m_pCantAffordObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_cant_afford.res" );
+			m_pCantAffordObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_cant_afford.res" );
+			m_pCantAffordObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_cant_afford.res" );
+			m_pCantAffordObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_cant_afford.res" );
+		}
+
+		// Set the cost label
+		for ( int i=0; i<4; i++ )
+		{
+			int iCost = GetObjectInfo( GetBuildingIDFromSlot( i+1 ) )->m_Cost;
+
+			m_pAvailableObjects[i]->SetDialogVariable( "metal", iCost );
+			m_pAlreadyBuiltObjects[i]->SetDialogVariable( "metal", iCost );
+			m_pCantAffordObjects[i]->SetDialogVariable( "metal", iCost );
+		}
 
 		int iDefaultSlot = 1;
 

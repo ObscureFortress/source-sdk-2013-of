@@ -401,6 +401,8 @@ private:
 	void				TFPlayerThink();
 	void				MedicRegenThink();
 	void				DismaticHealThink();
+	void				SaptrapBuffThink();
+	void				WorkerNodeMetalThink();
 	void				UpdateTimers( void );
 
 	// Taunt.

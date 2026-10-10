@@ -16,18 +16,17 @@ class CPointBlobContainer : public CBaseAnimating
 {
 public:
 	DECLARE_CLASS( CPointBlobContainer, CBaseAnimating );
-	DECLARE_SERVERCLASS();
 	DECLARE_DATADESC();
+	DECLARE_SERVERCLASS();
 
 	CPointBlobContainer();
 
 	virtual void Spawn( void );
-	virtual int UpdateTransmitState( void ) { return SetTransmitState( FL_EDICT_ALWAYS ); }
 
 protected:
 	CNetworkVar( int, GridSize );
 	CNetworkVar( float, colorBoost );
-	CNetworkVector( GridBounds );
+	CNetworkVar( Vector, GridBounds );
 	CNetworkVar( string_t, BlobMaterialName );
 	CNetworkColor32( color );
 	CNetworkColor32( Ambcolor );

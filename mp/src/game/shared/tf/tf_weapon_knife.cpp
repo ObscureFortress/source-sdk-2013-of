@@ -115,6 +115,17 @@ float CTFKnife::GetMeleeDamage( CBaseEntity *pTarget, int &iCustomDamage )
 
 			// Declare a backstab.
 			iCustomDamage = TF_DMG_CUSTOM_BACKSTAB;
+
+#ifdef GAME_DLL
+			// Stabbing an enemy heals us
+			if ( !pTarget->InSameTeam( GetPlayerOwner() ) )
+			{
+				if ( GetPlayerOwner()->GetHealth() < GetPlayerOwner()->GetMaxHealth() * 2 )
+				{
+					GetTFPlayerOwner()->TakeHealth( 50.0f, DMG_IGNORE_MAXHEALTH );
+				}
+			}
+#endif
 		}
 		else
 		{

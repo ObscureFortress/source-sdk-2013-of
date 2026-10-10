@@ -17,6 +17,7 @@
 #include "materialsystem/imaterial.h"
 #include "materialsystem/imaterialvar.h"
 #include "globals.h"
+#include "tf_shareddefs.h"
 #include "physics_impact_damage.h"
 #include "te_effect_dispatch.h"
 
@@ -613,6 +614,10 @@ void CBreakableSurface::Die( CBaseEntity *pBreaker, const Vector &vAttackDir )
 
 	m_bIsBroken = true;
 	m_iHealth = 0.0f;
+
+	// Keep the broken surface solid, in the rocket collision group
+	RemoveSolidFlags( FSOLID_NOT_SOLID );
+	SetCollisionGroup( TFCOLLISION_GROUP_ROCKETS );
 
 	if (pBreaker)
 	{

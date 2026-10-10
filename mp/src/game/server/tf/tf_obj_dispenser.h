@@ -38,6 +38,7 @@ public:
 	virtual void	DetonateObject( void );
 	virtual void	OnGoActive( void );	
 	virtual bool	StartBuilding( CBaseEntity *pBuilder );
+	virtual void	InitializeMapPlacedObject( void );
 	virtual int		DrawDebugTextOverlays(void) ;
 	virtual void	SetModel( const char *pModel );
 

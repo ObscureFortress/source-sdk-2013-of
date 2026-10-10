@@ -1,1 +1,1 @@
-devtools\bin\vpc.exe /fo +game /mksln game_fo.sln
+devtools\bin\vpc.exe /define:FO +game /mksln game_fo.sln

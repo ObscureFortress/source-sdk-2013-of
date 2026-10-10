@@ -16,26 +16,25 @@ class CPointBlobElement : public CBaseCombatCharacter
 {
 public:
 	DECLARE_CLASS( CPointBlobElement, CBaseCombatCharacter );
-	DECLARE_SERVERCLASS();
-	DECLARE_DATADESC();
 
 	CPointBlobElement();
 
-	virtual void Spawn( void );
-	virtual void Activate( void );
-	virtual bool KeyValue( const char *szKeyName, const char *szValue );
-	virtual int OnTakeDamage( const CTakeDamageInfo &info );
-	virtual bool ShouldCollide( int collisionGroup, int contentsMask ) const;
-	virtual int UpdateTransmitState( void ) { return SetTransmitState( FL_EDICT_ALWAYS ); }
+	DECLARE_SERVERCLASS();
+	DECLARE_DATADESC();
 
-	void BlobThink( void );
+	virtual void Spawn( void );
+	virtual void Think( void );
+	virtual void Activate( void );
+	virtual int OnTakeDamage( const CTakeDamageInfo &info );
+	virtual bool ShouldCollide( void ) const;
+	virtual bool KeyValue( const char *szKeyName, const char *szValue );
 
 protected:
 	CNetworkVar( float, radius );
 	CNetworkVar( float, radiusSquared );
 	CNetworkVar( int, collide );
 	CNetworkVar( int, destroy );
-	int health;
+	CNetworkVar( int, health );
 };
 
 #endif // POINT_BLOB_ELEMENT_H

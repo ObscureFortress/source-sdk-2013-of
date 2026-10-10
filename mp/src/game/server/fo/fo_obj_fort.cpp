@@ -43,7 +43,6 @@ IMPLEMENT_SERVERCLASS_ST( CObjectWorkerFort, DT_ObjectWorkerFort )
 END_SEND_TABLE()
 
 BEGIN_DATADESC( CObjectWorkerFort )
-	DEFINE_THINKFUNC( FortThink ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( obj_fort, CObjectWorkerFort );

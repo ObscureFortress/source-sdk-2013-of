@@ -1384,7 +1384,7 @@ void C_TFPlayer::OnDataChanged( DataUpdateType_t updateType )
 		}
 
 
-		if ( ((m_iOldClass == FO_CLASS_SAPTRAP + 1)) &&
+		if ( m_iOldClass == TF_CLASS_SPY &&
 		   ( m_bDisguised != m_Shared.InCond( TF_COND_DISGUISED ) || m_iOldDisguiseClass != m_Shared.GetDisguiseClass() ) )
 		{
 			IGameEvent *event = gameeventmanager->CreateEvent( "localplayer_changedisguise" );
@@ -3086,6 +3086,12 @@ void C_TFPlayer::ClientPlayerRespawn( void )
 		if ( m_bWasTaunting )
 		{
 			TurnOffTauntCam();
+		}
+
+		IGameEvent *event = gameeventmanager->CreateEvent( "localplayer_respawn" );
+		if ( event )
+		{
+			gameeventmanager->FireEventClientSide( event );
 		}
 
 		ResetToneMapping(1.0);

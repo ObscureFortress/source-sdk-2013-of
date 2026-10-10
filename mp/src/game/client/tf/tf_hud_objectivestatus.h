@@ -75,7 +75,11 @@ public:
 	virtual void Reset();
 
 	int GetTimerIndex( void ){ return m_iTimerIndex; }
-	void SetTimerIndex( int index ){ m_iTimerIndex = ( index >= 0 ) ? index : 0; SetExtraTimePanels(); }
+	void SetTimerIndex( int index );
+	void SetExtraTimePanels();
+
+	void SetTeam( int nTeam ){ m_iTeamIndex = nTeam; }
+	int GetTeam( void ){ return m_iTeamIndex; }
 	
 	virtual void FireGameEvent( IGameEvent *event );
 
@@ -85,12 +89,13 @@ protected:
 
 private:
 
-	void SetExtraTimePanels();
 	void SetTimeAdded( int iIndex, int nSeconds );
 	void CheckClockLabelLength( CTFLabel *pLabel, CTFImagePanel *pBG );
+	void SetTeamBackground( void );
 
 private:
 
+	int					m_iTeamIndex;
 	float				m_flNextThink;
 	int					m_iTimerIndex;
 	bool				m_bSuddenDeath;
@@ -112,6 +117,8 @@ private:
 	CTFLabel			*m_pSuddenDeathLabel;
 	CTFImagePanel		*m_pSuddenDeathBG;
 
+	CTFImagePanel		*m_pTimePanelBG;
+
 	// delta stuff
 	int m_iTimerDeltaHead;
 	timer_delta_t m_TimerDeltaItems[NUM_TIMER_DELTA_ITEMS];
@@ -126,6 +133,50 @@ private:
 	CPanelAnimationVar( float, m_flDeltaLifetime, "delta_lifetime", "2.0" );
 
 	CPanelAnimationVar( vgui::HFont, m_hDeltaItemFont, "delta_item_font", "Default" );
+};
+
+//-----------------------------------------------------------------------------
+// Purpose:  King of the Hill team timers
+//-----------------------------------------------------------------------------
+class CTFHudKothTimeStatus : public CHudElement, public vgui::EditablePanel
+{
+	DECLARE_CLASS_SIMPLE( CTFHudKothTimeStatus, vgui::EditablePanel );
+
+public:
+	CTFHudKothTimeStatus( const char *pElementName );
+
+	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
+	virtual bool ShouldDraw( void );
+	virtual void Reset();
+	virtual void Think();
+	virtual void UpdateActiveTeam( void );
+
+	virtual int GetRenderGroupPriority( void ) { return 60; }	// higher than build menus
+
+private:
+	CPanelAnimationVarAliasType( int, m_nBlueActiveXPos, "blue_active_xpos", "0", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_nRedActiveXPos, "red_active_xpos", "0", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_n3BlueActiveXPos, "3blue_active_xpos", "0", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_n3RedActiveXPos, "3red_active_xpos", "0", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_n6BlueActiveXPos, "6blue_active_xpos", "0", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_n6RedActiveXPos, "6red_active_xpos", "0", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_nGreenActiveXPos, "green_active_xpos", "0", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_n6GreenActiveXPos, "6green_active_xpos", "0", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_nYellowActiveXPos, "yellow_active_xpos", "0", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_nPurpleActiveXPos, "purple_active_xpos", "0", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_nPinkActiveXPos, "pink_active_xpos", "0", "proportional_int" );
+
+	CTFHudTimeStatus	*m_pBlueKothTimer;
+	CTFHudTimeStatus	*m_pRedKothTimer;
+	CTFHudTimeStatus	*m_pGreenKothTimer;
+	CTFHudTimeStatus	*m_pYellowKothTimer;
+	CTFHudTimeStatus	*m_pPurpleKothTimer;
+	CTFHudTimeStatus	*m_pPinkKothTimer;
+
+	vgui::ImagePanel	*m_pActiveTimerBG;
+	CTFHudTimeStatus	*m_pActiveKothTimerPanel;
+
+	int m_nOriginalActiveTimerBGYPos;
 };
 
 //-----------------------------------------------------------------------------
@@ -159,6 +210,7 @@ private:
 	CFOHud3FlagObjectives	*m_p3FlagPanel;
 	CFOHud6FlagObjectives	*m_p6FlagPanel;
 	CTFHudTimeStatus		*m_pTimePanel;
+	CTFHudKothTimeStatus	*m_pKothTimePanel;
 	CTFHudEscort			*m_pEscortPanel;
 	CTFHudMultipleEscort	*m_pEscortRacePanel;
 	CFOHudGeneratorObjectives	*m_pGeneratorPanel;

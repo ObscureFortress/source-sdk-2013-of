@@ -22,7 +22,7 @@
 STUB_WEAPON_CLASS_IMPLEMENT( tf_weapon_builder2, C_TFWeaponBuilder2 );
 
 // Recalc object sprite when we receive a new object type to build
-void RecvProxy_Builder2ObjectType( const CRecvProxyData *pData, void *pStruct, void *pOut )
+void RecvProxy_ObjectType2( const CRecvProxyData *pData, void *pStruct, void *pOut )
 {
 	// Pass to normal Int recvproxy
 	RecvProxy_Int32ToInt32( pData, pStruct, pOut );
@@ -33,7 +33,7 @@ void RecvProxy_Builder2ObjectType( const CRecvProxyData *pData, void *pStruct, v
 }
 
 BEGIN_NETWORK_TABLE_NOBASE( C_TFWeaponBuilder2, DT_Builder2LocalData )
-	RecvPropInt( RECVINFO(m_iObjectType), 0, RecvProxy_Builder2ObjectType ),
+	RecvPropInt( RECVINFO(m_iObjectType), 0, RecvProxy_ObjectType2 ),
 	RecvPropEHandle( RECVINFO(m_hObjectBeingBuilt) ),
 END_NETWORK_TABLE()
 

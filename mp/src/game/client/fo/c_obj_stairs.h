@@ -26,6 +26,8 @@ public:
 
 	virtual void GetStatusText( wchar_t *pStatus, int iMaxStatusLen );
 
+	virtual void OnGoActive( void );
+
 	virtual void OnDataChanged( DataUpdateType_t updateType );
 
 	virtual void UpdateDamageEffects( BuildingDamageLevel_t damageLevel );

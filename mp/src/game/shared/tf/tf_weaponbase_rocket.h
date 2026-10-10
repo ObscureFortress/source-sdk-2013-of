@@ -99,7 +99,7 @@ public:
 
 	virtual bool		IsDeflectable() { return true; }
 	virtual void		Deflected( CBaseEntity *pDeflectedBy, Vector &vecDir );
-	virtual bool		WasDefelected( void ) { return m_bWasDeflected; }
+	virtual bool		WasDeflected( void ) { return m_bWasDeflected; }
 
 	void			SetHomingTarget( CBaseEntity *pHomingTarget );
 

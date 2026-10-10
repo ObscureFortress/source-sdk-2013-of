@@ -448,6 +448,13 @@ void CCaptureFlag::FlagTouch( CBaseEntity *pOther )
 #ifdef GAME_DLL
 	if (PointInRespawnRoom(pPlayer, pPlayer->WorldSpaceCenter()))
 		return;
+
+	// In DITR the diamond returns to where it was last picked up from, unless it was dropped.
+	if (TFGameRules()->GetGameType() == FO_GAMETYPE_DITR && m_nFlagStatus != TF_FLAGINFO_DROPPED)
+	{
+		m_vecResetPos = GetAbsOrigin();
+		m_vecResetAng = GetAbsAngles();
+	}
 #endif
 
 	// Pick up the flag.

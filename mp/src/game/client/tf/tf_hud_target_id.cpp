@@ -159,6 +159,12 @@ bool CTargetID::ShouldDraw( void )
 				}
 
 				bReturn = ( pLocalTFPlayer->GetTeamNumber() == TEAM_SPECTATOR || pLocalTFPlayer->InSameTeam( pEnt ) || bDisguisedEnemy );
+
+				// Saptraps can identify enemies too
+				if ( pLocalTFPlayer->GetPlayerClass()->GetClassIndex() == FO_CLASS_SAPTRAP + 1 && !pLocalTFPlayer->InSameTeam( pEnt ) )
+				{
+					bReturn = true;
+				}
 			}
 			else if ( pEnt->IsBaseObject() && pLocalTFPlayer->InSameTeam( pEnt ) )
 			{
@@ -363,6 +369,13 @@ void CTargetID::UpdateID( void )
 				printFormatString = "#TF_playerid_diffteam";
 				bShowHealth = true;
 			}			
+
+			// Saptraps can see enemy names and health
+			if ( pLocalTFPlayer->GetPlayerClass()->GetClassIndex() == FO_CLASS_SAPTRAP + 1 && !pPlayer->InSameTeam( pLocalTFPlayer ) )
+			{
+				printFormatString = "#TF_playerid_diffteam";
+				bShowHealth = true;
+			}
 
 			if ( bShowHealth )
 			{

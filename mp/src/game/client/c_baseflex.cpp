@@ -369,7 +369,11 @@ bool CFlexSceneFileManager::Init()
 		"telecon",
 		"workernode",
 		"saptrap",
+		"custom1",
+		"custom2",
+		"custom3",
 		"courier",
+		"controlfreak",
 	};
 
 	char fn[ MAX_PATH ];
